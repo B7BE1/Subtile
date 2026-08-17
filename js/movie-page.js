@@ -5,17 +5,27 @@
 let currentMovie = null;
 let currentSeason = 1;
 let currentEpisode = 'all';
+const subState = new SubtitleStateManager();
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const movieId = urlParams.get('id') || 'dune-2';
 
-  currentMovie = MOVIES_DATABASE.find(m => m.id === movieId);
+  // 1. جلب بيانات الفيلم/المسلسل من TMDB
+  currentMovie = await tmdb.getMetadata(movieId);
+  
   if (!currentMovie) {
-    currentMovie = MOVIES_DATABASE[0];
+    // Fallback to local DB if API fails or ID is local
+    currentMovie = MOVIES_DATABASE.find(m => m.id === movieId);
+    if (!currentMovie) {
+      currentMovie = MOVIES_DATABASE[0]; // ultimate fallback
+    }
   }
 
   renderMovieDetails(currentMovie);
+  
+  // 2. جلب ملفات الترجمة عبر State Manager
+  await subState.fetchSubtitles(movieId, currentMovie.type);
   renderSubtitlesList();
 });
 
@@ -93,16 +103,24 @@ function selectSeason(seasonNum) {
   document.querySelectorAll('.season-tab-btn').forEach((btn, idx) => {
     btn.classList.toggle('active', (idx + 1) === seasonNum);
   });
+  subState.setFilter('season', seasonNum);
   renderSubtitlesList();
 }
 
 function filterTvSubtitles() {
   const epSelect = document.getElementById('episodeSelect');
   currentEpisode = epSelect ? epSelect.value : 'all';
+  subState.setFilter('episode', currentEpisode);
   renderSubtitlesList();
 }
 
 function applyFilters() {
+  const langFilter = document.getElementById('langFilter').value;
+  const qualityFilter = document.getElementById('qualityFilter').value;
+  
+  subState.setFilter('lang', langFilter);
+  subState.setFilter('quality', qualityFilter);
+  
   renderSubtitlesList();
 }
 
@@ -111,26 +129,7 @@ function renderSubtitlesList() {
   const countSpan = document.getElementById('subtitlesCount');
   if (!container || !currentMovie) return;
 
-  const langFilter = document.getElementById('langFilter').value;
-  const qualityFilter = document.getElementById('qualityFilter').value;
-
-  let subs = currentMovie.subtitles || [];
-
-  if (currentMovie.type === 'tv') {
-    subs = subs.filter(s => {
-      if (s.season && s.season !== currentSeason) return false;
-      if (currentEpisode !== 'all' && s.episode && s.episode.toString() !== currentEpisode.toString() && s.episode !== 'All') return false;
-      return true;
-    });
-  }
-
-  if (langFilter !== 'all') {
-    subs = subs.filter(s => s.language === langFilter);
-  }
-
-  if (qualityFilter !== 'all') {
-    subs = subs.filter(s => s.quality.toLowerCase().includes(qualityFilter.toLowerCase()) || s.release.toLowerCase().includes(qualityFilter.toLowerCase()));
-  }
+  const subs = subState.getFiltered();
 
   countSpan.textContent = `${subs.length} ملف ترجمة متوفر`;
 

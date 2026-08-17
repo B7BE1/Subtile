@@ -96,8 +96,12 @@ function setupLiveSearch() {
 
   if (!searchInput || !dropdown) return;
 
+  let searchTimeout;
+
   searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.trim().toLowerCase();
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+    
     if (!query) {
       dropdown.classList.remove('show');
       return;
@@ -105,37 +109,39 @@ function setupLiveSearch() {
 
     const selectedType = typeFilter ? typeFilter.value : 'all';
 
-    const matches = MOVIES_DATABASE.filter(item => {
-      const matchesType = (selectedType === 'all' || item.type === selectedType);
-      const matchesText = item.title.toLowerCase().includes(query) ||
-                          (item.arabicTitle && item.arabicTitle.includes(query)) ||
-                          (item.imdbId && item.imdbId.toLowerCase().includes(query));
-      return matchesType && matchesText;
-    });
+    // Show loading skeleton
+    dropdown.innerHTML = `
+      <div style="padding: 1.2rem; text-align: center; color: var(--text-muted);">
+        <i class="fas fa-spinner fa-spin"></i> جاري البحث...
+      </div>
+    `;
+    dropdown.classList.add('show');
 
-    if (matches.length === 0) {
-      dropdown.innerHTML = `
-        <div style="padding: 1.2rem; text-align: center; color: var(--text-muted);">
-          <i class="fas fa-search"></i> لم يتم العثور على نتائج لـ "${query}"
-        </div>
-      `;
-    } else {
-      dropdown.innerHTML = matches.map(movie => `
-        <div class="suggestion-item" onclick="window.location.href='movie.html?id=${movie.id}'">
-          <img src="${movie.poster}" class="suggestion-poster" alt="${movie.title}">
-          <div class="suggestion-info">
-            <div class="suggestion-title">${movie.title} <span style="font-size: 0.85rem; color: var(--text-secondary);">(${movie.year})</span></div>
-            <div class="suggestion-meta">
-              <span class="badge ${movie.type === 'tv' ? 'badge-tv' : 'badge-movie'}">${movie.type === 'tv' ? 'مسلسل' : 'فيلم'}</span>
-              <span><i class="fas fa-star" style="color: var(--accent-secondary);"></i> ${movie.rating}</span>
-              <span><i class="fas fa-closed-captioning"></i> ${movie.subtitles.length} ترجمة</span>
+    searchTimeout = setTimeout(async () => {
+      const typeParam = selectedType === 'all' ? 'multi' : selectedType;
+      const matches = await tmdb.search(query, typeParam);
+
+      if (!matches || matches.length === 0) {
+        dropdown.innerHTML = `
+          <div style="padding: 1.2rem; text-align: center; color: var(--text-muted);">
+            <i class="fas fa-search"></i> لم يتم العثور على نتائج لـ "${query}"
+          </div>
+        `;
+      } else {
+        dropdown.innerHTML = matches.slice(0, 8).map(movie => `
+          <div class="suggestion-item" onclick="window.location.href='movie.html?id=${movie.id}'">
+            <img src="${movie.poster}" class="suggestion-poster" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/50x75?text=No+Poster'">
+            <div class="suggestion-info">
+              <div class="suggestion-title">${movie.title} <span style="font-size: 0.85rem; color: var(--text-secondary);">(${movie.year})</span></div>
+              <div class="suggestion-meta">
+                <span class="badge ${movie.type === 'tv' ? 'badge-tv' : 'badge-movie'}">${movie.type === 'tv' ? 'مسلسل' : 'فيلم'}</span>
+                <span><i class="fas fa-star" style="color: var(--accent-secondary);"></i> ${movie.rating}</span>
+              </div>
             </div>
           </div>
-        </div>
-      `).join('');
-    }
-
-    dropdown.classList.add('show');
+        `).join('');
+      }
+    }, 500); // 500ms debounce
   });
 
   document.addEventListener('click', (e) => {
@@ -145,17 +151,21 @@ function setupLiveSearch() {
   });
 }
 
-function performSearch() {
+async function performSearch() {
   const searchInput = document.getElementById('heroSearchInput');
+  const typeFilter = document.getElementById('searchTypeFilter');
   if (searchInput && searchInput.value.trim()) {
-    const query = searchInput.value.trim().toLowerCase();
-    const match = MOVIES_DATABASE.find(item => 
-      item.title.toLowerCase().includes(query) || (item.arabicTitle && item.arabicTitle.includes(query))
-    );
-    if (match) {
-      window.location.href = `movie.html?id=${match.id}`;
+    const query = searchInput.value.trim();
+    const selectedType = typeFilter ? typeFilter.value : 'all';
+    const typeParam = selectedType === 'all' ? 'multi' : selectedType;
+    
+    showToast(`جاري البحث عن: ${query}`);
+    const matches = await tmdb.search(query, typeParam);
+    
+    if (matches && matches.length > 0) {
+      window.location.href = `movie.html?id=${matches[0].id}`;
     } else {
-      showToast(`جاري البحث عن: ${query}`);
+      showToast('لم يتم العثور على نتائج');
     }
   }
 }
