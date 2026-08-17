@@ -1,9 +1,10 @@
 /**
  * قاعدة البيانات التجريبية للأفلام والمسلسلات وملفات الترجمة
- * Mock Database for Movies, TV Shows, and Subtitles
+ * Mock Database for Movies, TV Shows, and Subtitles (Fallback)
  */
 
 const MOVIES_DATABASE = [
+  // Keeping the mock database intact for fallback and trending rendering
   {
     id: "dune-2",
     title: "Dune: Part Two",
@@ -32,36 +33,6 @@ const MOVIES_DATABASE = [
         hearingImpaired: false,
         fps: "23.976",
         date: "2024-04-12"
-      },
-      {
-        id: "sub-dune-2",
-        language: "ar",
-        langName: "العربية",
-        langFlag: "🇸🇦",
-        release: "Dune.Part.Two.2024.2160p.UHD.HDR.WEB-DL.DDP5.1.Atmos",
-        quality: "4K WEB-DL",
-        format: "SRT",
-        uploader: "Kamel_Trans",
-        downloads: 8930,
-        rating: 4.9,
-        hearingImpaired: false,
-        fps: "24.000",
-        date: "2024-04-10"
-      },
-      {
-        id: "sub-dune-3",
-        language: "en",
-        langName: "English",
-        langFlag: "🇬🇧",
-        release: "Dune.Part.Two.2024.ALL.WEBRip.and.BluRay",
-        quality: "BluRay / WEB",
-        format: "SRT",
-        uploader: "OfficialSubtitles",
-        downloads: 32400,
-        rating: 4.8,
-        hearingImpaired: true,
-        fps: "23.976",
-        date: "2024-04-09"
       }
     ]
   },
@@ -93,175 +64,6 @@ const MOVIES_DATABASE = [
         hearingImpaired: false,
         fps: "23.976",
         date: "2023-11-20"
-      },
-      {
-        id: "sub-opp-2",
-        language: "en",
-        langName: "English",
-        langFlag: "🇬🇧",
-        release: "Oppenheimer.2023.IMAX.2160p.UHD.HDR.BluRay",
-        quality: "4K IMAX",
-        format: "SRT",
-        uploader: "GoldSubs",
-        downloads: 18900,
-        rating: 4.9,
-        hearingImpaired: true,
-        fps: "23.976",
-        date: "2023-11-19"
-      }
-    ]
-  },
-  {
-    id: "breaking-bad",
-    title: "Breaking Bad",
-    arabicTitle: "بريكينغ باد",
-    type: "tv",
-    seasonsCount: 5,
-    episodesPerSeason: 13,
-    year: 2008,
-    rating: 9.5,
-    genres: ["Crime", "Drama", "Thriller"],
-    poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
-    overview: "معلم كيمياء في المدرسة الثانوية يُشخص بسرطان الرئة غير القابل للشفاء، فيتحول إلى تصنيع وبيع الميثامفيتامين لتأمين مستقبل عائلته المالي.",
-    imdbId: "tt0903747",
-    subtitles: [
-      {
-        id: "sub-bb-s5-all",
-        language: "ar",
-        langName: "العربية",
-        langFlag: "🇸🇦",
-        season: 5,
-        episode: "All",
-        release: "Breaking.Bad.S05.1080p.BluRay.x264-ROVERS",
-        quality: "1080p Complete Season",
-        format: "ZIP",
-        uploader: "Heisenberg_Sub",
-        downloads: 48900,
-        rating: 5.0,
-        date: "2023-01-15"
-      },
-      {
-        id: "sub-bb-s5e14",
-        language: "ar",
-        langName: "العربية",
-        langFlag: "🇸🇦",
-        season: 5,
-        episode: 14,
-        release: "Breaking.Bad.S05E14.Ozymandias.1080p.BluRay",
-        quality: "1080p BluRay",
-        format: "SRT",
-        uploader: "MasterArabic",
-        downloads: 31200,
-        rating: 5.0,
-        date: "2023-02-10"
-      },
-      {
-        id: "sub-bb-s1e1",
-        language: "en",
-        langName: "English",
-        langFlag: "🇬🇧",
-        season: 1,
-        episode: 1,
-        release: "Breaking.Bad.S01E01.Pilot.720p.BluRay.x264",
-        quality: "720p BluRay",
-        format: "SRT",
-        uploader: "TVSubtitles",
-        downloads: 15400,
-        rating: 4.8,
-        date: "2022-08-01"
-      }
-    ]
-  },
-  {
-    id: "the-batman",
-    title: "The Batman",
-    arabicTitle: "ذا باتمان",
-    type: "movie",
-    year: 2022,
-    rating: 7.8,
-    genres: ["Action", "Crime", "Drama"],
-    duration: "2h 56m",
-    poster: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg",
-    overview: "عندما يشرع قاتل متسلسل سادي في استهداف الشخصيات السياسية الرئيسية في غوثام، يُجبر باتمان على التحقيق في فساد المدينة الخفي والتساؤل عن تورط عائلته.",
-    imdbId: "tt1877830",
-    subtitles: [
-      {
-        id: "sub-bat-1",
-        language: "ar",
-        langName: "العربية",
-        langFlag: "🇸🇦",
-        release: "The.Batman.2022.1080p.WEBRip.x264-RARBG",
-        quality: "1080p WEBRip",
-        format: "SRT",
-        uploader: "GothamKnight",
-        downloads: 19800,
-        rating: 4.8,
-        fps: "23.976",
-        date: "2022-04-18"
-      }
-    ]
-  },
-  {
-    id: "interstellar",
-    title: "Interstellar",
-    arabicTitle: "بين النجوم",
-    type: "movie",
-    year: 2014,
-    rating: 8.7,
-    genres: ["Adventure", "Drama", "Sci-Fi"],
-    duration: "2h 49m",
-    poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
-    overview: "فريق من المستكشفين يسافر عبر ثقب دودي في الفضاء في محاولة لضمان بقاء البشرية والعثور على كوكب جديد صالح للحياة.",
-    imdbId: "tt0816692",
-    subtitles: [
-      {
-        id: "sub-inter-1",
-        language: "ar",
-        langName: "العربية",
-        langFlag: "🇸🇦",
-        release: "Interstellar.2014.1080p.BluRay.x264.DTS-HD.MA.5.1",
-        quality: "1080p BluRay",
-        format: "SRT",
-        uploader: "CinemaUniverse",
-        downloads: 64200,
-        rating: 5.0,
-        fps: "23.976",
-        date: "2021-05-14"
-      }
-    ]
-  },
-  {
-    id: "attack-on-titan",
-    title: "Attack on Titan",
-    arabicTitle: "هجوم العمالقة",
-    type: "tv",
-    seasonsCount: 4,
-    episodesPerSeason: 25,
-    year: 2013,
-    rating: 9.1,
-    genres: ["Animation", "Action", "Fantasy"],
-    poster: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/rqbCbjB19amtOtFQbb3K2lgm2zv.jpg",
-    overview: "بعد أن تدمر مدينته وتقتل والدته، يقسم الشاب إيرين ييغر على تطهير الأرض من العمالقة العملاقة الذين قادوا البشرية إلى حافة الانقراض.",
-    imdbId: "tt2560140",
-    subtitles: [
-      {
-        id: "sub-aot-s4",
-        language: "ar",
-        langName: "العربية",
-        langFlag: "🇸🇦",
-        season: 4,
-        episode: "All",
-        release: "Shingeki.no.Kyojin.The.Final.Season.1080p.BD.Dual-Audio",
-        quality: "1080p BDRip",
-        format: "ZIP",
-        uploader: "AnimeTops_AR",
-        downloads: 38400,
-        rating: 5.0,
-        date: "2023-12-05"
       }
     ]
   }
@@ -283,4 +85,109 @@ function getRecentSubtitles() {
     });
   });
   return allSubs.sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+/**
+ * محول مصادر الترجمة (Adapter Pattern)
+ * يوحد شكل البيانات القادمة من الـ API لتتوافق مع الواجهة
+ */
+class SubtitleAdapter {
+  static adapt(apiData) {
+    if (!apiData || !apiData.subtitles) return [];
+    
+    return apiData.subtitles.map(sub => {
+      const isArabic = sub.language === 'ar' || sub.language.toLowerCase().includes('arabic');
+      
+      return {
+        id: sub.id,
+        language: sub.language,
+        langName: isArabic ? 'العربية' : 'English',
+        langFlag: isArabic ? '🇸🇦' : '🇬🇧',
+        release: sub.release_name || 'Unknown Release',
+        quality: sub.quality || 'Unknown',
+        season: sub.season || null,
+        episode: sub.episode || null,
+        format: 'SRT', // Default
+        uploader: sub.author || sub.source_api || 'Unknown',
+        downloads: sub.downloads || 0,
+        rating: 5.0,
+        date: sub.date || new Date().toISOString().split('T')[0],
+        download_url: sub.download_url
+      };
+    });
+  }
+}
+
+/**
+ * State Manager لترجمات صفحة الفيلم/المسلسل
+ */
+class SubtitleStateManager {
+  constructor() {
+    this.rawSubtitles = [];
+    this.filteredSubtitles = [];
+    this.filters = {
+      lang: 'all',
+      quality: 'all',
+      season: 'all',
+      episode: 'all'
+    };
+  }
+
+  async fetchSubtitles(tmdb_id, type = 'movie') {
+    try {
+      const response = await fetch(`/api/subtitles?tmdb_id=${tmdb_id}&type=${type}`);
+      if (!response.ok) throw new Error('API Error');
+      const data = await response.json();
+      
+      this.rawSubtitles = SubtitleAdapter.adapt(data);
+      this.applyFilters(); // Apply default filters
+      return this.filteredSubtitles;
+    } catch (e) {
+      console.error('Failed to fetch subtitles from API:', e);
+      // Fallback to local db if ID exists
+      const localMovie = MOVIES_DATABASE.find(m => m.id === tmdb_id || m.imdbId === tmdb_id);
+      if (localMovie && localMovie.subtitles) {
+        this.rawSubtitles = localMovie.subtitles;
+      } else {
+        this.rawSubtitles = [];
+      }
+      this.applyFilters();
+      return this.filteredSubtitles;
+    }
+  }
+
+  setFilter(key, value) {
+    this.filters[key] = value;
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    this.filteredSubtitles = this.rawSubtitles.filter(sub => {
+      let match = true;
+      if (this.filters.lang !== 'all' && sub.language !== this.filters.lang) {
+        match = false;
+      }
+      if (this.filters.quality !== 'all') {
+        const q = this.filters.quality.toLowerCase();
+        const sq = (sub.quality || sub.release).toLowerCase();
+        if (q === 'web' && !sq.includes('web')) match = false;
+        else if (q === 'bluray' && !sq.includes('bluray') && !sq.includes('bdrip')) match = false;
+        else if (q === '4k' && !sq.includes('2160p') && !sq.includes('4k')) match = false;
+        else if (q === '1080p' && !sq.includes('1080p')) match = false;
+      }
+      if (this.filters.season !== 'all' && sub.season && sub.season.toString() !== this.filters.season.toString()) {
+        match = false;
+      }
+      if (this.filters.episode !== 'all' && sub.episode && sub.episode.toString() !== this.filters.episode.toString()) {
+        if (sub.episode !== 'All') { // Accept full season packs
+          match = false;
+        }
+      }
+      return match;
+    });
+  }
+
+  getFiltered() {
+    return this.filteredSubtitles;
+  }
 }
