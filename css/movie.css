@@ -1,0 +1,286 @@
+/* Movie & Series Detail View Styles */
+
+.movie-header-backdrop {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  background-size: cover;
+  background-position: center 20%;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-end;
+}
+
+.backdrop-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg-primary) 10%, rgba(11, 14, 20, 0.85) 60%, rgba(11, 14, 20, 0.5) 100%);
+}
+
+.movie-hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  gap: 2.2rem;
+  align-items: flex-end;
+}
+
+.movie-hero-poster {
+  width: 200px;
+  min-width: 200px;
+  aspect-ratio: 2/3;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-card);
+}
+
+.movie-hero-details {
+  flex: 1;
+}
+
+.movie-hero-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  line-height: 1.15;
+}
+
+.movie-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.movie-hero-overview {
+  color: #cbd5e1;
+  font-size: 0.96rem;
+  line-height: 1.6;
+  max-width: 850px;
+  margin-bottom: 1.2rem;
+}
+
+/* Season / Episode Selector for TV Shows */
+.tv-selector-bar {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+  margin-bottom: 1.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tv-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.season-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.season-tab-btn {
+  padding: 0.4rem 0.9rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+
+.season-tab-btn.active, .season-tab-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.episode-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 0.9rem;
+}
+
+/* Subtitle Filters Toolbar */
+.subtitles-filter-toolbar {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  outline: none;
+}
+
+/* Subtitles List & Cards */
+.subtitles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.subtitle-item-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  transition: var(--transition);
+}
+
+.subtitle-item-card:hover {
+  border-color: var(--border-hover);
+  background-color: var(--bg-card-hover);
+}
+
+.sub-card-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex: 1;
+}
+
+.lang-flag-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  font-size: 1.4rem;
+}
+
+.lang-flag-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.sub-details {
+  flex: 1;
+}
+
+.sub-release-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.sub-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.sub-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* Toast notification */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.toast {
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-green);
+  color: #fff;
+  padding: 0.8rem 1.4rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .movie-hero-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .movie-hero-meta {
+    justify-content: center;
+  }
+  .subtitle-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sub-card-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
