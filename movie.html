@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تفاصيل العمل | سبتايل — Subtle</title>
+  <title>Subtitles Archive — Subtile</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
@@ -32,12 +32,11 @@
     body {
       background-color: var(--bg-base);
       color: var(--text-main);
-      font-family: 'Tajawal', 'Inter', sans-serif;
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
     }
-    [dir="ltr"] body { font-family: 'Inter', 'Tajawal', sans-serif; }
 
     /* Dynamic Full-Bleed Movie Backdrop */
     .global-backdrop-bg {
@@ -324,11 +323,11 @@
       <div style="width: 32px; height: 32px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
         <svg style="width: 18px; height: 18px; color: #000;" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
       </div>
-      <span>سبتايل | Subtle</span>
+      <span>SUBTILE</span>
     </a>
     <div style="display: flex; gap: 1rem; align-items: center;">
-      <a href="index.html" class="back-btn"><i class="fas fa-home"></i> الرئيسية</a>
-      <a href="browse.html" class="back-btn"><i class="fas fa-compass"></i> الاستكشاف</a>
+      <a href="index.html" class="back-btn"><i class="fas fa-home"></i> Trending</a>
+      <a href="browse.html" class="back-btn"><i class="fas fa-compass"></i> Browse</a>
     </div>
   </header>
 
@@ -350,14 +349,14 @@
     <div class="right-panel">
       
       <div class="panel-header">
-        <h2 id="viewTitle" class="panel-title"><i class="fas fa-closed-captioning"></i> قائمة الترجمات</h2>
-        <button id="backToSeasonsBtn" class="back-btn" style="display: none;"><i class="fas fa-arrow-right rtl:rotate-0 ltr:rotate-180"></i> العودة للمواسم</button>
+        <h2 id="viewTitle" class="panel-title"><i class="fas fa-closed-captioning"></i> Subtitles Archive</h2>
+        <button id="backToSeasonsBtn" class="back-btn" style="display: none;"><i class="fas fa-arrow-left"></i> Back to Seasons</button>
       </div>
 
       <!-- Filter Pills -->
       <div id="filterPillsContainer" class="filter-pills">
-        <button class="pill active" data-filter="all">جميع اللغات</button>
-        <button class="pill" data-filter="lang:ar">العربية 🇸🇦</button>
+        <button class="pill active" data-filter="all">All Languages</button>
+        <button class="pill" data-filter="lang:ar">Arabic 🇸🇦</button>
         <button class="pill" data-filter="lang:en">English 🇬🇧</button>
         <button class="pill" data-filter="lang:fr">Français 🇫🇷</button>
         <button class="pill" data-filter="lang:ja">日本語 🇯🇵</button>
