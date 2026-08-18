@@ -1,6 +1,6 @@
 /**
  * Centralized Global Real-Time Trending API
- * Powered by Live Cinemeta (Movies & TV Series) + Live AniList GraphQL (Trending Anime)
+ * Serves 3 distinct Top 10 charts: Movies, TV Shows, and Anime
  */
 
 let cache = {
@@ -23,8 +23,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    const titles = [];
-
     // 1. Fetch Real-time Top Movies from Cinemeta
     const moviePromise = fetch('https://v3-cinemeta.strem.io/catalog/movie/top.json')
       .then(r => r.json())
@@ -64,8 +62,9 @@ export default async function handler(req, res) {
 
     const [movieRes, seriesRes, animeRes] = await Promise.all([moviePromise, seriesPromise, animePromise]);
 
-    // Process Movies
-    const liveMovies = (movieRes.metas || []).slice(0, 10).map((m, idx) => ({
+    // Process Top 10 Movies
+    const movies = (movieRes.metas || []).slice(0, 10).map((m, idx) => ({
+      rank: idx + 1,
       id: m.id,
       title: m.name,
       year: parseInt(m.year) || 2025,
@@ -79,8 +78,9 @@ export default async function handler(req, res) {
       lang: 'English'
     }));
 
-    // Process TV Series
-    const liveSeries = (seriesRes.metas || []).slice(0, 10).map((s, idx) => ({
+    // Process Top 10 TV Series
+    const tv = (seriesRes.metas || []).slice(0, 10).map((s, idx) => ({
+      rank: idx + 1,
       id: s.id,
       title: s.name,
       year: s.year || '2024–',
@@ -94,11 +94,12 @@ export default async function handler(req, res) {
       lang: 'English'
     }));
 
-    // Process Anime
-    const liveAnime = ((animeRes.data && animeRes.data.Page && animeRes.data.Page.media) || []).slice(0, 10).map((a, idx) => {
-      const cleanDesc = (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 200) + '...';
+    // Process Top 10 Anime
+    const anime = ((animeRes.data && animeRes.data.Page && animeRes.data.Page.media) || []).slice(0, 10).map((a, idx) => {
+      const cleanDesc = (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 220) + '...';
       const poster = (a.coverImage && (a.coverImage.extraLarge || a.coverImage.large)) || '';
       return {
+        rank: idx + 1,
         id: `anime-${a.idMal || a.id}`,
         mal_id: a.idMal || a.id,
         title: a.title.english || a.title.romaji || a.title.userPreferred,
@@ -114,26 +115,14 @@ export default async function handler(req, res) {
       };
     });
 
-    // Interleave them for a vibrant, balanced Top Chart
-    const combined = [];
-    const maxLen = Math.max(liveMovies.length, liveSeries.length, liveAnime.length);
-
-    for (let i = 0; i < maxLen; i++) {
-      if (liveMovies[i]) combined.push(liveMovies[i]);
-      if (liveSeries[i]) combined.push(liveSeries[i]);
-      if (liveAnime[i]) combined.push(liveAnime[i]);
-    }
-
-    if (combined.length > 0) {
-      combined[0].featured = true;
-    }
-
     const payload = {
       updatedAt: new Date().toISOString(),
-      source: 'Live Cinemeta + AniList Real-time Aggregator',
-      count: combined.length,
-      featured: combined[0] || null,
-      trending: combined
+      source: 'Live Cinemeta & AniList Top 10 Feeds',
+      categories: {
+        movie: movies,
+        tv: tv,
+        anime: anime
+      }
     };
 
     cache = { timestamp: now, data: payload };

@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Subtile — Premium Cinematic Subtitles Archive for Movies, TV Shows, and Anime.">
-    <title>Subtile — Trending Subtitles</title>
+    <title>Subtile — Trending Top 10</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -37,7 +37,7 @@
             mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
             -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
             opacity: 0.55;
-            transition: background-image 0.5s ease;
+            transition: background-image 0.6s ease-in-out;
         }
 
         .poster-container { position: relative; padding-bottom: 150%; }
@@ -80,14 +80,37 @@
         .movie-card:hover .overlay-content { opacity: 1; }
         .overlay-content { opacity: 0; transition: opacity 0.3s ease; z-index: 30; }
 
-        .reveal { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+        .reveal { opacity: 0; transform: translateY(20px); transition: opacity .4s ease, transform .4s ease; }
         .reveal.visible { opacity: 1; transform: none; }
 
-        .filter-btn.active {
+        /* Category Selector Pills */
+        .category-tab {
+            padding: 0.65rem 1.6rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-cine);
+            border: 1px solid var(--border-color);
+            background: rgba(18, 18, 24, 0.8);
+            color: var(--text-faded);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            backdrop-filter: blur(16px);
+        }
+        .category-tab:hover {
+            color: #ffffff;
+            border-color: var(--border-hover);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        .category-tab.active {
             background: #ffffff;
             color: #050507;
             border-color: #ffffff;
-            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
         }
 
         .btn-pill {
@@ -100,10 +123,13 @@
         .btn-secondary { background: rgba(255,255,255,0.05); color: #ffffff; border: 1px solid var(--border-color); }
         .btn-secondary:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.12); transform: translateY(-2px); }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #050507; }
-        ::-webkit-scrollbar-thumb { background: #222228; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3a3a44; }
+        .hero-fade-content {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .hero-fade-content.switching {
+            opacity: 0;
+            transform: translateY(10px);
+        }
     </style>
 </head>
 <body class="overflow-x-hidden min-h-screen">
@@ -139,10 +165,25 @@
         </div>
     </header>
 
+    <!-- Category Tabs Switcher (Top of Hero) -->
+    <div class="relative z-30 pt-24 pb-2 container mx-auto px-4 sm:px-8 flex justify-center sm:justify-start">
+        <div class="flex gap-3 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-full backdrop-blur-xl shadow-2xl">
+            <button data-cat="movie" class="category-tab active">
+                <i class="fas fa-film"></i> Movies
+            </button>
+            <button data-cat="tv" class="category-tab">
+                <i class="fas fa-tv"></i> TV Shows
+            </button>
+            <button data-cat="anime" class="category-tab">
+                <i class="fas fa-dragon"></i> Anime
+            </button>
+        </div>
+    </div>
+
     <!-- Featured Hero Banner (#01) -->
-    <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
+    <section class="relative w-full min-h-[75vh] flex items-center pb-12">
         <div id="bannerBg" class="banner-bg"></div>
-        <div class="relative z-10 container mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center gap-12">
+        <div id="heroContent" class="hero-fade-content relative z-10 container mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center gap-12">
             <div class="hidden md:block w-64 flex-shrink-0">
                 <div class="poster-container">
                     <img id="featuredPoster" src="" alt="" class="poster-img shadow-2xl shadow-black/90 border border-neutral-700/60">
@@ -154,14 +195,14 @@
                 <div class="flex items-center gap-4 mb-4">
                     <span class="text-neutral-100 font-black text-7xl md:text-8xl leading-none">01</span>
                     <div class="border-s border-neutral-700 ps-4">
-                        <p class="text-neutral-400 text-sm font-bold tracking-widest uppercase">Current #1 Title</p>
-                        <p class="text-neutral-500 text-xs mt-0.5">Trending Today</p>
+                        <p id="featuredCategoryLabel" class="text-neutral-400 text-sm font-bold tracking-widest uppercase">Current #1 Movie</p>
+                        <p class="text-neutral-500 text-xs mt-0.5">Live Real-Time Trending</p>
                     </div>
                 </div>
 
-                <h1 id="featuredTitle" class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none"></h1>
+                <h1 id="featuredTitle" class="text-4xl md:text-6xl font-black text-neutral-50 mb-3 tracking-tight leading-tight"></h1>
                 <div id="featuredMeta" class="flex items-center flex-wrap gap-x-4 gap-y-2 mb-6 text-neutral-400 text-sm font-medium"></div>
-                <p id="featuredDesc" class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl"></p>
+                <p id="featuredDesc" class="text-neutral-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl"></p>
 
                 <!-- Direct navigation buttons to movie.html -->
                 <div class="flex items-center gap-4 flex-wrap">
@@ -177,18 +218,16 @@
         </div>
     </section>
 
-    <!-- Trending Grid -->
-    <main class="container mx-auto px-4 sm:px-8 pt-12 pb-20 relative z-20">
-        <div class="mb-14 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <!-- Trending Grid (Ranks #02 to #10) -->
+    <main class="container mx-auto px-4 sm:px-8 pt-8 pb-20 relative z-20">
+        <div class="mb-12 flex justify-between items-end gap-6 border-b border-neutral-800/80 pb-6">
             <div>
-                <p class="text-neutral-500 font-bold mb-2 tracking-[0.2em] text-xs uppercase">Top Charts</p>
-                <h2 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight">Trending Now</h2>
+                <p id="gridSubtitle" class="text-neutral-500 font-bold mb-2 tracking-[0.2em] text-xs uppercase">Top 10 Movies Chart</p>
+                <h2 id="gridTitle" class="text-3xl md:text-4xl font-black text-neutral-50 tracking-tight">Top Ranked #02 — #10</h2>
             </div>
-            <div id="filters" class="flex gap-2 flex-wrap">
-                <button data-filter="all"   class="filter-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">All</button>
-                <button data-filter="movie" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">Movies</button>
-                <button data-filter="tv"    class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">TV Shows</button>
-                <button data-filter="anime" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">Anime</button>
+            
+            <div class="text-xs text-neutral-400 font-semibold bg-neutral-900/80 px-3.5 py-1.5 rounded-full border border-neutral-800">
+                <i class="fas fa-circle text-emerald-400 text-[8px] me-1"></i> Live Real-Time Feed
             </div>
         </div>
 
@@ -197,7 +236,7 @@
         <div id="emptyState" class="hidden text-center py-24">
             <p class="text-5xl mb-4">🎬</p>
             <p class="text-neutral-300 font-bold text-xl mb-1">No results found</p>
-            <p class="text-neutral-500 text-sm">Try a different search term or category filter</p>
+            <p class="text-neutral-500 text-sm">Try a different search term</p>
         </div>
     </main>
 
@@ -223,73 +262,86 @@
 <script>
 "use strict";
 
-let TITLES = [
-    { id: "tt15398776",  title: "Oppenheimer",       year: 2023, genre: "Biography / Drama", type: "movie", lang: "English", dl: "4.2M", featured: true,
-      poster: "https://images.metahub.space/poster/small/tt15398776/img", backdrop: "https://images.metahub.space/background/medium/tt15398776/img",
-      desc: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II." },
-    { id: "tt15239678",  title: "Dune: Part Two",      year: 2024, genre: "Sci-Fi / Adventure", type: "movie", lang: "English", dl: "3.8M", poster: "https://images.metahub.space/poster/small/tt15239678/img" }
-];
+let CURRENT_CATEGORY = "movie"; // 'movie' | 'tv' | 'anime'
+let CATEGORY_DATA = {
+    movie: [],
+    tv: [],
+    anime: []
+};
 
-let activeFilter = "all";
 let searchQuery = "";
 const $ = id => document.getElementById(id);
 
-async function loadLiveTrending() {
+async function fetchLiveTrending() {
     try {
         const res = await fetch('/api/trending');
         if (res.ok) {
             const data = await res.json();
-            if (data.trending && data.trending.length > 0) {
-                TITLES = data.trending;
+            if (data.categories) {
+                CATEGORY_DATA = data.categories;
             }
         }
     } catch (e) {
-        console.warn('Using local fallback for trending:', e);
+        console.warn('API error, using local fallback:', e);
     }
-    renderFeatured();
-    renderGrid();
+    renderActiveCategory();
 }
 
-function updateAuthNav() {
-    const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
-    const btn = $("navAuthBtn");
-    const txt = $("navAuthText");
-    if (!btn || !txt) return;
+function switchCategory(cat) {
+    if (CURRENT_CATEGORY === cat) return;
+    CURRENT_CATEGORY = cat;
 
-    if (user && user.username) {
-        txt.textContent = user.username;
-        btn.href = "#";
-        btn.onclick = (e) => {
-            e.preventDefault();
-            if (confirm('Do you want to log out?')) {
-                Auth.logout();
-                updateAuthNav();
-            }
-        };
-    } else {
-        txt.textContent = "Login";
-        btn.href = "login.html";
-        btn.onclick = null;
-    }
+    // Update active tab styling
+    document.querySelectorAll(".category-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.cat === cat);
+    });
+
+    // Smooth transition
+    const hero = $("heroContent");
+    hero.classList.add("switching");
+
+    setTimeout(() => {
+        renderActiveCategory();
+        hero.classList.remove("switching");
+    }, 200);
 }
 
-function renderFeatured() {
-    const f = TITLES.find(x => x.featured);
-    $("bannerBg").style.backgroundImage = `url('${f.backdrop}')`;
-    $("featuredTitle").textContent = f.title;
-    $("featuredDesc").textContent = f.desc;
+function renderActiveCategory() {
+    const list = CATEGORY_DATA[CURRENT_CATEGORY] || [];
+    if (list.length === 0) return;
+
+    const featured = list[0];
+    const rest = list.slice(1);
+
+    // 1. Update Labels
+    const labels = {
+        movie: { label: "Current #1 Movie", chart: "Top 10 Movies Chart" },
+        tv: { label: "Current #1 TV Series", chart: "Top 10 TV Shows Chart" },
+        anime: { label: "Current #1 Anime", chart: "Top 10 Anime Chart" }
+    };
+    $("featuredCategoryLabel").textContent = labels[CURRENT_CATEGORY].label;
+    $("gridSubtitle").textContent = labels[CURRENT_CATEGORY].chart;
+
+    // 2. Update Featured Hero Banner
+    $("bannerBg").style.backgroundImage = `url('${featured.backdrop || featured.poster}')`;
+    $("featuredTitle").textContent = featured.title;
+    $("featuredDesc").textContent = featured.desc;
     $("featuredMeta").innerHTML =
-        `<span>${f.year}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
-        `<span>${f.genre}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
-        `<span>${f.dl} Downloads</span>`;
-    const img = $("featuredPoster"), fb = $("featuredFallback");
-    img.alt = f.title; img.style.display = "";
-    img.onerror = () => { img.style.display = "none"; fb.style.display = "flex"; fb.textContent = f.title; };
-    img.src = f.poster;
+        `<span>${featured.year}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
+        `<span>${featured.genre}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
+        `<span>⭐ ${featured.rating} Rating</span>`;
     
-    const movieUrl = `movie.html?id=${f.id}&type=${f.type}`;
+    const img = $("featuredPoster"), fb = $("featuredFallback");
+    img.alt = featured.title; img.style.display = "";
+    img.onerror = () => { img.style.display = "none"; fb.style.display = "flex"; fb.textContent = featured.title; };
+    img.src = featured.poster;
+    
+    const movieUrl = `movie.html?id=${featured.id}&type=${featured.type}`;
     $("featuredDownload").href = movieUrl;
     $("featuredInfo").href = movieUrl;
+
+    // 3. Update Grid (#02 to #10)
+    renderGrid(rest);
 }
 
 function cardHTML(item, rank) {
@@ -315,22 +367,46 @@ function cardHTML(item, rank) {
             <div class="flex items-center gap-2 mb-1">
                 <span class="bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${item.lang}</span>
                 <span class="text-neutral-500 text-xs">${item.year}</span>
+                <span class="text-neutral-600">•</span>
+                <span class="text-amber-400 text-xs font-semibold">★ ${item.rating}</span>
             </div>
             <h3 class="text-base font-bold text-neutral-100 truncate">${item.title}</h3>
-            <p class="text-neutral-500 text-sm mt-0.5">${item.dl} Downloads</p>
+            <p class="text-neutral-500 text-sm mt-0.5">${item.downloads} Downloads</p>
         </div>
     </a>`;
 }
 
-function renderGrid() {
+function renderGrid(customList) {
+    const list = customList || (CATEGORY_DATA[CURRENT_CATEGORY] || []).slice(1);
     const q = searchQuery.trim().toLowerCase();
-    const list = TITLES.filter(x => !x.featured)
-        .filter(x => activeFilter === "all" || x.type === activeFilter)
-        .filter(x => !q || x.title.toLowerCase().includes(q));
+    const filtered = list.filter(x => !q || x.title.toLowerCase().includes(q));
 
-    $("grid").innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
-    $("emptyState").classList.toggle("hidden", list.length > 0);
+    $("grid").innerHTML = filtered.map((item, i) => cardHTML(item, i + 2)).join("");
+    $("emptyState").classList.toggle("hidden", filtered.length > 0);
     observeReveals();
+}
+
+function updateAuthNav() {
+    const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+    const btn = $("navAuthBtn");
+    const txt = $("navAuthText");
+    if (!btn || !txt) return;
+
+    if (user && user.username) {
+        txt.textContent = user.username;
+        btn.href = "#";
+        btn.onclick = (e) => {
+            e.preventDefault();
+            if (confirm('Do you want to log out?')) {
+                Auth.logout();
+                updateAuthNav();
+            }
+        };
+    } else {
+        txt.textContent = "Login";
+        btn.href = "login.html";
+        btn.onclick = null;
+    }
 }
 
 const io = new IntersectionObserver(entries => {
@@ -346,11 +422,12 @@ $("searchInput").addEventListener("keydown", e => {
     }
 });
 
-document.querySelectorAll(".filter-btn").forEach(btn => btn.addEventListener("click", () => {
-    activeFilter = btn.dataset.filter;
-    document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
-    renderGrid();
-}));
+// Category Tab Clicks
+document.querySelectorAll(".category-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+        switchCategory(btn.dataset.cat);
+    });
+});
 
 const toTop = $("toTop");
 window.addEventListener("scroll", () => {
@@ -362,7 +439,7 @@ toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smoot
 
 $("year").textContent = new Date().getFullYear();
 updateAuthNav();
-loadLiveTrending();
+fetchLiveTrending();
 </script>
 </body>
 </html>
