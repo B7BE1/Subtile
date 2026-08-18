@@ -141,17 +141,26 @@ function renderMovieDetails(movie) {
 
   const title = document.getElementById('movieTitle');
   if (title) {
-    title.innerHTML = `${movie.title} <span style="font-size: 1.4rem; font-weight: 500; color: var(--text-secondary);">(${movie.year || 'N/A'})</span>`;
+    title.textContent = movie.title || 'Movie Details';
+  }
+
+  const tags = document.getElementById('movieTags');
+  if (tags) {
+    let tagsHtml = `<span class="tag">${movie.year || ''}</span>`;
+    if (movie.genres && movie.genres.length > 0) {
+      tagsHtml += movie.genres.map(g => `<span class="tag">${g}</span>`).join('');
+    }
+    tags.innerHTML = tagsHtml;
   }
 
   const meta = document.getElementById('movieMeta');
   if (meta) {
-    const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Series' : 'Movie');
     meta.innerHTML = `
-      <span class="badge ${movie.type === 'tv' ? 'badge-tv' : 'badge-movie'}">${typeLabel}</span>
-      ${movie.rating ? `<span class="badge badge-rating"><i class="fas fa-star"></i> ${movie.rating} / 10</span>` : ''}
-      ${movie.genres && movie.genres.length ? `<span>${movie.genres.join(', ')}</span>` : ''}
-      ${(movie.imdb_id || movie.imdbId) ? `<a href="https://www.imdb.com/title/${movie.imdb_id || movie.imdbId}" target="_blank" style="color: #f5c518; margin-left: 0.5rem;"><i class="fab fa-imdb"></i> IMDb</a>` : ''}
+      <div class="rating-circle">
+        <span>${movie.rating || 'N/A'}</span>
+      </div>
+      <div class="meta-item"><i class="fas fa-clock"></i> ${movie.type === 'tv' ? 'TV Series' : 'Movie'}</div>
+      ${(movie.imdb_id || movie.imdbId) ? `<div class="meta-item"><a href="https://www.imdb.com/title/${movie.imdb_id || movie.imdbId}" target="_blank" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
     `;
   }
 
@@ -233,30 +242,34 @@ async function filterTvSubtitles() {
   }
 }
 
-function applyFilters() {
+window.currentFilters = { lang: 'all', quality: 'all' };
+
+window.applyPillFilter = function(filterValue) {
+  if (filterValue === 'all') {
+    window.currentFilters.lang = 'all';
+    window.currentFilters.quality = 'all';
+  } else if (filterValue.startsWith('lang:')) {
+    window.currentFilters.lang = filterValue.split(':')[1];
+  } else if (filterValue.startsWith('quality:')) {
+    window.currentFilters.quality = filterValue.split(':')[1];
+  }
   renderSubtitlesList();
-}
+};
 
 function renderSubtitlesList() {
   const container = document.getElementById('subtitlesList');
-  const countSpan = document.getElementById('subtitlesCount');
   if (!container || !currentMovie) return;
-
-  const langFilter = document.getElementById('langFilter') ? document.getElementById('langFilter').value : 'all';
-  const qualityFilter = document.getElementById('qualityFilter') ? document.getElementById('qualityFilter').value : 'all';
 
   let subs = [...loadedSubtitles];
 
-  if (langFilter !== 'all') {
-    subs = subs.filter(s => s.langCode === langFilter || (s.language && s.language.toLowerCase().includes(langFilter)));
-  }
+  const langF = window.currentFilters.lang;
+  const qualF = window.currentFilters.quality;
 
-  if (qualityFilter !== 'all') {
-    subs = subs.filter(s => s.quality && s.quality.toLowerCase().includes(qualityFilter.toLowerCase()));
+  if (langF !== 'all') {
+    subs = subs.filter(s => s.langCode === langF || (s.language && s.language.toLowerCase().includes(langF)));
   }
-
-  if (countSpan) {
-    countSpan.textContent = `${subs.length} subtitle files available from SubDL`;
+  if (qualF !== 'all') {
+    subs = subs.filter(s => s.quality && s.quality.toLowerCase().includes(qualF.toLowerCase()));
   }
 
   if (subs.length === 0) {
@@ -265,7 +278,7 @@ function renderSubtitlesList() {
         <i class="fas fa-closed-captioning" style="font-size: 2rem; margin-bottom: 0.8rem; display: block;"></i>
         <h3>No subtitles found for this selection</h3>
         <p style="margin-top: 0.4rem; font-size: 0.85rem;">You can upload a custom subtitle for this title.</p>
-        <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload Subtitle</button>
+        <button class="btn btn-outline" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload Subtitle</button>
       </div>
     `;
     return;
@@ -276,31 +289,24 @@ function renderSubtitlesList() {
     const downloadParam = sub.download_url ? encodeURIComponent(sub.download_url) : '';
 
     return `
-      <div class="subtitle-item-card">
-        <div class="sub-card-left">
-          <div class="lang-flag-box">
-            <span>${sub.langFlag || '🌐'}</span>
-            <span class="lang-flag-label">${(sub.langName || sub.language || 'SUB').toUpperCase()}</span>
+      <div class="subtitle-card">
+        <div class="sub-info">
+          <div class="sub-release">
+            ${sub.release}
+            <span class="format-badge">${sub.format || 'SRT'}</span>
           </div>
-          <div class="sub-details">
-            <div class="sub-release-title">
-              <span>${sub.release}</span>
-              <span class="badge badge-quality">${sub.quality || 'HD'}</span>
-              ${sub.hearingImpaired ? '<span class="badge" style="background: rgba(255,255,255,0.06);" title="Hearing Impaired"><i class="fas fa-deaf"></i> HI</span>' : ''}
-            </div>
-            <div class="sub-meta-tags">
-              <span><i class="fas fa-user-edit"></i> ${sub.uploader || 'SubDL Author'}</span>
-              <span><i class="fas fa-file-code"></i> ${sub.format || 'SRT'}</span>
-              ${sub.fps ? `<span><i class="fas fa-film"></i> ${sub.fps} FPS</span>` : ''}
-              <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()} downloads</span>
-              <span style="color: #5b9df5;"><i class="fas fa-check-circle"></i> Verified SubDL</span>
-            </div>
+          <div class="sub-meta">
+            <span class="meta-badge"><i class="fas fa-flag"></i> ${sub.langFlag || ''} ${(sub.langName || sub.language || 'SUB').toUpperCase()}</span>
+            <span class="meta-badge"><i class="fas fa-user"></i> ${sub.uploader || 'SubDL Author'}</span>
+            ${sub.quality ? `<span class="meta-badge"><i class="fas fa-video"></i> ${sub.quality}</span>` : ''}
           </div>
         </div>
-        <div class="sub-card-actions">
-          <button class="btn-auth-subdl" style="padding: 0.45rem 1.1rem; border-color: #3a3f4b;" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}')">
-            <i class="fas fa-download"></i> Download (${sub.format || 'SRT'})
-          </button>
+        <div class="actions-group">
+          <div class="download-stats">
+            <span>${(sub.downloads || 0).toLocaleString()}</span>
+            Downloads
+          </div>
+          <a href="#" class="download-btn" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}'); return false;"><i class="fas fa-download"></i></a>
         </div>
       </div>
     `;

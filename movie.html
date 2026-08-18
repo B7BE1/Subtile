@@ -628,7 +628,6 @@
 
     <div class="nav-actions">
       <button class="btn btn-outline" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload</button>
-      <button class="btn btn-primary"><i class="fas fa-crown"></i> Go Premium</button>
     </div>
   </header>
 
@@ -636,28 +635,24 @@
   <section class="hero-section">
     <div class="movie-card-hero">
       <div class="hero-poster-container">
-        <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Dune Part Two Poster" class="movie-hero-poster">
+        <img id="moviePoster" src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-hero-poster">
       </div>
       <div class="hero-details">
-        <div class="hero-tags">
+        <div id="movieTags" class="hero-tags">
           <span class="tag">2024</span>
           <span class="tag">Sci-Fi</span>
-          <span class="tag">Adventure</span>
-          <span class="tag">Action</span>
         </div>
-        <h1 class="movie-hero-title">Dune: Part Two</h1>
+        <h1 id="movieTitle" class="movie-hero-title">Dune: Part Two</h1>
         
-        <div class="movie-hero-meta">
+        <div id="movieMeta" class="movie-hero-meta">
           <div class="rating-circle">
             <span>8.6</span>
           </div>
           <div class="meta-item"><i class="fas fa-calendar-alt"></i> March 1, 2024</div>
-          <div class="meta-item"><i class="fas fa-clock"></i> 2h 46m</div>
-          <div class="meta-item"><i class="fas fa-language"></i> English</div>
         </div>
         
-        <p class="movie-hero-overview">
-          Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible future.
+        <p id="movieOverview" class="movie-hero-overview">
+          Loading overview...
         </p>
         
         <div class="hero-actions">
@@ -673,13 +668,13 @@
     
     <!-- Filters Toolbar -->
     <div class="toolbar">
-      <div class="filter-pills">
-        <div class="pill active">All Subtitles</div>
-        <div class="pill">English</div>
-        <div class="pill">Arabic</div>
-        <div class="pill">4K UHD</div>
-        <div class="pill">1080p</div>
-        <div class="pill">720p</div>
+      <div id="filterPillsContainer" class="filter-pills">
+        <div class="pill active" data-filter="all">All Subtitles</div>
+        <div class="pill" data-filter="lang:en">English</div>
+        <div class="pill" data-filter="lang:ar">Arabic</div>
+        <div class="pill" data-filter="quality:4K">4K UHD</div>
+        <div class="pill" data-filter="quality:1080p">1080p</div>
+        <div class="pill" data-filter="quality:720p">720p</div>
       </div>
 
       <div class="sort-dropdown">
@@ -694,73 +689,7 @@
 
     <!-- Subtitles List -->
     <div id="subtitlesList" class="subtitles-list">
-      
-      <!-- Card 1 -->
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">
-            Dune.Part.Two.2024.720p.HD
-            <span class="format-badge">SRT</span>
-          </div>
-          <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> Arabic (SA)</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> Translator Pro</span>
-            <span class="meta-badge"><i class="fas fa-clock"></i> 2 days ago</span>
-          </div>
-        </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>12,450</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="showToast('Download started!', 'success'); return false;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-      
-      <!-- Card 2 -->
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">
-            Dune.Part.Two.2024.720p.HD
-            <span class="format-badge">ZIP</span>
-          </div>
-          <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> Arabic (SA)</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> Sub Team X</span>
-            <span class="meta-badge"><i class="fas fa-clock"></i> 5 days ago</span>
-          </div>
-        </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>8,920</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="showToast('Download started!', 'success'); return false;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">
-            Dune.Part.Two.2024.2160p.4K.UHD
-            <span class="format-badge">SRT</span>
-          </div>
-          <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> English (GB)</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> Official Release</span>
-            <span class="meta-badge"><i class="fas fa-clock"></i> 1 week ago</span>
-          </div>
-        </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>24,100</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="showToast('Download started!', 'success'); return false;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-
+      <!-- Generated by JS -->
     </div>
 
   </main>
@@ -856,6 +785,9 @@
       pill.addEventListener('click', function() {
         this.parentNode.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         this.classList.add('active');
+        if (typeof window.applyPillFilter === 'function') {
+          window.applyPillFilter(this.getAttribute('data-filter'));
+        }
       });
     });
 
