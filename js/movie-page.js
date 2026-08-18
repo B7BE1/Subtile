@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const movieId = urlParams.get('id') || 'dune-2';
   const movieType = urlParams.get('type') || 'movie';
 
-  showPageLoading();
-
   // 1. Fetch metadata from API (Cinemeta / Jikan / Local)
   currentMovie = await loadMetadata(movieId, movieType);
 
@@ -26,6 +24,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. Fetch live subtitles from SubDL API
   await fetchRealSubtitles(currentMovie);
+
+  // 3. Hide global loader and fade in page
+  const loader = document.getElementById('globalLoader');
+  const container = document.querySelector('.split-container');
+  if (loader) loader.style.opacity = '0';
+  setTimeout(() => {
+    if (loader) loader.style.display = 'none';
+    if (container) container.classList.add('loaded');
+  }, 300);
 });
 
 async function loadMetadata(id, type) {

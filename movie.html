@@ -276,9 +276,27 @@
       .movie-title { font-size: 2.5rem; }
       .filter-pills { grid-template-columns: repeat(3, 1fr); }
     }
+
+    /* Global Loader */
+    #globalLoader {
+      position: fixed; inset: 0; background: var(--bg-black); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.3s ease;
+    }
+    .split-container {
+      opacity: 0; visibility: hidden; transition: opacity 0.8s ease;
+    }
+    .split-container.loaded {
+      opacity: 1; visibility: visible;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Global Loader -->
+  <div id="globalLoader">
+    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+  </div>
 
   <!-- Navbar -->
   <header class="navbar">
