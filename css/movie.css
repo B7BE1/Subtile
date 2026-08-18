@@ -391,23 +391,29 @@
 #backToSeasonsBtn {
   display: none;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--bg-card);
+  justify-content: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: var(--transition);
-  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  margin: 0 auto 2.5rem auto;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  width: fit-content;
 }
 
 #backToSeasonsBtn:hover {
-  background: #2563eb;
-  color: white;
-  border-color: #2563eb;
+  background: white;
+  color: black;
+  border-color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
 }
 
 /* ---------- New: Filter pills (applyPillFilter) ---------- */
