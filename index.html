@@ -3,33 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="سبتايل — أرشيف الترجمات العربية والأجنبية للأفلام والمسلسلات والأنمي.">
+    <meta name="description" content="سبتايل — أرشيف الترجمات السينمائية للأفلام والمسلسلات والأنمي.">
     <title>سبتايل | Subtle — الترجمات الرائجة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #0a0a0a; }
+        :root {
+            --bg-main: #050507;
+            --bg-glass: rgba(15, 15, 18, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.25);
+            --text-main: #ffffff;
+            --text-faded: #8a8a92;
+            --transition-cine: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); }
         [dir="ltr"] body { font-family: 'Inter', 'Tajawal', sans-serif; }
-        .nav-blur { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(10, 10, 10, 0.85); }
+        
+        .nav-blur {
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            background: var(--bg-glass);
+            border-bottom: 1px solid var(--border-color);
+        }
 
         .banner-bg {
             background-size: cover;
             background-position: center top;
             position: absolute; inset: 0; z-index: 0;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
-            opacity: 0.6;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            opacity: 0.55;
+            transition: background-image 0.5s ease;
         }
 
         .poster-container { position: relative; padding-bottom: 150%; }
-        .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; background: #171717; }
+        .poster-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+            border-radius: 1rem; background: #121216; border: 1px solid var(--border-color);
+            transition: var(--transition-cine);
+        }
         .poster-fallback {
-            position: absolute; inset: 0; border-radius: 12px; background: #171717;
+            position: absolute; inset: 0; border-radius: 1rem; background: #121216;
             display: none; align-items: center; justify-content: center; text-align: center;
-            color: #525252; font-weight: 700; padding: 1rem; border: 1px solid #262626;
+            color: #525252; font-weight: 700; padding: 1rem; border: 1px solid var(--border-color);
         }
 
         /* Hollow Transparent Stroke Rank Numbers */
@@ -40,96 +61,105 @@
             line-height: 0.8;
             color: transparent;
             -webkit-text-stroke: 2px rgba(255, 255, 255, 0.45);
-            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9);
+            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.95);
             position: absolute;
-            bottom: -14px;
+            bottom: -12px;
             z-index: 25;
             pointer-events: none;
             user-select: none;
             transition: -webkit-text-stroke 0.3s ease, transform 0.3s ease;
         }
         .movie-card:hover .rank-number {
-            -webkit-text-stroke: 2.5px rgba(255, 255, 255, 0.9);
-            transform: scale(1.03);
+            -webkit-text-stroke: 2.5px rgba(255, 255, 255, 0.95);
+            transform: scale(1.04);
         }
         [dir="rtl"] .rank-number { right: -10px; }
         [dir="ltr"] .rank-number { left: -10px; }
 
-        .movie-card { position: relative; z-index: 1; transition: transform 0.3s ease; }
-        .movie-card:hover { transform: translateY(-5px); }
-        .movie-card:hover .poster-img { filter: brightness(0.3); }
+        .movie-card { position: relative; z-index: 1; transition: var(--transition-cine); }
+        .movie-card:hover { transform: translateY(-6px); }
+        .movie-card:hover .poster-img { filter: brightness(0.35); border-color: var(--border-hover); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
         .movie-card:hover .overlay-content { opacity: 1; }
         .overlay-content { opacity: 0; transition: opacity 0.3s ease; z-index: 30; }
-        .movie-card:focus-visible { outline: 2px solid #a3a3a3; outline-offset: 4px; border-radius: 12px; }
-        .movie-card:focus-visible .overlay-content { opacity: 1; }
 
-        .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+        .reveal { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
         .reveal.visible { opacity: 1; transform: none; }
 
-        .filter-btn.active { background: #f5f5f5; color: #171717; border-color: #f5f5f5; }
-
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 6px; }
-        ::-webkit-scrollbar-thumb:hover { background: #404040; }
-
-        @media (prefers-reduced-motion: reduce) {
-            .reveal, .movie-card, .overlay-content { transition: none !important; }
+        .filter-btn.active {
+            background: #ffffff;
+            color: #050507;
+            border-color: #ffffff;
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
         }
+
+        .btn-pill {
+            padding: 0.75rem 1.6rem; border-radius: 50px; font-weight: 700; cursor: pointer;
+            transition: var(--transition-cine); text-decoration: none; display: inline-flex;
+            align-items: center; gap: 0.6rem;
+        }
+        .btn-primary { background: #ffffff; color: #050507; }
+        .btn-primary:hover { background: rgba(255,255,255,0.9); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,0.25); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: #ffffff; border: 1px solid var(--border-color); }
+        .btn-secondary:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050507; }
+        ::-webkit-scrollbar-thumb { background: #222228; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a44; }
     </style>
 </head>
-<body class="bg-neutral-950 text-white overflow-x-hidden">
+<body class="overflow-x-hidden min-h-screen">
 
     <!-- Navbar -->
-    <header class="fixed top-0 w-full z-50 nav-blur border-b border-neutral-800/50">
-        <div class="container mx-auto px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
-            <a href="index.html" class="flex items-center gap-3 flex-shrink-0">
-                <div class="w-8 h-8 bg-neutral-100 rounded-md flex items-center justify-center">
+    <header class="fixed top-0 w-full z-50 nav-blur">
+        <div class="container mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center gap-3 flex-shrink-0 group">
+                <div class="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105">
                     <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </div>
-                <span class="text-lg font-black tracking-tight text-neutral-200 hidden sm:block" data-i18n="brand">سبتايل</span>
+                <span class="text-lg font-black tracking-tight text-neutral-100 hidden sm:block" data-i18n="brand">سبتايل</span>
             </a>
 
             <div class="flex-1 max-w-xl">
                 <div class="relative">
                     <input id="searchInput" type="search" data-i18n-ph="searchPh" placeholder="ابحث عن فيلم، مسلسل، أنمي..."
-                        class="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-600">
-                    <svg class="absolute end-3 top-3 w-5 h-5 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-500">
+                    <svg class="absolute end-3.5 top-3 w-4 h-4 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
             </div>
 
             <div class="flex items-center gap-3 flex-shrink-0">
-                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
-                    <a href="index.html" class="text-white border-b border-neutral-100 pb-1" data-i18n="navTrending">الرائج</a>
+                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-neutral-400">
+                    <a href="index.html" class="text-white border-b-2 border-white pb-0.5" data-i18n="navTrending">الرائج</a>
                     <a href="browse.html#latest" class="hover:text-neutral-200 transition-colors" data-i18n="navLatest">الأحدث</a>
                     <a href="browse.html#discover" class="hover:text-neutral-200 transition-colors" data-i18n="navUpload">الاستكشاف</a>
                 </nav>
-                <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-900 px-3.5 py-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
                     <i class="fas fa-user-circle text-sm"></i>
                     <span id="navAuthText" data-i18n="loginBtn">دخول</span>
                 </a>
-                <button id="langToggle" class="text-xs font-bold border border-neutral-700 hover:border-neutral-400 rounded-lg px-3 py-2 text-neutral-300 transition-colors">EN</button>
+                <button id="langToggle" class="text-xs font-bold border border-neutral-700 hover:border-neutral-400 rounded-xl px-3 py-2 text-neutral-300 transition-colors">EN</button>
             </div>
         </div>
     </header>
 
-    <!-- Featured Banner -->
-    <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-10">
+    <!-- Featured Hero Banner (#01) -->
+    <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
         <div id="bannerBg" class="banner-bg"></div>
         <div class="relative z-10 container mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center gap-12">
             <div class="hidden md:block w-64 flex-shrink-0">
                 <div class="poster-container">
-                    <img id="featuredPoster" src="" alt="" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800">
+                    <img id="featuredPoster" src="" alt="" class="poster-img shadow-2xl shadow-black/90 border border-neutral-700/60">
                     <div id="featuredFallback" class="poster-fallback"></div>
                 </div>
             </div>
 
             <div class="max-w-2xl mt-4 md:mt-0">
                 <div class="flex items-center gap-4 mb-4">
-                    <span class="text-neutral-100 font-black text-7xl md:text-8xl">01</span>
+                    <span class="text-neutral-100 font-black text-7xl md:text-8xl leading-none">01</span>
                     <div class="border-s border-neutral-700 ps-4">
-                        <p class="text-neutral-400 text-sm font-medium tracking-widest" data-i18n="current1">المرتبة الأولى حالياً</p>
-                        <p class="text-neutral-500 text-sm" data-i18n="trendingToday">الرائج اليوم</p>
+                        <p class="text-neutral-400 text-sm font-bold tracking-widest uppercase" data-i18n="current1">المرتبة الأولى حالياً</p>
+                        <p class="text-neutral-500 text-xs mt-0.5" data-i18n="trendingToday">الرائج اليوم</p>
                     </div>
                 </div>
 
@@ -139,11 +169,11 @@
 
                 <!-- Direct navigation buttons to movie.html -->
                 <div class="flex items-center gap-4 flex-wrap">
-                    <a id="featuredDownload" href="#" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                    <a id="featuredDownload" href="#" class="btn-pill btn-primary">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span data-i18n="downloadSubs">تحميل الترجمة</span>
                     </a>
-                    <a id="featuredInfo" href="#" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors flex items-center" data-i18n="moreInfo">
+                    <a id="featuredInfo" href="#" class="btn-pill btn-secondary" data-i18n="moreInfo">
                         معلومات أكثر
                     </a>
                 </div>
@@ -152,17 +182,17 @@
     </section>
 
     <!-- Trending Grid -->
-    <main class="container mx-auto px-4 sm:px-8 pt-16 pb-20 relative z-20">
-        <div class="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <main class="container mx-auto px-4 sm:px-8 pt-12 pb-20 relative z-20">
+        <div class="mb-14 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-                <p class="text-neutral-500 font-medium mb-3 tracking-[0.2em] text-xs" data-i18n="topCharts">أعلى القوائم</p>
+                <p class="text-neutral-500 font-bold mb-2 tracking-[0.2em] text-xs uppercase" data-i18n="topCharts">أعلى القوائم</p>
                 <h2 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight" data-i18n="trendingNow">الرائج الآن</h2>
             </div>
             <div id="filters" class="flex gap-2 flex-wrap">
-                <button data-filter="all"   class="filter-btn active px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fAll">الكل</button>
-                <button data-filter="movie" class="filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fMovies">أفلام</button>
-                <button data-filter="tv"    class="filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fTv">مسلسلات</button>
-                <button data-filter="anime" class="filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fAnime">أنمي</button>
+                <button data-filter="all"   class="filter-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" data-i18n="fAll">الكل</button>
+                <button data-filter="movie" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" data-i18n="fMovies">أفلام</button>
+                <button data-filter="tv"    class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" data-i18n="fTv">مسلسلات</button>
+                <button data-filter="anime" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" data-i18n="fAnime">أنمي</button>
             </div>
         </div>
 
@@ -176,19 +206,19 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-neutral-900 mt-20 relative z-30 bg-neutral-950">
+    <footer class="border-t border-neutral-900 mt-20 relative z-30 bg-neutral-950/80">
         <div class="container mx-auto px-4 sm:px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-neutral-600 text-sm"><span id="year"></span> <span data-i18n="footerText">© سبتايل — أرشيف الترجمات. صُمم لعشاق السينما.</span></p>
-            <div class="flex gap-8 text-sm text-neutral-500">
+            <p class="text-neutral-500 text-sm"><span id="year"></span> <span data-i18n="footerText">© سبتايل — أرشيف الترجمات السينمائية.</span></p>
+            <div class="flex gap-8 text-sm text-neutral-500 font-medium">
                 <a href="#" class="hover:text-neutral-300 transition-colors" data-i18n="contact">تواصل</a>
                 <a href="#" class="hover:text-neutral-300 transition-colors" data-i18n="privacy">الخصوصية</a>
-                <a href="#" class="hover:text-neutral-300 transition-colors" data-i18n="DMCA">DMCA</a>
+                <a href="#" class="hover:text-neutral-300 transition-colors">DMCA</a>
             </div>
         </div>
     </footer>
 
     <!-- Back to top -->
-    <button id="toTop" class="hidden fixed bottom-6 end-6 z-40 w-11 h-11 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-full items-center justify-center transition-colors" aria-label="Back to top">
+    <button id="toTop" class="hidden fixed bottom-6 end-6 z-40 w-11 h-11 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-full items-center justify-center transition-colors shadow-lg" aria-label="Back to top">
         <svg class="w-5 h-5 mx-auto text-neutral-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
     </button>
 
@@ -197,25 +227,25 @@
 <script>
 "use strict";
 
-/* ---------------- Data (With Verified Working MetaHub & MAL Posters) ---------------- */
+/* ---------------- High-Resolution Verified Dataset ---------------- */
 const TITLES = [
-    { id: "oppenheimer",  title: "Oppenheimer",       year: 2023, genre: { ar: "سيرة / دراما", en: "Biography / Drama" }, type: "movie", lang: "English", dl: "4.2M", featured: true,
+    { id: "tt15398776",  title: "Oppenheimer",       year: 2023, genre: { ar: "سيرة / دراما", en: "Biography / Drama" }, type: "movie", lang: "English", dl: "4.2M", featured: true,
       poster: "https://images.metahub.space/poster/small/tt15398776/img", backdrop: "https://images.metahub.space/background/medium/tt15398776/img",
       desc: { ar: "قصة ج. روبرت أوبنهايمر ودوره في تطوير القنبلة الذرية خلال الحرب العالمية الثانية. عِش الملحمة بترجمات عالية الجودة.",
               en: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II. Experience the epic in high-quality subtitles." } },
-    { id: "dune-2",  title: "Dune: Part Two",      year: 2024, genre: { ar: "خيال علمي", en: "Sci-Fi" },     type: "movie", lang: "English", dl: "3.8M", poster: "https://images.metahub.space/poster/small/tt15239678/img" },
-    { id: "the-batman",          title: "The Batman",          year: 2022, genre: { ar: "أكشن / جريمة", en: "Action / Crime" }, type: "movie", lang: "Arabic", dl: "2.9M", poster: "https://images.metahub.space/poster/small/tt1877830/img" },
-    { id: "interstellar",        title: "Interstellar",        year: 2014, genre: { ar: "خيال علمي", en: "Sci-Fi" },     type: "movie", lang: "Arabic",  dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt0816692/img" },
-    { id: "the-last-of-us",      title: "The Last of Us",      year: 2023, genre: { ar: "دراما / رعب", en: "Drama / Horror" }, type: "tv", lang: "Arabic", dl: "1.9M", poster: "https://images.metahub.space/poster/small/tt3581920/img" },
-    { id: "joker",               title: "Joker",               year: 2019, genre: { ar: "جريمة / دراما", en: "Crime / Drama" }, type: "movie", lang: "Arabic", dl: "1.5M", poster: "https://images.metahub.space/poster/small/tt7286456/img" },
-    { id: "attack-on-titan",     title: "Attack on Titan",     year: 2013, genre: { ar: "أنمي / أكشن", en: "Anime / Action" }, type: "anime", lang: "Arabic", dl: "1.45M", poster: "https://images.metahub.space/poster/small/tt2560140/img" },
-    { id: "inception",           title: "Inception",           year: 2010, genre: { ar: "خيال علمي", en: "Sci-Fi" },     type: "movie", lang: "Arabic",  dl: "1.4M", poster: "https://images.metahub.space/poster/small/tt1375666/img" },
-    { id: "breaking-bad",        title: "Breaking Bad",        year: 2008, genre: { ar: "جريمة / دراما", en: "Crime / Drama" }, type: "tv", lang: "Arabic", dl: "1.35M", poster: "https://images.metahub.space/poster/small/tt0903747/img" },
-    { id: "the-dark-knight",     title: "The Dark Knight",     year: 2008, genre: { ar: "أكشن", en: "Action" },          type: "movie", lang: "English", dl: "1.3M", poster: "https://images.metahub.space/poster/small/tt0468569/img" },
-    { id: "parasite",            title: "Parasite",            year: 2019, genre: { ar: "إثارة / دراما", en: "Thriller / Drama" }, type: "movie", lang: "Arabic", dl: "1.1M", poster: "https://images.metahub.space/poster/small/tt6751668/img" },
-    { id: "solo-leveling",   title: "Solo Leveling",   year: 2024, genre: { ar: "أنمي / مغامرة", en: "Anime / Action" },     type: "anime", lang: "Arabic", dl: "1.6M", poster: "https://cdn.myanimelist.net/images/anime/1801/142390l.jpg" },
-    { id: "jujutsu-kaisen",      title: "Jujutsu Kaisen",      year: 2020, genre: { ar: "أنمي / فانتازيا", en: "Anime / Fantasy" }, type: "anime", lang: "Arabic", dl: "920K", poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg" },
-    { id: "house-of-the-dragon",            title: "House of the Dragon",            year: 2024, genre: { ar: "دراما / فانتازيا", en: "Drama / Fantasy" }, type: "tv", lang: "Arabic", dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt11198330/img" },
+    { id: "tt15239678",  title: "Dune: Part Two",      year: 2024, genre: { ar: "خيال علمي / مغامرة", en: "Sci-Fi / Adventure" }, type: "movie", lang: "English", dl: "3.8M", poster: "https://images.metahub.space/poster/small/tt15239678/img" },
+    { id: "tt1877830",   title: "The Batman",          year: 2022, genre: { ar: "أكشن / جريمة", en: "Action / Crime" }, type: "movie", lang: "Arabic", dl: "2.9M", poster: "https://images.metahub.space/poster/small/tt1877830/img" },
+    { id: "tt0816692",   title: "Interstellar",        year: 2014, genre: { ar: "خيال علمي / مغامرة", en: "Sci-Fi / Adventure" }, type: "movie", lang: "Arabic", dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt0816692/img" },
+    { id: "tt3581920",   title: "The Last of Us",      year: 2023, genre: { ar: "دراما / رعب", en: "Drama / Horror" }, type: "tv", lang: "Arabic", dl: "1.9M", poster: "https://images.metahub.space/poster/small/tt3581920/img" },
+    { id: "tt7286456",   title: "Joker",               year: 2019, genre: { ar: "جريمة / دراما", en: "Crime / Drama" }, type: "movie", lang: "Arabic", dl: "1.5M", poster: "https://images.metahub.space/poster/small/tt7286456/img" },
+    { id: "anime-16498", title: "Attack on Titan",     year: 2013, genre: { ar: "أنمي / أكشن", en: "Anime / Action" }, type: "anime", lang: "Arabic", dl: "1.45M", poster: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg" },
+    { id: "tt1375666",   title: "Inception",           year: 2010, genre: { ar: "خيال علمي / إثارة", en: "Sci-Fi / Thriller" }, type: "movie", lang: "Arabic", dl: "1.4M", poster: "https://images.metahub.space/poster/small/tt1375666/img" },
+    { id: "tt0903747",   title: "Breaking Bad",        year: 2008, genre: { ar: "جريمة / دراما", en: "Crime / Drama" }, type: "tv", lang: "Arabic", dl: "1.35M", poster: "https://images.metahub.space/poster/small/tt0903747/img" },
+    { id: "tt0468569",   title: "The Dark Knight",     year: 2008, genre: { ar: "أكشن / جريمة", en: "Action / Crime" }, type: "movie", lang: "English", dl: "1.3M", poster: "https://images.metahub.space/poster/small/tt0468569/img" },
+    { id: "tt6751668",   title: "Parasite",            year: 2019, genre: { ar: "إثارة / دراما", en: "Thriller / Drama" }, type: "movie", lang: "Arabic", dl: "1.1M", poster: "https://images.metahub.space/poster/small/tt6751668/img" },
+    { id: "anime-52991", title: "Solo Leveling",       year: 2024, genre: { ar: "أنمي / مغامرة", en: "Anime / Action" }, type: "anime", lang: "Arabic", dl: "1.6M", poster: "https://cdn.myanimelist.net/images/anime/1801/142390l.jpg" },
+    { id: "anime-40748", title: "Jujutsu Kaisen",      year: 2020, genre: { ar: "أنمي / فانتازيا", en: "Anime / Fantasy" }, type: "anime", lang: "Arabic", dl: "920K", poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg" },
+    { id: "tt11198330",  title: "House of the Dragon", year: 2024, genre: { ar: "دراما / فانتازيا", en: "Drama / Fantasy" }, type: "tv", lang: "Arabic", dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt11198330/img" },
 ];
 
 /* ---------------- i18n ---------------- */
@@ -229,8 +259,8 @@ const I18N = {
         topCharts: "أعلى القوائم", trendingNow: "الرائج الآن",
         fAll: "الكل", fMovies: "أفلام", fTv: "مسلسلات", fAnime: "أنمي",
         noResults: "لا توجد نتائج", noResultsHint: "جرّب كلمة بحث مختلفة أو غيّر التصنيف",
-        footerText: "© سبتايل — أرشيف الترجمات. صُمم لعشاق السينما.",
-        contact: "تواصل", privacy: "الخصوصية", DMCA: "DMCA",
+        footerText: "© سبتايل — أرشيف الترجمات السينمائية.",
+        contact: "تواصل", privacy: "الخصوصية",
         downloads: "تحميل", download: "تحميل",
         langName: { Arabic: "العربية", English: "الإنجليزية" },
         title: "سبتايل | Subtle — الترجمات الرائجة", toggle: "EN", dir: "rtl",
@@ -245,7 +275,7 @@ const I18N = {
         fAll: "All", fMovies: "Movies", fTv: "TV Shows", fAnime: "Anime",
         noResults: "No results found", noResultsHint: "Try a different search term or category",
         footerText: "© Subtle — Subtitles Archive. Designed for cinephiles.",
-        contact: "Contact", privacy: "Privacy Policy", DMCA: "DMCA",
+        contact: "Contact", privacy: "Privacy Policy",
         downloads: "Downloads", download: "Download",
         langName: { Arabic: "Arabic", English: "English" },
         title: "Subtle — Trending Subtitles", toggle: "ع", dir: "ltr",
@@ -303,8 +333,8 @@ function renderFeatured() {
     $("featuredTitle").textContent = f.title;
     $("featuredDesc").textContent = f.desc[lang];
     $("featuredMeta").innerHTML =
-        `<span>${f.year}</span><span class="w-1 h-1 bg-neutral-600 rounded-full"></span>` +
-        `<span>${f.genre[lang]}</span><span class="w-1 h-1 bg-neutral-600 rounded-full"></span>` +
+        `<span>${f.year}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
+        `<span>${f.genre[lang]}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
         `<span>${f.dl} ${t("downloads")}</span>`;
     const img = $("featuredPoster"), fb = $("featuredFallback");
     img.alt = f.title; img.style.display = "";
@@ -324,12 +354,12 @@ function cardHTML(item, rank) {
     <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block" data-id="${item.id}" aria-label="${item.title}">
         <div class="relative">
             <div class="poster-container">
-                <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/60"
+                <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${item.title.replace(/'/g, "\\'")}'">
                 <div class="poster-fallback"></div>
                 <span class="rank-number">${rank}</span>
                 <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                    <div class="dl-btn w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <div class="w-full bg-white text-neutral-950 font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-transform group-hover:scale-105 shadow-xl">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         ${t("download")}
                     </div>
@@ -338,8 +368,8 @@ function cardHTML(item, rank) {
         </div>
         <div class="mt-4">
             <div class="flex items-center gap-2 mb-1">
-                <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${t("langName")[item.lang] || item.lang}</span>
-                <span class="text-neutral-600 text-xs">${item.year}</span>
+                <span class="bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${t("langName")[item.lang] || item.lang}</span>
+                <span class="text-neutral-500 text-xs">${item.year}</span>
             </div>
             <h3 class="text-base font-bold text-neutral-100 truncate">${item.title}</h3>
             <p class="text-neutral-500 text-sm mt-0.5">${item.dl} ${t("downloads")}</p>
