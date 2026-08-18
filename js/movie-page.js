@@ -38,6 +38,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentMovie = await loadMetadata(movieId, movieType);
 
     if (!currentMovie) {
+      // Fallback to backend proxy to bypass browser issues or frontend rate limits
+      try {
+        const proxyRes = await fetch(`/api/metadata?id=${movieId}&type=${movieType}`);
+        if (proxyRes.ok) {
+          currentMovie = await proxyRes.json();
+        }
+      } catch (e) {
+        console.error("Backend proxy failed too", e);
+      }
+    }
+
+    if (!currentMovie) {
       currentMovie = MOVIES_DATABASE.find(m => m.id === movieId);
       // Instead of defaulting to Oppenheimer, create a generic fallback for this ID
       if (!currentMovie) {
@@ -188,8 +200,20 @@ async function loadMetadata(id, type) {
   try {
     if (type === 'anime') {
       const malId = id.replace('anime-', '');
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, { signal: controller.signal });
-      if (res.ok) {
+      let res;
+      let retries = 2;
+      while (retries >= 0) {
+        res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, { signal: controller.signal });
+        if (res.ok) break;
+        if (res.status === 429 && retries > 0) {
+          await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+          retries--;
+        } else {
+          break;
+        }
+      }
+      
+      if (res && res.ok) {
         const d = await res.json();
         if (d.data) {
           const a = d.data;

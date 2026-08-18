@@ -15,9 +15,20 @@ export default async function handler(req, res) {
       const malId = id.replace('anime-', '');
       const jikanUrl = `https://api.jikan.moe/v4/anime/${malId}/full`;
       
-      const response = await fetch(jikanUrl, {
-        headers: { 'User-Agent': USER_AGENT }
-      });
+      let response;
+      let retries = 2;
+      while (retries >= 0) {
+        response = await fetch(jikanUrl, {
+          headers: { 'User-Agent': USER_AGENT }
+        });
+        if (response.ok) break;
+        if (response.status === 429 && retries > 0) {
+          await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+          retries--;
+        } else {
+          break;
+        }
+      }
       
       if (!response.ok) throw new Error(`Jikan API Error: ${response.statusText}`);
       const json = await response.json();
