@@ -22,10 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderMovieDetails(currentMovie);
 
-  // 2. Fetch live subtitles from SubDL API
-  await fetchRealSubtitles(currentMovie);
-
-  // 3. Hide global loader and fade in page
+  // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
   const loader = document.getElementById('globalLoader');
   const container = document.querySelector('.split-container');
   if (loader) loader.style.opacity = '0';
@@ -33,6 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loader) loader.style.display = 'none';
     if (container) container.classList.add('loaded');
   }, 300);
+
+  // 4. Fetch live subtitles from SubDL API in the background
+  await fetchRealSubtitles(currentMovie);
 });
 
 async function loadMetadata(id, type) {
