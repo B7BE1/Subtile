@@ -3,810 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subtile | Dune: Part Two Subtitles</title>
+  <title>Subtile | Download Subtitles</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/movie.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <style>
-    :root {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
-      --bg-card: #ffffff;
-      --bg-accent: #fff7ed;
-      --border-color: #e2e8f0;
-      --text-primary: #0f172a;
-      --text-muted: #64748b;
-      --accent: #f97316; /* Dune Orange */
-      --accent-hover: #ea580c;
-      --accent-light: #fed7aa;
-      --accent-glow: rgba(249, 115, 22, 0.15);
-      --success: #10b981;
-      --danger: #ef4444;
-      --radius-lg: 1.5rem;
-      --radius-md: 0.75rem;
-      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      background-image: 
-        radial-gradient(circle at 10% 10%, rgba(249, 115, 22, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
-    }
-
-    /* Scrollbar Styling */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg-primary); }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-    /* Navbar */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.2rem 5%;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-      transition: var(--transition);
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      text-decoration: none;
-      color: var(--text-primary);
-    }
-
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent), #fbbf24);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      color: white;
-      box-shadow: 0 4px 15px var(--accent-glow);
-      transition: transform 0.3s ease;
-    }
-    .brand-logo:hover .brand-icon { transform: rotate(-10deg) scale(1.1); }
-
-    .brand-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .brand-name span { color: var(--accent); }
-
-    .nav-links {
-      display: flex;
-      gap: 2.5rem;
-      list-style: none;
-    }
-
-    .nav-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: var(--transition);
-      position: relative;
-    }
-    .nav-link:hover { color: var(--text-primary); }
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 0;
-      width: 0;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: var(--transition);
-    }
-    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-    .nav-link.active { color: var(--text-primary); }
-
-    .nav-actions { display: flex; align-items: center; gap: 1.5rem; }
-
-    /* Buttons */
-    .btn {
-      padding: 0.8rem 1.8rem;
-      border-radius: 50px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-family: inherit;
-      font-size: 0.9rem;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 4px 15px var(--accent-glow);
-    }
-    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 8px 20px var(--accent-glow); }
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-accent); }
-
-    /* Hero Section - Integrated Light Card */
-    .hero-section {
-      max-width: 1200px;
-      margin: 2.5rem auto;
-      padding: 0 5%;
-      animation: floatIn 1s ease;
-    }
-
-    .movie-card-hero {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.08);
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 2.5rem;
-      padding: 2.5rem;
-      position: relative;
-      border: 1px solid var(--border-color);
-    }
-
-    .hero-poster-container {
-      position: relative;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    }
-
-    .movie-hero-poster {
-      width: 100%;
-      height: 450px;
-      object-fit: cover;
-      transition: transform 0.8s ease;
-    }
-    .movie-card-hero:hover .movie-hero-poster { transform: scale(1.05); }
-
-    .hero-details {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .hero-tags {
-      display: flex;
-      gap: 0.8rem;
-      margin-bottom: 1rem;
-    }
-
-    .tag {
-      padding: 0.4rem 1rem;
-      background: var(--bg-accent);
-      color: var(--accent);
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .movie-hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 3.5rem;
-      font-weight: 700;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-      color: var(--text-primary);
-    }
-
-    .movie-hero-meta {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      font-size: 1rem;
-      align-items: center;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .meta-item i { color: var(--accent); }
-
-    .rating-circle {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: conic-gradient(var(--success) 86%, #e2e8f0 86%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .rating-circle::before {
-      content: '';
-      position: absolute;
-      inset: 6px;
-      background: var(--bg-secondary);
-      border-radius: 50%;
-    }
-    .rating-circle span {
-      position: relative;
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--success);
-    }
-
-    .movie-hero-overview {
-      color: var(--text-muted);
-      font-size: 1.1rem;
-      line-height: 1.8;
-      margin-bottom: 2rem;
-      max-width: 90%;
-    }
-
-    .hero-actions { display: flex; gap: 1rem; }
-
-    /* Main Content */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 5% 4rem;
-    }
-
-    /* Filters Toolbar */
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
-
-    .filter-pills {
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      padding: 0.6rem 1.4rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-
-    .pill:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-color: var(--accent); color: var(--accent); }
-    .pill.active { background: var(--text-primary); color: white; border-color: var(--text-primary); }
-
-    .sort-dropdown {
-      position: relative;
-    }
-    .sort-dropdown select {
-      appearance: none;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: 0.7rem 2.5rem 0.7rem 1.2rem;
-      border-radius: 50px;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      outline: none;
-      color: var(--text-primary);
-      transition: var(--transition);
-    }
-    .sort-dropdown select:hover { border-color: var(--accent); }
-    .sort-dropdown i {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: var(--text-muted);
-    }
-
-    /* Subtitles List */
-    .subtitles-list {
-      display: grid;
-      gap: 1.5rem;
-    }
-
-    .subtitle-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: 1.8rem 2rem;
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-      animation: slideInUp 0.6s ease backwards;
-    }
-
-    .subtitle-card:nth-child(1) { animation-delay: 0.1s; }
-    .subtitle-card:nth-child(2) { animation-delay: 0.2s; }
-    .subtitle-card:nth-child(3) { animation-delay: 0.3s; }
-
-    .subtitle-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 5px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transition: transform 0.3s ease;
-    }
-
-    .subtitle-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-      border-color: transparent;
-    }
-    .subtitle-card:hover::before { transform: scaleY(1); }
-
-    .sub-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .sub-release {
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .format-badge {
-      background: var(--bg-accent);
-      color: var(--accent);
-      padding: 0.3rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 800;
-    }
-
-    .sub-meta {
-      display: flex;
-      gap: 1.5rem;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .meta-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.3rem 0.8rem;
-      background: var(--bg-primary);
-      border-radius: 50px;
-      font-weight: 600;
-    }
-    .meta-badge i { font-size: 0.9rem; }
-
-    .actions-group {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .download-stats {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      border-left: 1px solid var(--border-color);
-      padding-left: 1.5rem;
-    }
-    .download-stats span { display: block; font-weight: 800; color: var(--text-primary); font-size: 1.2rem; }
-
-    .download-btn {
-      background: var(--bg-primary);
-      color: var(--accent);
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 1.2rem;
-      border: 1px solid var(--border-color);
-    }
-
-    .download-btn:hover {
-      background: var(--accent);
-      color: white;
-      transform: rotate(15deg) scale(1.1);
-      box-shadow: 0 5px 20px var(--accent-glow);
-      border-color: transparent;
-    }
-
-    /* Modal */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(10px);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-
-    .modal-backdrop.active { display: flex; animation: fadeIn 0.3s ease; }
-
-    .modal-content {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 550px;
-      padding: 2.5rem;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.2);
-      animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      color: var(--text-primary);
-    }
-
-    .modal-close {
-      background: var(--bg-primary);
-      border: none;
-      color: var(--text-muted);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 1rem;
-    }
-    .modal-close:hover { background: var(--danger); color: white; transform: rotate(90deg); }
-
-    .form-group { margin-bottom: 1.5rem; }
-    .form-label { display: block; margin-bottom: 0.6rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .form-control {
-      width: 100%;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      padding: 0.9rem 1.2rem;
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-family: inherit;
-      transition: var(--transition);
-      font-size: 0.95rem;
-    }
-    .form-control:focus { outline: none; border-color: var(--accent); background: var(--bg-secondary); box-shadow: 0 0 0 4px var(--accent-glow); }
-
-    /* Toast */
-    .toast-container {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      z-index: 3000;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .toast {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--success);
-      padding: 1.2rem 1.8rem;
-      border-radius: var(--radius-md);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      min-width: 300px;
-      animation: slideInRight 0.4s ease;
-    }
-    .toast i { color: var(--success); font-size: 1.2rem; }
-
-    /* Footer */
-    .footer {
-      border-top: 1px solid var(--border-color);
-      padding: 3rem 5%;
-      text-align: center;
-      color: var(--text-muted);
-      margin-top: 2rem;
-      background: var(--bg-secondary);
-    }
-
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 2.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .footer-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    .footer-links a:hover { color: var(--accent); }
-
-    /* Animations */
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideInUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes floatIn { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    /* Responsive */
-    @media (max-width: 968px) {
-      .nav-links, .nav-actions .btn-outline { display: none; }
-      .movie-card-hero { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.5rem; }
-      .hero-poster-container { width: 250px; margin: 0 auto; }
-      .movie-hero-poster { height: 350px; }
-      .movie-hero-title { font-size: 2.2rem; }
-      .subtitle-card { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-      .actions-group { width: 100%; justify-content: space-between; }
-      .download-stats { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; text-align: left; }
-    }
-  </style>
 </head>
-<body>
+<body class="movie-page-body">
 
-  <!-- Navbar -->
-  <header class="navbar">
-    <a href="index.html" class="brand-logo">
-      <div class="brand-icon"><i class="fas fa-closed-captioning"></i></div>
-      <div class="brand-name">Sub<span>tile</span></div>
+  <!-- Top Header (From index.html) -->
+  <header class="subdl-header">
+    <a href="index.html" class="subdl-logo">
+      <span class="logo-badge">SUBTILE</span>
     </a>
 
-    <ul class="nav-links">
-      <li><a href="index.html" class="nav-link active">Home</a></li>
-      <li><a href="#" class="nav-link">Trending</a></li>
-      <li><a href="#" class="nav-link">Latest</a></li>
+    <ul class="subdl-nav">
+      <li><a href="index.html" class="subdl-nav-link active">Latest</a></li>
+      <li><a href="index.html#mostDownloaded" class="subdl-nav-link">Trends</a></li>
+      <li><a href="index.html#mostDownloaded" class="subdl-nav-link">Leaderboard</a></li>
+      <li><a href="https://github.com/B7BE1/Subtile" target="_blank" class="subdl-nav-link">Community</a></li>
     </ul>
 
-    <div class="nav-actions">
-      <button class="btn btn-outline" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload</button>
-      <button class="btn btn-primary"><i class="fas fa-crown"></i> Go Premium</button>
+    <div class="subdl-header-actions">
+      <div id="navAuthSlot">
+        <button class="btn-auth-subdl" onclick="openAuthModal('login')">
+          <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+        </button>
+      </div>
+      <button class="btn-icon-subdl" onclick="openUploadModal()" title="Upload Subtitle">
+        <i class="fas fa-upload"></i>
+      </button>
     </div>
   </header>
 
-  <!-- Hero Section (Integrated Card) -->
-  <section class="hero-section">
-    <div class="movie-card-hero">
-      <div class="hero-poster-container">
-        <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Dune Part Two Poster" class="movie-hero-poster">
-      </div>
-      <div class="hero-details">
-        <div class="hero-tags">
-          <span class="tag">2024</span>
-          <span class="tag">Sci-Fi</span>
-          <span class="tag">Adventure</span>
-          <span class="tag">Action</span>
+  <!-- Movie Backdrop & Hero Info -->
+  <section id="movieBackdropSection" class="movie-header-backdrop">
+    <div class="backdrop-gradient"></div>
+    <div class="movie-hero-content">
+      <img id="moviePoster" src="https://via.placeholder.com/200x300" alt="Poster" class="movie-hero-poster">
+      <div class="movie-hero-details">
+        <h1 id="movieTitle" class="movie-hero-title">Movie Title</h1>
+        <div id="movieMeta" class="movie-hero-meta">
+          <span><i class="fas fa-star" style="color: #fbbf24;"></i> 8.5</span>
+          <span><i class="fas fa-calendar-alt"></i> 2023</span>
+          <span><i class="fas fa-clock"></i> 2h 15m</span>
         </div>
-        <h1 class="movie-hero-title">Dune: Part Two</h1>
-        
-        <div class="movie-hero-meta">
-          <div class="rating-circle">
-            <span>8.6</span>
-          </div>
-          <div class="meta-item"><i class="fas fa-calendar-alt"></i> March 1, 2024</div>
-          <div class="meta-item"><i class="fas fa-clock"></i> 2h 46m</div>
-          <div class="meta-item"><i class="fas fa-language"></i> English</div>
-        </div>
-        
-        <p class="movie-hero-overview">
-          Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible future.
-        </p>
-        
-        <div class="hero-actions">
-          <button class="btn btn-primary"><i class="fas fa-play"></i> Watch Trailer</button>
-          <button class="btn btn-outline"><i class="fas fa-bookmark"></i> Add to List</button>
-        </div>
+        <p id="movieOverview" class="movie-hero-overview">Loading overview...</p>
       </div>
     </div>
   </section>
 
-  <!-- Main Content -->
+  <!-- Main Content & Subtitles List -->
   <main class="container">
     
-    <!-- Filters Toolbar -->
-    <div class="toolbar">
-      <div class="filter-pills">
-        <div class="pill active">All Subtitles</div>
-        <div class="pill">English</div>
-        <div class="pill">Arabic</div>
-        <div class="pill">4K UHD</div>
-        <div class="pill">1080p</div>
-        <div class="pill">720p</div>
+    <!-- TV Show Season / Episode Bar -->
+    <div id="tvSelectorBar" class="tv-selector-bar" style="display: none;">
+      <div class="tv-selector-group">
+        <span style="font-weight: 700; color: var(--text-secondary); font-size: 0.9rem;">Season:</span>
+        <div id="seasonTabsContainer" class="season-tabs">
+          <!-- Populated by JS -->
+        </div>
       </div>
-
-      <div class="sort-dropdown">
-        <select>
-          <option>Most Downloaded</option>
-          <option>Latest</option>
-          <option>Alphabetical</option>
+      <div class="tv-selector-group">
+        <span style="font-weight: 700; color: var(--text-secondary); font-size: 0.9rem;">Episode:</span>
+        <select id="episodeSelect" class="episode-select" onchange="filterTvSubtitles()">
+          <option value="all">All Episodes</option>
         </select>
-        <i class="fas fa-sort"></i>
       </div>
     </div>
 
-    <!-- Subtitles List -->
+    <!-- Filters Toolbar -->
+    <div class="subtitles-filter-toolbar">
+      <div class="filter-group">
+        <label style="font-weight: 600; font-size: 0.88rem; color: var(--text-secondary);"><i class="fas fa-filter"></i> Filter:</label>
+        
+        <select id="langFilter" class="filter-select" onchange="applyFilters()">
+          <option value="all">All Languages</option>
+          <option value="ar">🇸🇦 Arabic</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+
+        <select id="qualityFilter" class="filter-select" onchange="applyFilters()">
+          <option value="all">All Qualities</option>
+          <option value="BluRay">BluRay</option>
+          <option value="WEB">WEB-DL</option>
+          <option value="4K">4K / UHD</option>
+        </select>
+      </div>
+
+      <div>
+        <span id="subtitlesCount" class="subtitles-count-badge">
+          0 subtitles
+        </span>
+      </div>
+    </div>
+
     <div id="subtitlesList" class="subtitles-list">
-      
-      <!-- Card 1 -->
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">
-            Dune.Part.Two.2024.720p.HD
-            <span class="format-badge">SRT</span>
-          </div>
-          <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> Arabic (SA)</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> Translator Pro</span>
-            <span class="meta-badge"><i class="fas fa-clock"></i> 2 days ago</span>
-          </div>
-        </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>12,450</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="showToast('Download started!', 'success'); return false;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-      
-      <!-- Card 2 -->
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">
-            Dune.Part.Two.2024.720p.HD
-            <span class="format-badge">ZIP</span>
-          </div>
-          <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> Arabic (SA)</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> Sub Team X</span>
-            <span class="meta-badge"><i class="fas fa-clock"></i> 5 days ago</span>
-          </div>
-        </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>8,920</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="showToast('Download started!', 'success'); return false;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">
-            Dune.Part.Two.2024.2160p.4K.UHD
-            <span class="format-badge">SRT</span>
-          </div>
-          <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> English (GB)</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> Official Release</span>
-            <span class="meta-badge"><i class="fas fa-clock"></i> 1 week ago</span>
-          </div>
-        </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>24,100</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="showToast('Download started!', 'success'); return false;"><i class="fas fa-download"></i></a>
-        </div>
-      </div>
-
+      <!-- Generated by JS -->
     </div>
 
   </main>
+
+  <!-- Auth Modal (From index.html) -->
+  <div id="authModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Subtile Account</h3>
+        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+      </div>
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
+        <button id="authTabLogin" class="btn-subdl-submit" style="flex: 1; padding: 0.4rem;" onclick="switchAuthTab('login')">Login</button>
+        <button id="authTabRegister" class="btn-auth-subdl" style="flex: 1; padding: 0.4rem; justify-content: center;" onclick="switchAuthTab('register')">Register</button>
+      </div>
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Username or Email</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-subdl-submit" style="margin-top: 0.5rem;">Sign In</button>
+      </form>
+      <form id="registerForm" style="display: none;" onsubmit="handleRegisterSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="regUsername" class="form-control" placeholder="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="email@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-subdl-submit" style="margin-top: 0.5rem;">Create Account</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Upload Modal -->
   <div id="uploadModal" class="modal-backdrop">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">Upload Subtitle</h3>
-        <button class="modal-close" onclick="closeUploadModal()"><i class="fas fa-times"></i></button>
+        <button class="modal-close" onclick="closeUploadModal()">&times;</button>
       </div>
       <form id="uploadForm" onsubmit="handleUploadSubtitle(event)">
         <div class="form-group">
-          <label class="form-label">Movie / TV Show</label>
-          <input type="text" class="form-control" value="Dune: Part Two (2024)" readonly>
+          <label class="form-label">Movie / TV Show Title</label>
+          <input type="text" id="modalMovieNameInput" class="form-control" placeholder="e.g. Dune: Part Two" readonly>
         </div>
-        <div class="form-group" style="display: flex; gap: 1rem;">
+        <div class="form-group" style="display: flex; gap: 0.8rem;">
           <div style="flex: 1;">
             <label class="form-label">Language</label>
             <select class="form-control">
-              <option>English</option>
-              <option>Arabic</option>
-              <option>French</option>
-              <option>Spanish</option>
+              <option value="Arabic">Arabic</option>
+              <option value="English">English</option>
+              <option value="French">French</option>
+              <option value="Spanish">Spanish</option>
             </select>
           </div>
           <div style="flex: 1;">
-            <label class="form-label">Format</label>
-            <select class="form-control">
-              <option>SRT</option>
-              <option>VTT</option>
-              <option>ZIP</option>
-            </select>
+            <label class="form-label">Release Name</label>
+            <input type="text" class="form-control" placeholder="1080p.BluRay.x264" required>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Release Version</label>
-          <input type="text" class="form-control" placeholder="e.g., 1080p.BluRay.x264" required>
+          <label class="form-label">Subtitle File (.srt / .zip)</label>
+          <input type="file" accept=".srt,.zip,.vtt" class="form-control" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Uploader Name</label>
+          <label class="form-label">Translator / Uploader</label>
           <input type="text" class="form-control" placeholder="Your name or team" required>
         </div>
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-          <button type="button" class="btn btn-outline" onclick="closeUploadModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit</button>
+        <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-auth-subdl" onclick="closeUploadModal()">Cancel</button>
+          <button type="submit" class="btn-subdl-submit" style="width: auto; padding: 0.5rem 1.2rem;">Upload</button>
         </div>
       </form>
     </div>
@@ -816,72 +193,25 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-links">
-      <a href="#">Home</a>
-      <a href="#">About Us</a>
-      <a href="#">FAQ</a>
-      <a href="#">Contact</a>
-      <a href="#">Privacy Policy</a>
+  <footer class="subdl-footer">
+    <ul class="subdl-footer-links">
+      <li><a href="#">Filter Languages</a></li>
+      <li><a href="#">Advertise</a></li>
+      <li><a href="#">Search and Download API</a></li>
+      <li><a href="#">DMCA</a></li>
+      <li><a href="#">Terms</a></li>
+    </ul>
+    <div style="color: var(--text-muted);">
+      &copy; 2026 Subtile
     </div>
-    <p>© 2024 Subtile. Premium Subtitles Platform. All rights reserved.</p>
   </footer>
 
-  <script>
-    // Modal Control
-    function openUploadModal() {
-      document.getElementById('uploadModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeUploadModal() {
-      document.getElementById('uploadModal').classList.remove('active');
-      document.body.style.overflow = 'auto';
-    }
-
-    // Close modal on backdrop click
-    document.getElementById('uploadModal').addEventListener('click', function(e) {
-      if (e.target === this) closeUploadModal();
-    });
-
-    // Mock submit handler
-    function handleUploadSubtitle(e) {
-      e.preventDefault();
-      closeUploadModal();
-      showToast('Subtitle uploaded successfully!', 'success');
-    }
-
-    // Filter Pills UI Logic
-    document.querySelectorAll('.pill').forEach(pill => {
-      pill.addEventListener('click', function() {
-        this.parentNode.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        this.classList.add('active');
-      });
-    });
-
-    // Premium Toast Notification System
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      
-      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <div>
-          <strong style="display:block; color: #0f172a; margin-bottom: 2px;">${type === 'success' ? 'Success' : 'Error'}</strong>
-          ${message}
-        </div>
-      `;
-      
-      container.appendChild(toast);
-      
-      // Auto remove after 3 seconds
-      setTimeout(() => {
-        toast.style.animation = 'slideInRight 0.3s ease reverse';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-  </script>
+  <!-- Scripts -->
+  <script src="js/security.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/tmdb-service.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/auth-ui.js"></script>
+  <script src="js/movie-page.js"></script>
 </body>
 </html>
