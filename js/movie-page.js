@@ -187,28 +187,27 @@ async function loadMetadata(id, type) {
 
   try {
     if (type === 'anime') {
-      const kitsuId = id.replace('anime-', '');
-      const res = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`, { signal: controller.signal });
+      const malId = id.replace('anime-', '');
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, { signal: controller.signal });
       if (res.ok) {
         const d = await res.json();
         if (d.data) {
           const a = d.data;
-          const attrs = a.attributes || {};
-          const posterUrl = (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || '';
-          const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
+          const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '';
+          const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
           clearTimeout(timeoutId);
           return {
-            id: `anime-${a.id}`,
-            slug: attrs.slug,
-            title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle,
+            id: `anime-${a.mal_id}`,
+            mal_id: a.mal_id,
+            title: a.title_english || a.title,
             type: 'anime',
-            year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
+            year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
             poster: posterUrl,
             backdrop: bgUrl,
-            overview: attrs.synopsis || '',
-            genres: ['Anime'],
-            rating: attrs.averageRating ? (attrs.averageRating / 10).toFixed(1) : 'N/A',
-            episodes: Array.from({length: attrs.episodeCount || 12}, (_, i) => ({season: 1, episode: i+1}))
+            overview: a.synopsis || '',
+            genres: (a.genres || []).map(g => g.name),
+            rating: parseFloat(a.score) || 8.0,
+            episodes: Array.from({length: a.episodes || 12}, (_, i) => ({season: 1, episode: i+1}))
           };
         }
       }
@@ -388,7 +387,7 @@ function renderMovieDetails(movie) {
       </div>
       <div class="meta-item"><i class="fas fa-clock"></i> ${movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Series' : 'Movie')}</div>
       ${imdbId && !imdbId.startsWith('anime') ? `<div class="meta-item"><a href="https://www.imdb.com/title/${encodeURIComponent(imdbId)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
-      ${movie.type === 'anime' && movie.slug ? `<div class="meta-item"><a href="https://kitsu.io/anime/${encodeURIComponent(movie.slug)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fas fa-external-link-alt" style="color:#fd755c"></i> Kitsu</a></div>` : ''}
+      ${movie.type === 'anime' && movie.mal_id ? `<div class="meta-item"><a href="https://myanimelist.net/anime/${movie.mal_id}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fas fa-external-link-alt" style="color:#2e51a2"></i> MyAnimeList</a></div>` : ''}
     `;
   }
 
