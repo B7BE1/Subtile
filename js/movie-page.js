@@ -320,15 +320,15 @@ function generateFallbackSubtitles(movie) {
 function renderMovieDetails(movie) {
   document.title = `${movie.title || 'Movie Details'} (${movie.year || ''}) - Subtile`;
 
-  const backdropSec = document.getElementById('movieBackdropSection');
-  if (backdropSec) {
+  const globalBg = document.getElementById('globalMovieBackdrop');
+  if (globalBg) {
     const rawBg = movie.backdrop || (movie.imdb_id ? `https://images.metahub.space/background/medium/${movie.imdb_id}/img` : (movie.imdbId ? `https://images.metahub.space/background/medium/${movie.imdbId}/img` : movie.poster));
     const bg = safeUrl(rawBg);
     if (bg) {
-      // CSS.escape guards the url('...') from being broken out of by a stray quote.
-      backdropSec.style.backgroundImage = `url('${bg.replace(/'/g, "%27")}')`;
+      globalBg.style.backgroundImage = `url('${bg.replace(/'/g, "%27")}')`;
+      globalBg.style.opacity = '0.42';
     } else {
-      backdropSec.style.backgroundImage = '';
+      globalBg.style.backgroundImage = '';
     }
   }
 
