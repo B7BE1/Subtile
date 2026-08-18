@@ -175,6 +175,7 @@ async function loadMetadata(id, type) {
           const m = d.meta;
           return {
             id: m.imdb_id || m.id,
+            imdbId: m.imdb_id || m.id,
             title: m.name,
             type: type,
             year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
