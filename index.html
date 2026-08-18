@@ -175,234 +175,22 @@
                 <h2 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight">Trending Now</h2>
             </div>
             
-            <div class="flex gap-2 flex-wrap">
-                <a href="browse.html" class="px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors">All</a>
-                <a href="browse.html?type=movie" class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Movies</a>
-                <a href="browse.html?type=tv" class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">TV Shows</a>
-                <a href="browse.html?type=anime" class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Anime</a>
+            <div class="flex gap-2 flex-wrap" id="homeFilterPills">
+                <button onclick="filterHomeTrending('all', this)" class="home-tab active px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors">All</button>
+                <button onclick="filterHomeTrending('movie', this)" class="home-tab px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Movies</button>
+                <button onclick="filterHomeTrending('tv', this)" class="home-tab px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">TV Shows</button>
+                <button onclick="filterHomeTrending('anime', this)" class="home-tab px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Anime</button>
             </div>
         </div>
 
         <!-- Movies Grid (Top 10 Currently Trending) -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16">
-            
-            <!-- Card 2: Backrooms -->
-            <a href="movie.html?id=tt26657236&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt26657236/img" alt="Backrooms" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">2</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
-                        <span class="text-neutral-600 text-xs">2026</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">The Backrooms</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">3.9M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 3: The Odyssey -->
-            <a href="movie.html?id=tt33764258&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt33764258/img" alt="The Odyssey" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">3</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2026</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">The Odyssey</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">3.2M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 4: Alien: Romulus -->
-            <a href="movie.html?id=tt18412256&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt18412256/img" alt="Alien: Romulus" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">4</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
-                        <span class="text-neutral-600 text-xs">2024</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Alien: Romulus</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">2.8M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 5: The Penguin -->
-            <a href="movie.html?id=tt15435876&type=tv" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt15435876/img" alt="The Penguin" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">5</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">TV Series</span>
-                        <span class="text-neutral-600 text-xs">2024</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">The Penguin</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">2.4M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 6: House of the Dragon -->
-            <a href="movie.html?id=tt11198330&type=tv" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt11198330/img" alt="House of the Dragon" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">6</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">Season 2</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">House of the Dragon</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">2.1M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 7: Gladiator II -->
-            <a href="movie.html?id=tt9218128&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt9218128/img" alt="Gladiator II" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">7</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">English</span>
-                        <span class="text-neutral-600 text-xs">2024</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Gladiator II</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">1.8M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 8: Solo Leveling -->
-            <a href="movie.html?id=tt21209876&type=anime" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://cdn.myanimelist.net/images/anime/1801/142390l.jpg" alt="Solo Leveling" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">8</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Anime</span>
-                        <span class="text-neutral-600 text-xs">2024</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Solo Leveling</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">1.6M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 9: Beetlejuice Beetlejuice -->
-            <a href="movie.html?id=tt2049403&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt2049403/img" alt="Beetlejuice Beetlejuice" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">9</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2024</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Beetlejuice Beetlejuice</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">1.3M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 10: Inside Out 2 -->
-            <a href="movie.html?id=tt22022452&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="https://images.metahub.space/poster/small/tt22022452/img" alt="Inside Out 2" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">10</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
-                        <span class="text-neutral-600 text-xs">2024</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Inside Out 2</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">1.1M Downloads</p>
-                </div>
-            </a>
-
+        <div id="homeTrendingGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16">
+            <div style="grid-column: 1 / -1; padding: 4rem; text-align: center; color: var(--text-muted);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <div>Loading trending titles...</div>
+            </div>
         </div>
+
     </main>
 
     <!-- Footer -->
@@ -486,6 +274,121 @@
 
         searchDropdown.classList.add('active');
       }
+
+      // Home Page Trending Logic
+      async function filterHomeTrending(type, btn) {
+        // Update active tab styles
+        document.querySelectorAll('#homeFilterPills .home-tab').forEach(b => {
+          b.className = "home-tab px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors";
+        });
+        if (btn) {
+          btn.className = "home-tab active px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors";
+        }
+
+        const grid = document.getElementById('homeTrendingGrid');
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 4rem; text-align: center; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+            <div>Loading trending titles...</div>
+          </div>
+        `;
+
+        try {
+          const promises = [];
+          const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
+
+          if (type === 'all' || type === 'tv') {
+            promises.push(
+              fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+                .then(r => r.ok ? r.json() : { metas: [] })
+                .then(d => (d.metas || []).slice(0, 10).map(m => ({
+                  id: m.imdb_id || m.id, title: m.name, type: 'tv', 
+                  year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
+                  poster: m.poster || \`https://images.metahub.space/poster/small/\${m.id}/img\`
+                })))
+                .catch(() => [])
+            );
+          }
+
+          if (type === 'all' || type === 'movie') {
+            promises.push(
+              fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+                .then(r => r.ok ? r.json() : { metas: [] })
+                .then(d => (d.metas || []).slice(0, 10).map(m => ({
+                  id: m.imdb_id || m.id, title: m.name, type: 'movie',
+                  year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
+                  poster: m.poster || \`https://images.metahub.space/poster/small/\${m.id}/img\`
+                })))
+                .catch(() => [])
+            );
+          }
+
+          if (type === 'all' || type === 'anime') {
+            promises.push(
+              fetch(`https://api.jikan.moe/v4/top/anime?limit=10`, { headers: { 'User-Agent': USER_AGENT } })
+                .then(r => r.ok ? r.json() : { data: [] })
+                .then(d => (d.data || []).map(a => ({
+                  id: \`anime-\${a.mal_id}\`, title: a.title_english || a.title, type: 'anime',
+                  year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+                  poster: (a.images && a.images.webp && a.images.webp.large_image_url) || ''
+                })))
+                .catch(() => [])
+            );
+          }
+
+          const settled = await Promise.all(promises);
+          let results = settled.flat();
+          
+          // Randomize / shuffle for 'all' to look interesting, or just sort by a proxy for popularity
+          results.sort(() => Math.random() - 0.5);
+          results = results.slice(0, 10); // keep top 10 for home page
+
+          if (results.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;">No trending data available.</div>';
+            return;
+          }
+
+          grid.innerHTML = results.map((m, index) => {
+            const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
+            const targetUrl = \`movie.html?id=\${encodeURIComponent(m.id)}&type=\${m.type}\`;
+            // Fake downloads just for the UI
+            const fakeDl = (Math.random() * 5 + 1).toFixed(1) + 'M Downloads';
+            
+            return \`
+              <a href="\${targetUrl}" class="movie-card cursor-pointer group block">
+                  <div class="relative">
+                      <div class="poster-container">
+                          <img src="\${m.poster}" alt="\${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                          <span class="rank-number">\${index + 2}</span>
+                          <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                              <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                  Download
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="mt-4">
+                      <div class="flex items-center gap-2 mb-1">
+                          <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">\${typeLabel}</span>
+                          <span class="text-neutral-600 text-xs">\${m.year || ''}</span>
+                      </div>
+                      <h3 class="text-base font-bold text-neutral-100 truncate">\${m.title}</h3>
+                      <p class="text-neutral-500 text-sm mt-0.5">\${fakeDl}</p>
+                  </div>
+              </a>
+            \`;
+          }).join('');
+
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Initial load
+      window.addEventListener('load', () => {
+        filterHomeTrending('all', document.querySelector('#homeFilterPills .home-tab'));
+      });
     </script>
 </body>
 </html>
