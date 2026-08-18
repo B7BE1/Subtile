@@ -223,28 +223,32 @@
 <script>
 "use strict";
 
-const TITLES = [
+let TITLES = [
     { id: "tt15398776",  title: "Oppenheimer",       year: 2023, genre: "Biography / Drama", type: "movie", lang: "English", dl: "4.2M", featured: true,
       poster: "https://images.metahub.space/poster/small/tt15398776/img", backdrop: "https://images.metahub.space/background/medium/tt15398776/img",
-      desc: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II. Experience the epic in high-fidelity subtitles." },
-    { id: "tt15239678",  title: "Dune: Part Two",      year: 2024, genre: "Sci-Fi / Adventure", type: "movie", lang: "English", dl: "3.8M", poster: "https://images.metahub.space/poster/small/tt15239678/img" },
-    { id: "tt1877830",   title: "The Batman",          year: 2022, genre: "Action / Crime", type: "movie", lang: "English", dl: "2.9M", poster: "https://images.metahub.space/poster/small/tt1877830/img" },
-    { id: "tt0816692",   title: "Interstellar",        year: 2014, genre: "Sci-Fi / Adventure", type: "movie", lang: "English", dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt0816692/img" },
-    { id: "tt3581920",   title: "The Last of Us",      year: 2023, genre: "Drama / Horror", type: "tv", lang: "English", dl: "1.9M", poster: "https://images.metahub.space/poster/small/tt3581920/img" },
-    { id: "tt7286456",   title: "Joker",               year: 2019, genre: "Crime / Drama", type: "movie", lang: "English", dl: "1.5M", poster: "https://images.metahub.space/poster/small/tt7286456/img" },
-    { id: "anime-16498", title: "Attack on Titan",     year: 2013, genre: "Anime / Action", type: "anime", lang: "Japanese", dl: "1.45M", poster: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg" },
-    { id: "tt1375666",   title: "Inception",           year: 2010, genre: "Sci-Fi / Thriller", type: "movie", lang: "English", dl: "1.4M", poster: "https://images.metahub.space/poster/small/tt1375666/img" },
-    { id: "tt0903747",   title: "Breaking Bad",        year: 2008, genre: "Crime / Drama", type: "tv", lang: "English", dl: "1.35M", poster: "https://images.metahub.space/poster/small/tt0903747/img" },
-    { id: "tt0468569",   title: "The Dark Knight",     year: 2008, genre: "Action / Crime", type: "movie", lang: "English", dl: "1.3M", poster: "https://images.metahub.space/poster/small/tt0468569/img" },
-    { id: "tt6751668",   title: "Parasite",            year: 2019, genre: "Thriller / Drama", type: "movie", lang: "Korean", dl: "1.1M", poster: "https://images.metahub.space/poster/small/tt6751668/img" },
-    { id: "anime-52991", title: "Solo Leveling",       year: 2024, genre: "Anime / Action", type: "anime", lang: "Korean", dl: "1.6M", poster: "https://cdn.myanimelist.net/images/anime/1801/142390l.jpg" },
-    { id: "anime-40748", title: "Jujutsu Kaisen",      year: 2020, genre: "Anime / Fantasy", type: "anime", lang: "Japanese", dl: "920K", poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg" },
-    { id: "tt11198330",  title: "House of the Dragon", year: 2024, genre: "Drama / Fantasy", type: "tv", lang: "English", dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt11198330/img" },
+      desc: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II." },
+    { id: "tt15239678",  title: "Dune: Part Two",      year: 2024, genre: "Sci-Fi / Adventure", type: "movie", lang: "English", dl: "3.8M", poster: "https://images.metahub.space/poster/small/tt15239678/img" }
 ];
 
 let activeFilter = "all";
 let searchQuery = "";
 const $ = id => document.getElementById(id);
+
+async function loadLiveTrending() {
+    try {
+        const res = await fetch('/api/trending');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.trending && data.trending.length > 0) {
+                TITLES = data.trending;
+            }
+        }
+    } catch (e) {
+        console.warn('Using local fallback for trending:', e);
+    }
+    renderFeatured();
+    renderGrid();
+}
 
 function updateAuthNav() {
     const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
@@ -358,8 +362,7 @@ toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smoot
 
 $("year").textContent = new Date().getFullYear();
 updateAuthNav();
-renderFeatured();
-renderGrid();
+loadLiveTrending();
 </script>
 </body>
 </html>
