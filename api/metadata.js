@@ -12,25 +12,25 @@ export default async function handler(req, res) {
   const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
 
   try {
-    // 1. Anime from Jikan API
+    // 1. Anime from Kitsu API
     if (type === 'anime' || id.startsWith('anime-') || (!id.startsWith('tt') && !isNaN(id))) {
-      const malId = id.replace('anime-', '');
-      const jikanRes = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, {
-        headers: { 'User-Agent': USER_AGENT }
+      const kitsuId = id.replace('anime-', '');
+      const kitsuRes = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`, {
+        headers: { 'User-Agent': USER_AGENT, 'Accept': 'application/vnd.api+json' }
       });
 
-      if (!jikanRes.ok) {
-        throw new Error(`Jikan API responded with status ${jikanRes.status}`);
+      if (!kitsuRes.ok) {
+        throw new Error(`Kitsu API responded with status ${kitsuRes.status}`);
       }
 
-      const jikanData = await jikanRes.json();
-      const a = jikanData.data;
+      const kitsuData = await kitsuRes.json();
+      const attrs = kitsuData.data.attributes;
 
-      const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '';
-      const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
+      const posterUrl = (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || '';
+      const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
 
       // Generate episodes array
-      const episodesCount = a.episodes || 12;
+      const episodesCount = attrs.episodeCount || 12;
       const episodes = [];
       for (let i = 1; i <= episodesCount; i++) {
         episodes.push({
@@ -41,18 +41,18 @@ export default async function handler(req, res) {
       }
 
       const result = {
-        id: `anime-${a.mal_id}`,
-        mal_id: a.mal_id,
-        title: a.title_english || a.title,
-        original_title: a.title_japanese,
-        year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+        id: `anime-${kitsuData.data.id}`,
+        mal_id: kitsuData.data.id,
+        title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle,
+        original_title: attrs.titles ? attrs.titles.ja_jp : '',
+        year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
         type: 'anime',
-        rating: parseFloat(a.score) || 8.5,
+        rating: attrs.averageRating ? parseFloat((attrs.averageRating / 10).toFixed(1)) : 8.5,
         poster: posterUrl,
         backdrop: bgUrl,
-        overview: a.synopsis || '',
-        genres: (a.genres || []).map(g => g.name),
-        status: a.status,
+        overview: attrs.synopsis || '',
+        genres: ['Anime'],
+        status: attrs.status,
         episodes: episodes,
         seasonsCount: 1
       };
