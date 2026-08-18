@@ -749,16 +749,6 @@ function switchCategory(cat) {
     });
 
     renderActiveCategory();
-});
-
-    // Smooth transition
-    const hero = $("heroContent");
-    hero.classList.add("switching");
-
-    setTimeout(() => {
-        renderActiveCategory();
-        hero.classList.remove("switching");
-    }, 200);
 }
 
 function renderActiveCategory() {
