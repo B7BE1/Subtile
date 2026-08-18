@@ -2,7 +2,12 @@
  * Subtitles API - Multi-Language & Multi-Format Subtitle Engine (ASS / SRT / VTT)
  */
 
-const SUBDL_API_KEY = process.env.SUBDL_API_KEY || 'DQfpJoLmLBJf4uxK43chifO66btqon3I';
+// No hardcoded fallback: .env.example explicitly states real keys must
+// never live in source (they end up in git history / the public repo).
+// A committed fallback key here previously defeated that policy entirely
+// and is treated as compromised — see the SUBDL_API_KEY line in
+// .env.example, which now generates a fresh key.
+const SUBDL_API_KEY = process.env.SUBDL_API_KEY || null;
 
 const LANG_MAP = {
   ar: { name: 'Arabic', flag: '🇸🇦', local: 'العربية' },
@@ -26,6 +31,13 @@ export default async function handler(req, res) {
 
   if (!imdb_id && !film_name && !tmdb_id) {
     return res.status(400).json({ error: 'imdb_id, tmdb_id or film_name is required' });
+  }
+
+  if (!SUBDL_API_KEY) {
+    // Matches api/season.js's posture for an unconfigured optional
+    // provider: a clear 200 with empty results rather than a 500, so the
+    // UI can render its own "no subtitles yet" state instead of an error.
+    return res.status(200).json({ status: true, count: 0, subtitles: [], degraded: true });
   }
 
   try {
