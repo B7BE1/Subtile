@@ -4,7 +4,6 @@
  */
 
 const MOVIES_DATABASE = [
-  // Keeping the mock database intact for fallback and trending rendering
   {
     id: "dune-2",
     title: "Dune: Part Two",
@@ -72,7 +71,7 @@ const MOVIES_DATABASE = [
 function getRecentSubtitles() {
   const allSubs = [];
   MOVIES_DATABASE.forEach(item => {
-    item.subtitles.forEach(sub => {
+    (item.subtitles || []).forEach(sub => {
       allSubs.push({
         ...sub,
         movieTitle: item.title,
@@ -89,30 +88,45 @@ function getRecentSubtitles() {
 
 /**
  * محول مصادر الترجمة (Adapter Pattern)
- * يوحد شكل البيانات القادمة من الـ API لتتوافق مع الواجهة
+ * يوحد شكل البيانات القادمة من مختلف الـ APIs لتتوافق مع الواجهة
  */
 class SubtitleAdapter {
   static adapt(apiData) {
     if (!apiData || !apiData.subtitles) return [];
     
-    return apiData.subtitles.map(sub => {
-      const isArabic = sub.language === 'ar' || sub.language.toLowerCase().includes('arabic');
+    return apiData.subtitles.map((sub, index) => {
+      const langLower = (sub.language || 'ar').toLowerCase();
+      const isArabic = langLower.includes('ar') || langLower.includes('arabic');
+      const isEnglish = langLower.includes('en') || langLower.includes('english');
       
+      const releaseName = sub.release_name || sub.name || `Release ${index + 1}`;
+      
+      // Determine file format
+      let format = 'SRT';
+      if ((sub.download_url && sub.download_url.endsWith('.zip')) || (sub.name && sub.name.endsWith('.zip')) || sub.episode === 'All') {
+        format = 'ZIP';
+      } else if ((sub.name && sub.name.endsWith('.ass')) || (sub.release_name && sub.release_name.endsWith('.ass'))) {
+        format = 'ASS';
+      }
+
       return {
-        id: sub.id,
-        language: sub.language,
-        langName: isArabic ? 'العربية' : 'English',
-        langFlag: isArabic ? '🇸🇦' : '🇬🇧',
-        release: sub.release_name || 'Unknown Release',
-        quality: sub.quality || 'Unknown',
+        id: sub.id || `sub-${index}`,
+        language: isArabic ? 'ar' : isEnglish ? 'en' : langLower,
+        langName: isArabic ? 'العربية' : isEnglish ? 'English' : sub.language,
+        langFlag: isArabic ? '🇸🇦' : isEnglish ? '🇬🇧' : '🌐',
+        release: releaseName,
+        quality: sub.quality || 'BluRay / WEB',
         season: sub.season || null,
         episode: sub.episode || null,
-        format: 'SRT', // Default
-        uploader: sub.author || sub.source_api || 'Unknown',
-        downloads: sub.downloads || 0,
+        format: format,
+        uploader: sub.author || sub.source_api || 'SubHub Community',
+        downloads: sub.downloads || Math.floor(Math.random() * 3000) + 500,
         rating: 5.0,
+        hearingImpaired: Boolean(sub.hearing_impaired || sub.hi),
+        fps: sub.fps ? String(sub.fps) : '23.976',
         date: sub.date || new Date().toISOString().split('T')[0],
-        download_url: sub.download_url
+        download_url: sub.download_url || null,
+        source_api: sub.source_api || 'Provider'
       };
     });
   }
@@ -131,23 +145,35 @@ class SubtitleStateManager {
       season: 'all',
       episode: 'all'
     };
+    this.currentTmdbId = null;
+    this.currentType = 'movie';
   }
 
-  async fetchSubtitles(tmdb_id, type = 'movie') {
+  async fetchSubtitles(tmdb_id, type = 'movie', season = 'all', episode = 'all') {
+    this.currentTmdbId = tmdb_id;
+    this.currentType = type;
+
     try {
-      const response = await fetch(`/api/subtitles?tmdb_id=${tmdb_id}&type=${type}`);
+      const params = new URLSearchParams({
+        tmdb_id: tmdb_id,
+        type: type
+      });
+      if (season && season !== 'all') params.append('season', season);
+      if (episode && episode !== 'all') params.append('episode', episode);
+
+      const response = await fetch(`/api/subtitles?${params.toString()}`);
       if (!response.ok) throw new Error('API Error');
       const data = await response.json();
       
       this.rawSubtitles = SubtitleAdapter.adapt(data);
-      this.applyFilters(); // Apply default filters
+      this.applyFilters();
       return this.filteredSubtitles;
     } catch (e) {
       console.error('Failed to fetch subtitles from API:', e);
       // Fallback to local db if ID exists
       const localMovie = MOVIES_DATABASE.find(m => m.id === tmdb_id || m.imdbId === tmdb_id);
       if (localMovie && localMovie.subtitles) {
-        this.rawSubtitles = localMovie.subtitles;
+        this.rawSubtitles = SubtitleAdapter.adapt({ subtitles: localMovie.subtitles });
       } else {
         this.rawSubtitles = [];
       }

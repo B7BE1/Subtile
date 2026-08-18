@@ -1,5 +1,6 @@
 /**
  * Movie & Series Details Page Logic (SubHub)
+ * Enhanced with Real Multi-Provider Subtitles & Direct Download Proxy
  */
 
 let currentMovie = null;
@@ -24,10 +25,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderMovieDetails(currentMovie);
   
-  // 2. جلب ملفات الترجمة عبر State Manager
-  await subState.fetchSubtitles(movieId, currentMovie.type);
+  // 2. عرض مؤشر التحميل ثم جلب ملفات الترجمة عبر State Manager
+  showSubtitlesLoading();
+  await subState.fetchSubtitles(movieId, currentMovie.type, currentSeason, currentEpisode);
   renderSubtitlesList();
 });
+
+function showSubtitlesLoading() {
+  const container = document.getElementById('subtitlesList');
+  if (!container) return;
+  container.innerHTML = `
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 3rem; text-align: center; color: var(--text-muted);">
+      <i class="fas fa-circle-notch fa-spin" style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent-primary);"></i>
+      <h3 style="color: var(--text-primary); font-size: 1.1rem;">جاري جلب ملفات الترجمة المتوافقة...</h3>
+      <p style="margin-top: 0.5rem; font-size: 0.85rem;">يتم البحث عبر مزودات الترجمة العالمية (SubDL & OpenSubtitles)</p>
+    </div>
+  `;
+}
 
 function renderMovieDetails(movie) {
   document.title = `${movie.title} (${movie.year}) - تحميل الترجمات | SubHub`;
@@ -79,9 +93,9 @@ function setupTvSelectors(movie) {
   const tabsContainer = document.getElementById('seasonTabsContainer');
   const epSelect = document.getElementById('episodeSelect');
 
-  const seasons = movie.seasonsCount || 1;
+  const seasonsCount = (movie.seasons && movie.seasons.length) || movie.seasonsCount || 1;
   let tabsHtml = '';
-  for (let s = 1; s <= seasons; s++) {
+  for (let s = 1; s <= seasonsCount; s++) {
     tabsHtml += `
       <button class="season-tab-btn ${s === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
         الموسم ${s}
@@ -90,27 +104,43 @@ function setupTvSelectors(movie) {
   }
   tabsContainer.innerHTML = tabsHtml;
 
-  const episodesCount = movie.episodesPerSeason || 10;
+  let epCount = 10;
+  if (movie.seasons && movie.seasons[currentSeason - 1]) {
+    epCount = movie.seasons[currentSeason - 1].episode_count || 10;
+  } else if (movie.episodesPerSeason) {
+    epCount = movie.episodesPerSeason;
+  }
+
   let epHtml = '<option value="all">كل الحلقات / الموسم كامل</option>';
-  for (let e = 1; e <= episodesCount; e++) {
+  for (let e = 1; e <= epCount; e++) {
     epHtml += `<option value="${e}">الحلقة ${e}</option>`;
   }
   epSelect.innerHTML = epHtml;
 }
 
-function selectSeason(seasonNum) {
+async function selectSeason(seasonNum) {
   currentSeason = seasonNum;
   document.querySelectorAll('.season-tab-btn').forEach((btn, idx) => {
     btn.classList.toggle('active', (idx + 1) === seasonNum);
   });
   subState.setFilter('season', seasonNum);
+  
+  showSubtitlesLoading();
+  if (currentMovie) {
+    await subState.fetchSubtitles(currentMovie.id, currentMovie.type, currentSeason, currentEpisode);
+  }
   renderSubtitlesList();
 }
 
-function filterTvSubtitles() {
+async function filterTvSubtitles() {
   const epSelect = document.getElementById('episodeSelect');
   currentEpisode = epSelect ? epSelect.value : 'all';
   subState.setFilter('episode', currentEpisode);
+  
+  showSubtitlesLoading();
+  if (currentMovie) {
+    await subState.fetchSubtitles(currentMovie.id, currentMovie.type, currentSeason, currentEpisode);
+  }
   renderSubtitlesList();
 }
 
@@ -145,41 +175,72 @@ function renderSubtitlesList() {
     return;
   }
 
-  container.innerHTML = subs.map(sub => `
-    <div class="subtitle-item-card">
-      <div class="sub-card-left">
-        <div class="lang-flag-box">
-          <span>${sub.langFlag}</span>
-          <span class="lang-flag-label">${sub.language}</span>
+  container.innerHTML = subs.map(sub => {
+    const downloadParam = sub.download_url ? encodeURIComponent(sub.download_url) : '';
+    const safeRelease = (sub.release || 'Subtitle').replace(/'/g, "\\'");
+
+    return `
+      <div class="subtitle-item-card">
+        <div class="sub-card-left">
+          <div class="lang-flag-box">
+            <span>${sub.langFlag}</span>
+            <span class="lang-flag-label">${sub.language.toUpperCase()}</span>
+          </div>
+          <div class="sub-details">
+            <div class="sub-release-title">
+              <span>${sub.release}</span>
+              <span class="badge badge-quality">${sub.quality}</span>
+              ${sub.hearingImpaired ? '<span class="badge" title="ضعاف السمع"><i class="fas fa-deaf"></i> HI</span>' : ''}
+              ${sub.source_api ? `<span class="badge" style="background: rgba(255,255,255,0.06); font-size: 0.75rem;"><i class="fas fa-bolt"></i> ${sub.source_api}</span>` : ''}
+            </div>
+            <div class="sub-meta-tags">
+              <span><i class="fas fa-user-edit"></i> ${sub.uploader}</span>
+              <span><i class="fas fa-file-code"></i> ${sub.format}</span>
+              ${sub.fps ? `<span><i class="fas fa-film"></i> ${sub.fps} FPS</span>` : ''}
+              <span><i class="fas fa-download"></i> ${sub.downloads.toLocaleString()} تحميل</span>
+              <span><i class="far fa-calendar-alt"></i> ${sub.date}</span>
+            </div>
+          </div>
         </div>
-        <div class="sub-details">
-          <div class="sub-release-title">
-            <span>${sub.release}</span>
-            <span class="badge badge-quality">${sub.quality}</span>
-            ${sub.hearingImpaired ? '<span class="badge" title="ضعاف السمع"><i class="fas fa-deaf"></i> HI</span>' : ''}
-          </div>
-          <div class="sub-meta-tags">
-            <span><i class="fas fa-user-edit"></i> ${sub.uploader}</span>
-            <span><i class="fas fa-file-code"></i> ${sub.format}</span>
-            ${sub.fps ? `<span><i class="fas fa-film"></i> ${sub.fps} FPS</span>` : ''}
-            <span><i class="fas fa-download"></i> ${sub.downloads.toLocaleString()} تحميل</span>
-            <span><i class="far fa-calendar-alt"></i> ${sub.date}</span>
-          </div>
+        <div class="sub-card-actions">
+          <button class="btn btn-primary" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}')">
+            <i class="fas fa-download"></i> تحميل (${sub.format})
+          </button>
         </div>
       </div>
-      <div class="sub-card-actions">
-        <button class="btn btn-primary" onclick="downloadSubtitle('${sub.id}', '${sub.release}', '${sub.format}')">
-          <i class="fas fa-download"></i> تحميل (${sub.format})
-        </button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-function downloadSubtitle(subId, releaseName, format = 'SRT') {
+/**
+ * دالة تحميل الترجمة الحقيقية عبر الـ Serverless Proxy أو التوليد المباشر
+ */
+function downloadSubtitle(subId, releaseName, format = 'SRT', encodedDownloadUrl = '') {
+  showToast(`جاري بدء تحميل ملف الترجمة (${releaseName})...`);
+
+  if (encodedDownloadUrl) {
+    const rawUrl = decodeURIComponent(encodedDownloadUrl);
+    const extension = format.toLowerCase();
+    const fileName = `${releaseName}.${extension}`;
+    const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(rawUrl)}&filename=${encodeURIComponent(fileName)}`;
+
+    const a = document.createElement('a');
+    a.href = proxyDownloadUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => {
+      showToast(`تم بدء تنزيل ${fileName} بنجاح!`);
+    }, 1000);
+    return;
+  }
+
+  // Fallback direct Blob generation for sample subtitles
   const srtSampleContent = `1
 00:00:05,000 --> 00:00:09,000
-مرحباً بكم في فيلم/مسلسل ${currentMovie.title}
+مرحباً بكم في فيلم/مسلسل ${currentMovie ? currentMovie.title : ''}
 النسخة المتوافقة: ${releaseName}
 
 2
