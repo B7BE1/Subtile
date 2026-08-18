@@ -44,40 +44,61 @@ function renderMostDownloaded() {
   }).join('');
 }
 
-// Live Search with Cinemeta + Jikan Integration
+// Live Search with Cinemeta + Jikan Integration (via /api/search — same
+// ranked, deduped results as js/browse.js's catalog search, so the two
+// entry points never disagree for the same query).
 let searchDebounceTimer = null;
+let searchAbortController = null; // cancels an in-flight /api/search fetch
+let searchRequestToken = 0; // guards against a stale response rendering after a newer one
 
 function setupLiveSearch() {
-  const searchInput = document.getElementById('heroSearchInput');
+  const searchInput = document.getElementById('searchInput');
   const dropdown = document.getElementById('searchResultsDropdown');
 
   if (!searchInput || !dropdown) return;
 
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
+
+    // A fresh keystroke invalidates anything still in flight — both the
+    // pending debounce timer and any request already sent to the server.
+    clearTimeout(searchDebounceTimer);
+    if (searchAbortController) searchAbortController.abort();
+
     if (!query) {
       dropdown.classList.remove('active');
       return;
     }
 
-    clearTimeout(searchDebounceTimer);
+    const thisRequest = ++searchRequestToken;
+
     searchDebounceTimer = setTimeout(async () => {
-      // First show local instant matches
+      // First show local instant matches — no network round trip needed.
       const localMatches = MOVIES_DATABASE.filter(item => {
         return item.title.toLowerCase().includes(query.toLowerCase()) ||
                (item.arabicTitle && item.arabicTitle.includes(query)) ||
                (item.imdbId && item.imdbId.toLowerCase().includes(query.toLowerCase()));
       });
 
-      renderSearchResults(localMatches, dropdown, true);
+      if (thisRequest === searchRequestToken) {
+        renderSearchResults(localMatches, dropdown, true);
+      }
 
-      // Fetch live matches from Cinemeta & Jikan API
+      // Fetch live matches from Cinemeta & Jikan (via /api/search).
+      searchAbortController = new AbortController();
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+          signal: searchAbortController.signal,
+        });
+
+        // Query changed (or was cleared) while this request was in
+        // flight — its result is stale, drop it silently.
+        if (thisRequest !== searchRequestToken) return;
+
         if (res.ok) {
           const data = await res.json();
           if (data.results && data.results.length > 0) {
-            // Merge and deduplicate
+            // Merge and deduplicate against the local instant matches.
             const combined = [...localMatches];
             data.results.forEach(r => {
               if (!combined.some(c => (c.imdbId && c.imdbId === r.id) || (c.id === r.id) || (c.title.toLowerCase() === r.title.toLowerCase()))) {
@@ -88,9 +109,15 @@ function setupLiveSearch() {
           }
         }
       } catch (err) {
-        console.error('Live search error:', err);
+        if (err.name !== 'AbortError') {
+          console.error('Live search error:', err);
+        }
       }
     }, 200);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') dropdown.classList.remove('active');
   });
 
   document.addEventListener('click', (e) => {
@@ -111,19 +138,30 @@ function renderSearchResults(items, dropdown, isLocalOnly) {
     return;
   }
 
+  // Titles/genres below come from external APIs (Cinemeta/Jikan) as well
+  // as local data — per js/security.js's own policy ("search terms" and
+  // any user/external-controlled text MUST go through this module before
+  // reaching innerHTML), everything interpolated here is escaped.
+  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
+  const safeImg = (typeof Security !== 'undefined')
+    ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
+    : (url) => url || 'https://images.metahub.space/poster/small/tt15239678/img';
+
   dropdown.innerHTML = items.slice(0, 10).map(movie => {
     const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
-    const targetUrl = `movie.html?id=${encodeURIComponent(movie.id || movie.imdb_id)}&type=${movie.type || 'movie'}`;
+    const targetId = encodeURIComponent(movie.id || movie.imdb_id);
+    const targetType = encodeURIComponent(movie.type || 'movie');
+    const targetUrl = `movie.html?id=${targetId}&type=${targetType}`;
 
     return `
       <div class="search-result-item" onclick="window.location.href='${targetUrl}'">
-        <img src="${movie.poster || 'https://images.metahub.space/poster/small/tt15239678/img'}" alt="${movie.title}" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+        <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
         <div style="flex: 1;">
-          <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${movie.title} <span style="color: #6b7280; font-size: 0.8rem;">(${movie.year || movie.releaseInfo || 'N/A'})</span></div>
+          <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${esc(movie.title)} <span style="color: #6b7280; font-size: 0.8rem;">(${esc(movie.year || movie.releaseInfo || 'N/A')})</span></div>
           <div class="search-result-meta">
             <span style="color: #5b9df5;">${typeLabel}</span>
-            ${movie.rating ? `<span class="search-result-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
-            ${movie.genres && movie.genres.length ? `<span>&bull; ${movie.genres.slice(0, 2).join(', ')}</span>` : ''}
+            ${movie.rating ? `<span class="search-result-rating"><i class="fas fa-star"></i> ${esc(movie.rating)}</span>` : ''}
+            ${movie.genres && movie.genres.length ? `<span>&bull; ${esc(movie.genres.slice(0, 2).join(', '))}</span>` : ''}
           </div>
         </div>
       </div>
@@ -134,7 +172,7 @@ function renderSearchResults(items, dropdown, isLocalOnly) {
 }
 
 function performSearch() {
-  const searchInput = document.getElementById('heroSearchInput');
+  const searchInput = document.getElementById('searchInput');
   if (searchInput && searchInput.value.trim()) {
     window.location.href = `browse.html?q=${encodeURIComponent(searchInput.value.trim())}`;
   }
