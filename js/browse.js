@@ -177,6 +177,14 @@ function renderCatalog() {
   }
 
   empty.classList.add('hidden');
+  // Titles/genres below can come straight from Cinemeta/Jikan (external
+  // APIs) via /api/search — per js/security.js's policy, anything
+  // external- or user-controlled must be escaped before reaching
+  // innerHTML.
+  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
+  const safeImg = (typeof Security !== 'undefined')
+    ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
+    : (url) => url || 'https://images.metahub.space/poster/small/tt15239678/img';
   let list = [...results];
 
   if (currentSort === 'rating') {
@@ -207,20 +215,20 @@ function renderCatalog() {
       ? movie.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) 
       : Math.floor(Math.random() * 15000) + 1000;
     const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
-    const targetUrl = `movie.html?id=${encodeURIComponent(movie.id || movie.imdb_id)}&type=${movie.type || 'movie'}`;
+    const targetUrl = `movie.html?id=${encodeURIComponent(movie.id || movie.imdb_id)}&type=${encodeURIComponent(movie.type || 'movie')}`;
 
     return `
       <a href="${targetUrl}" class="movie-card" style="position: relative; text-decoration: none; color: inherit; display: block;">
-        <img src="${movie.poster || 'https://images.metahub.space/poster/small/tt15239678/img'}" alt="${movie.title}" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 1.5rem; filter: grayscale(20%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border-color);">
+        <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 1.5rem; filter: grayscale(20%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border-color);">
         ${movie.rating ? `
           <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(8px); border: 1px solid var(--border-color); color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; z-index: 2; font-family: 'Inter', sans-serif;">
-            <i class="fas fa-star" style="font-size: 0.65rem; margin-right: 0.2rem;"></i> ${movie.rating}
+            <i class="fas fa-star" style="font-size: 0.65rem; margin-right: 0.2rem;"></i> ${esc(movie.rating)}
           </span>
         ` : ''}
         <div style="margin-top: 1rem;">
-          <div style="font-size: 1.1rem; color: var(--text-main); font-weight: 700; font-family: 'Playfair Display', serif; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${movie.title}</div>
+          <div style="font-size: 1.1rem; color: var(--text-main); font-weight: 700; font-family: 'Playfair Display', serif; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(movie.title)}</div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.85rem; color: var(--text-faded); font-family: 'Inter', sans-serif;">${movie.year || 'N/A'} • ${typeLabel}</span>
+            <span style="font-size: 0.85rem; color: var(--text-faded); font-family: 'Inter', sans-serif;">${esc(movie.year || 'N/A')} • ${typeLabel}</span>
             <span style="font-size: 0.85rem; color: var(--text-faded); font-family: 'Inter', sans-serif;"><i class="fas fa-arrow-down"></i> ${totalDl.toLocaleString()}</span>
           </div>
         </div>
@@ -251,6 +259,10 @@ function onCatalogSearch() {
 
   currentSearchQuery = input.value.trim();
   clearTimeout(browseDebounceTimer);
+  // A fresh keystroke invalidates any /api/search call already in flight —
+  // otherwise a slow response to an earlier query can land after a faster
+  // response to a later one and clobber the correct results on screen.
+  if (catalogSearchAbortController) catalogSearchAbortController.abort();
 
   currentPage = 1;
   hasMore = true;
@@ -261,10 +273,14 @@ function onCatalogSearch() {
     return;
   }
 
+  const thisRequest = ++catalogSearchRequestToken;
   browseDebounceTimer = setTimeout(() => {
-    triggerLiveCatalogSearch(currentSearchQuery);
+    triggerLiveCatalogSearch(currentSearchQuery, thisRequest);
   }, 300);
 }
+
+let catalogSearchAbortController = null;
+let catalogSearchRequestToken = 0;
 
 // Search via /api/search — same endpoint and ranked/deduped results as the
 // hero search in js/app.js, so search behavior never drifts between the two
@@ -272,7 +288,8 @@ function onCatalogSearch() {
 // function used to make on its own (no ranking, separate dedup logic,
 // AniList instead of Jikan for anime — three ways this could disagree with
 // the hero search's results for the same query).
-async function triggerLiveCatalogSearch(q) {
+async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequestToken) {
+  catalogSearchAbortController = new AbortController();
   try {
     const apiType = currentTypeFilter === 'all' ? 'all'
       : currentTypeFilter === 'tv' ? 'tv'
@@ -280,7 +297,14 @@ async function triggerLiveCatalogSearch(q) {
       : currentTypeFilter === 'anime' ? 'anime'
       : 'all';
 
-    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`);
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`, {
+      signal: catalogSearchAbortController.signal,
+    });
+
+    // The user has since typed something else — this response is stale,
+    // drop it rather than overwrite the (correct) in-progress results.
+    if (requestToken !== catalogSearchRequestToken) return;
+
     const data = res.ok ? await res.json() : { results: [] };
 
     // /api/search's normalized shape already carries id/type/title/year/
@@ -298,10 +322,11 @@ async function triggerLiveCatalogSearch(q) {
       );
     }
   } catch (err) {
+    if (err.name === 'AbortError') return; // superseded by a newer query — not an error
     console.error('Catalog search error:', err);
-    liveSearchResults = [];
+    if (requestToken === catalogSearchRequestToken) liveSearchResults = [];
   }
-  renderCatalog();
+  if (requestToken === catalogSearchRequestToken) renderCatalog();
 }
 
 function onCatalogSort() {
