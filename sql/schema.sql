@@ -60,6 +60,22 @@ create index if not exists idx_subtitles_created on subtitles(created_at desc);
 create index if not exists idx_downloads_subtitle on downloads_log(subtitle_id);
 
 -- ============================================================================
+-- Metadata Resolution Service — cache للنتائج القادمة من Cinemeta و Jikan/AniList
+-- (api/metadata.js + lib/metadata/*)
+-- ============================================================================
+create table if not exists metadata_cache (
+  key            text primary key,   -- e.g. "v2:movie:tt1234567", "v2:anime:21"
+  type           text,
+  payload        jsonb,
+  content_status text,
+  fetched_at     timestamptz not null default now(),
+  expires_at     timestamptz not null,
+  not_found      boolean not null default false
+);
+
+create index if not exists idx_metadata_cache_expires_at on metadata_cache(expires_at);
+
+-- ============================================================================
 -- استعلامات جاهزة للصفحة الرئيسية
 -- ============================================================================
 
