@@ -212,18 +212,37 @@ function handleUploadSubtitle(event) {
   showToast('تم استلام ملف الترجمة ومراجعته بنجاح! شكراً لمساهمتك.');
 }
 
-function showToast(message) {
+const TOAST_ICONS = {
+  success: 'fa-check-circle',
+  error: 'fa-times-circle',
+  info: 'fa-info-circle'
+};
+
+function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
 
+  const icon = TOAST_ICONS[type] || TOAST_ICONS.success;
+
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--accent-green);"></i> <span>${message}</span>`;
+  toast.className = `toast ${type}`;
+
+  const iconEl = document.createElement('i');
+  iconEl.className = `fas ${icon}`;
+  iconEl.style.color = type === 'error' ? 'var(--accent-primary)'
+    : type === 'info' ? 'var(--accent-cyan)'
+    : 'var(--accent-green)';
+
+  const textEl = document.createElement('span');
+  // Never use innerHTML here — message may contain user-influenced text.
+  Security.setText(textEl, message);
+
+  toast.appendChild(iconEl);
+  toast.appendChild(textEl);
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
+    toast.classList.add('hide');
     setTimeout(() => toast.remove(), 300);
   }, 3500);
 }
