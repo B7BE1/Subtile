@@ -266,78 +266,30 @@ function onCatalogSearch() {
   }, 300);
 }
 
-// Keyless Search using Cinemeta and AniList
+// Search via /api/search — same endpoint and ranked/deduped results as the
+// hero search in js/app.js, so search behavior never drifts between the two
+// entry points. Replaces the old direct Cinemeta + AniList calls this
+// function used to make on its own (no ranking, separate dedup logic,
+// AniList instead of Jikan for anime — three ways this could disagree with
+// the hero search's results for the same query).
 async function triggerLiveCatalogSearch(q) {
   try {
-    const promises = [];
+    const apiType = currentTypeFilter === 'all' ? 'all'
+      : currentTypeFilter === 'tv' ? 'tv'
+      : currentTypeFilter === 'movie' ? 'movie'
+      : currentTypeFilter === 'anime' ? 'anime'
+      : 'all';
 
-    if (currentTypeFilter === 'all' || currentTypeFilter === 'movie') {
-      promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/movie/search/${encodeURIComponent(q)}.json`)
-          .then(r => r.ok ? r.json() : { metas: [] })
-          .then(d => (d.metas || []).slice(0, 15).map(m => ({
-            id: m.imdb_id || m.id,
-            title: m.name,
-            type: 'movie',
-            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
-            rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || ''
-          })))
-          .catch(() => [])
-      );
-    }
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`);
+    const data = res.ok ? await res.json() : { results: [] };
 
-    if (currentTypeFilter === 'all' || currentTypeFilter === 'tv') {
-      promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/series/search/${encodeURIComponent(q)}.json`)
-          .then(r => r.ok ? r.json() : { metas: [] })
-          .then(d => (d.metas || []).slice(0, 15).map(m => ({
-            id: m.imdb_id || m.id,
-            title: m.name,
-            type: 'tv',
-            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
-            rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || ''
-          })))
-          .catch(() => [])
-      );
-    }
-
-    if (currentTypeFilter === 'all' || currentTypeFilter === 'anime') {
-      const query = `
-        query ($search: String) {
-          Page(page: 1, perPage: 15) {
-            media(type: ANIME, search: $search, sort: SEARCH_MATCH) {
-              id
-              title { romaji english }
-              averageScore
-              coverImage { large }
-              startDate { year }
-            }
-          }
-        }
-      `;
-      promises.push(
-        fetch('https://graphql.anilist.co', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ query, variables: { search: q } })
-        })
-          .then(r => r.ok ? r.json() : { data: { Page: { media: [] } } })
-          .then(d => (d.data?.Page?.media || []).map(a => ({
-            id: `anime-${a.id}`,
-            title: a.title.english || a.title.romaji,
-            type: 'anime',
-            year: a.startDate?.year || 'N/A',
-            rating: a.averageScore ? (a.averageScore / 10).toFixed(1) : 0,
-            poster: a.coverImage?.large || ''
-          })))
-          .catch(() => [])
-      );
-    }
-
-    const settled = await Promise.all(promises);
-    liveSearchResults = settled.flat();
+    // /api/search's normalized shape already carries id/type/title/year/
+    // rating/poster — renderCatalog needs no further mapping, just a
+    // fallback for the 'N/A' year placeholder the old client-side path used.
+    liveSearchResults = (data.results || []).map(r => ({
+      ...r,
+      year: r.year || 'N/A',
+    }));
 
     if (liveSearchResults.length === 0) {
       const lowerQ = q.toLowerCase();
