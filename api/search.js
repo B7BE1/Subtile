@@ -74,26 +74,27 @@ export default async function handler(req, res) {
       searchPromises.push(pMovie);
     }
 
-    // 3. Search Jikan Anime
+    // 3. Search Kitsu Anime
     if (type === 'all' || type === 'anime') {
-      const pAnime = fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(cleanQ)}&limit=8`, {
-        headers: { 'User-Agent': USER_AGENT }
+      const pAnime = fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(cleanQ)}&page[limit]=8`, {
+        headers: { 'User-Agent': USER_AGENT, 'Accept': 'application/vnd.api+json' }
       })
       .then(r => r.ok ? r.json() : { data: [] })
       .then(d => (d.data || []).map(a => {
-        const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '';
-        const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
+        const attrs = a.attributes || {};
+        const posterUrl = (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || '';
+        const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
 
         return {
-          id: `anime-${a.mal_id}`,
-          mal_id: a.mal_id,
-          title: a.title_english || a.title,
-          year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+          id: `anime-${a.id}`,
+          mal_id: a.id,
+          title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle,
+          year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
           type: 'anime',
-          rating: parseFloat(a.score) || 8.0,
+          rating: attrs.averageRating ? parseFloat((attrs.averageRating / 10).toFixed(1)) : 8.0,
           poster: posterUrl,
           backdrop: bgUrl,
-          genres: (a.genres || []).map(g => g.name)
+          genres: ['Anime']
         };
       }))
       .catch(() => []);
