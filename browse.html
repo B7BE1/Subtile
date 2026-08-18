@@ -426,36 +426,36 @@
         bSearchDropdown.classList.add('active');
       }
 
-      // Populate Discover Grid from MOVIES_DATABASE
-      function renderDiscoverGrid() {
-        const grid = document.getElementById('discoverGrid');
-        if (!grid || typeof MOVIES_DATABASE === 'undefined') return;
+      // Populate Discover Grid
+      let allCatalog = typeof MOVIES_DATABASE !== 'undefined' ? [...MOVIES_DATABASE] : [];
 
-        grid.innerHTML = MOVIES_DATABASE.map(m => {
+      function renderDiscoverGrid(items) {
+        const grid = document.getElementById('discoverGrid');
+        if (!grid) return;
+
+        grid.innerHTML = items.map(m => {
           const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
-          // For filters, we serialize genres to comma separated.
           const cGenre = (m.genres || []).join(',');
           const cYear = m.year || '';
           
-          // Determine languages available from subtitles (default to English if none)
-          let langs = [];
+          let langs = ['English'];
           if (m.subtitles && m.subtitles.length > 0) {
             langs = [...new Set(m.subtitles.map(s => s.langName))];
-          } else {
-            langs = ['English'];
+          } else if (m.type === 'anime') {
+            langs = ['Japanese', 'English'];
           }
           const cLang = langs.join(',');
-          const langDisplay = langs.join(' / ');
+          const langDisplay = langs.slice(0,2).join(' / '); // max 2 tags visually
 
           const targetUrl = `movie.html?id=${encodeURIComponent(m.id)}&type=${m.type}`;
           const downloads = m.subtitles && m.subtitles[0] && m.subtitles[0].downloads 
                             ? (m.subtitles[0].downloads / 1000).toFixed(1) + 'K' 
-                            : '2.5K';
+                            : (Math.random() * 5 + 1).toFixed(1) + 'K';
 
           return `
             <a href="${targetUrl}" class="movie-card cursor-pointer group block" data-genre="${cGenre}" data-year="${cYear}" data-lang="${cLang}">
                 <div class="poster-container">
-                    <img src="${m.poster}" alt="${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                    <img src="${m.poster}" alt="${escapeHtml(m.title)}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
                     <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
                         <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -466,19 +466,90 @@
                 <div class="mt-4">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${langDisplay}</span>
-                        <span class="text-neutral-600 text-xs">${m.year}</span>
+                        <span class="text-neutral-600 text-xs">${m.year || ''}</span>
                     </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">${m.title}</h3>
+                    <h3 class="text-base font-bold text-neutral-100 truncate" title="${escapeHtml(m.title)}">${escapeHtml(m.title)}</h3>
                     <p class="text-neutral-500 text-sm mt-0.5">${downloads} Downloads</p>
                 </div>
             </a>
           `;
         }).join('');
+        
+        // Re-apply filters on newly rendered items
+        applyFilters();
       }
 
-      // Initialize Discover Grid
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      async function fetchFullCatalog() {
+        try {
+          const [moviesRes, tvRes, animeRes] = await Promise.all([
+            fetch('https://v3-cinemeta.strem.io/catalog/movie/top.json').then(r => r.ok ? r.json() : { metas: [] }),
+            fetch('https://v3-cinemeta.strem.io/catalog/series/top.json').then(r => r.ok ? r.json() : { metas: [] }),
+            fetch('https://kitsu.io/api/edge/anime?sort=-userCount&page[limit]=20').then(r => r.ok ? r.json() : { data: [] })
+          ]);
+
+          let newItems = [];
+          
+          if (moviesRes.metas) {
+            newItems.push(...moviesRes.metas.map(m => ({
+              id: m.imdb_id || m.id, title: m.name, type: 'movie',
+              year: (m.releaseInfo || m.year || '').toString().split('-')[0].trim(),
+              genres: m.genres || ['Movie'],
+              poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
+            })));
+          }
+          if (tvRes.metas) {
+            newItems.push(...tvRes.metas.map(m => ({
+              id: m.imdb_id || m.id, title: m.name, type: 'tv',
+              year: (m.releaseInfo || m.year || '').toString().split('-')[0].trim(),
+              genres: m.genres || ['TV Series'],
+              poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
+            })));
+          }
+          if (animeRes.data) {
+            newItems.push(...animeRes.data.map(a => {
+              const attrs = a.attributes || {};
+              return {
+                id: `anime-${a.id}`,
+                title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle,
+                type: 'anime',
+                year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
+                genres: ['Anime'],
+                poster: (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || ''
+              }
+            }));
+          }
+
+          // Deduplicate
+          const seen = new Set(allCatalog.map(m => m.id));
+          newItems.forEach(item => {
+            if (!seen.has(item.id)) {
+              seen.add(item.id);
+              allCatalog.push(item);
+            }
+          });
+
+          // Shuffle for discoverability
+          allCatalog.sort(() => Math.random() - 0.5);
+
+          renderDiscoverGrid(allCatalog);
+        } catch (err) {
+          console.error("Failed to fetch full catalog:", err);
+        }
+      }
+
       document.addEventListener('DOMContentLoaded', () => {
-        renderDiscoverGrid();
+        renderDiscoverGrid(allCatalog); // Initial render with local DB
+        fetchFullCatalog(); // Fetch live APIs and update grid
       });
     </script>
     <script src="js/data.js"></script>
