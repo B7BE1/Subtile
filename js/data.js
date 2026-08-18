@@ -119,14 +119,14 @@ const MOVIES_DATABASE = [
     ]
   },
   {
-    id: "solo-leveling",
+    id: "anime-52991",
     title: "Solo Leveling",
     arabicTitle: "سولو ليفلينج",
     type: "anime",
     year: 2024,
     rating: 8.5,
     genres: ["Action", "Adventure", "Fantasy"],
-    poster: "https://cdn.myanimelist.net/images/anime/1801/142390l.jpg",
+    poster: "https://media.kitsu.app/anime/46231/poster_image/large-cdadff31f42490b9f48a035939a01a92.jpeg",
     backdrop: "https://images.metahub.space/background/medium/tt21209876/img",
     overview: "In a world where hunters must battle deadly monsters, weak hunter Sung Jinwoo discovers a quest only he can see.",
     imdbId: "tt21209876",
@@ -231,14 +231,14 @@ const MOVIES_DATABASE = [
     ]
   },
   {
-    id: "jujutsu-kaisen",
+    id: "anime-40748",
     title: "Jujutsu Kaisen",
     arabicTitle: "جوجوتسو كايسن",
     type: "anime",
     year: 2020,
     rating: 8.6,
     genres: ["Animation", "Action", "Fantasy"],
-    poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg",
+    poster: "https://media.kitsu.app/anime/42765/poster_image/large-5ce19551c1a6cf995b378205b9149b5c.jpeg",
     backdrop: "https://images.metahub.space/background/medium/tt12343534/img",
     overview: "A boy swallows a cursed talisman and becomes cursed himself. He enters a shaman's school to find the demon's other body parts.",
     imdbId: "tt12343534",
