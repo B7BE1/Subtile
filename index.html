@@ -1,93 +1,69 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subtile - Trending Now</title>
+    <meta name="description" content="سبتايل — أرشيف الترجمات العربية والأجنبية للأفلام والمسلسلات والأنمي.">
+    <title>سبتايل | Subtle — الترجمات الرائجة</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; }
-        .nav-blur { backdrop-filter: blur(16px); background: rgba(10, 10, 10, 0.85); }
-        
-        /* Banner Background with Fade-out effect */
+        :root { --stroke: #333; }
+        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #0a0a0a; }
+        [dir="ltr"] body { font-family: 'Inter', 'Tajawal', sans-serif; }
+        .nav-blur { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(10, 10, 10, 0.85); }
+
         .banner-bg {
             background-size: cover;
             background-position: center top;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
+            position: absolute; inset: 0; z-index: 0;
             mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
             -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
             opacity: 0.6;
         }
-        
-        /* Perfect Poster Aspect Ratio */
-        .poster-container { position: relative; padding-bottom: 150%; /* 2:3 Aspect Ratio */ }
-        .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-        
-        /* Rank Number Styling - Directly Overlaying on the Poster */
-        .rank-number {
-            font-family: 'Inter', sans-serif;
-            font-weight: 900;
-            font-size: 5.5rem;
-            line-height: 0.8;
-            color: #ffffff;
-            -webkit-text-stroke: 3px #0a0a0a;
-            text-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.8);
-            position: absolute;
-            left: -8px;
-            bottom: -10px;
-            z-index: 25;
-            pointer-events: none;
-            user-select: none;
+
+        .poster-container { position: relative; padding-bottom: 150%; }
+        .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; background: #171717; }
+        .poster-fallback {
+            position: absolute; inset: 0; border-radius: 12px; background: #171717;
+            display: none; align-items: center; justify-content: center; text-align: center;
+            color: #525252; font-weight: 700; padding: 1rem; border: 1px solid #262626;
         }
-        
-        /* Card Hover Effects */
+
+        .rank-number {
+            font-weight: 900; font-size: 6rem; line-height: 0.8;
+            color: transparent; -webkit-text-stroke: 2px var(--stroke);
+            position: absolute; bottom: -15px; z-index: 0; pointer-events: none;
+        }
+        [dir="rtl"] .rank-number { right: -10px; }
+        [dir="ltr"] .rank-number { left: -10px; }
+
         .movie-card { position: relative; z-index: 1; transition: transform 0.3s ease; }
         .movie-card:hover { transform: translateY(-5px); }
-        .movie-card:hover .poster-img { filter: brightness(0.35); }
+        .movie-card:hover .poster-img { filter: brightness(0.3); }
         .movie-card:hover .overlay-content { opacity: 1; }
-        .overlay-content { opacity: 0; transition: opacity 0.3s ease; z-index: 30; }
+        .overlay-content { opacity: 0; transition: opacity 0.3s ease; }
+        .movie-card:focus-visible { outline: 2px solid #a3a3a3; outline-offset: 4px; border-radius: 12px; }
+        .movie-card:focus-visible .overlay-content { opacity: 1; }
 
-        /* Search Dropdown */
-        .search-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            right: 0;
-            background: rgba(18, 18, 18, 0.96);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            max-height: 380px;
-            overflow-y: auto;
-            display: none;
-            z-index: 100;
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
-        }
-        .search-dropdown.active { display: block; }
-        .search-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-        .search-item:last-child { border-bottom: none; }
-        .search-item:hover { background: rgba(255, 255, 255, 0.08); }
-        .search-item img {
-            width: 36px;
-            height: 52px;
-            object-fit: cover;
-            border-radius: 6px;
-            flex-shrink: 0;
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+        .reveal.visible { opacity: 1; transform: none; }
+
+        .filter-btn.active { background: #f5f5f5; color: #171717; border-color: #f5f5f5; }
+
+        .modal-backdrop { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0,0,0,.7); }
+        .toast { transform: translateY(150%); transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
+        .toast.show { transform: translateY(0); }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #404040; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, .movie-card, .overlay-content, .toast { transition: none !important; }
         }
     </style>
 </head>
@@ -95,71 +71,64 @@
 
     <!-- Navbar -->
     <header class="fixed top-0 w-full z-50 nav-blur border-b border-neutral-800/50">
-        <div class="container mx-auto px-8 py-4 flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3">
+        <div class="container mx-auto px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="w-8 h-8 bg-neutral-100 rounded-md flex items-center justify-center">
                     <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </div>
-                <span class="text-lg font-bold tracking-tight text-neutral-300 hidden sm:block">SUBTILE</span>
-            </a>
-            
-            <div class="flex-1 max-w-xl mx-8 relative">
-                <div class="relative">
-                    <input type="text" id="mainSearchInput" placeholder="Search movies, TV shows, anime..." autocomplete="off" class="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-600">
-                    <svg class="absolute right-4 top-3 w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <div id="mainSearchDropdown" class="search-dropdown"></div>
+                <span class="text-lg font-black tracking-tight text-neutral-200 hidden sm:block" data-i18n="brand">سبتايل</span>
             </div>
 
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
-                <a href="index.html" class="text-white border-b border-neutral-100 pb-1">Trending</a>
-                <a href="browse.html#discover" class="hover:text-neutral-200 transition-colors">Discover</a>
-                <a href="browse.html#latest" class="hover:text-neutral-200 transition-colors">Latest</a>
-                <a href="browse.html#community" class="hover:text-neutral-200 transition-colors">Community</a>
-            </nav>
+            <div class="flex-1 max-w-xl">
+                <div class="relative">
+                    <input id="searchInput" type="search" data-i18n-ph="searchPh" placeholder="ابحث عن فيلم، مسلسل، أنمي..."
+                        class="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-600">
+                    <svg class="absolute end-3 top-3 w-5 h-5 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
+                    <a href="index.html" class="text-white border-b border-neutral-100 pb-1" data-i18n="navTrending">الرائج</a>
+                    <a href="browse.html#latest" class="hover:text-neutral-200 transition-colors" data-i18n="navLatest">الأحدث</a>
+                    <a href="browse.html#discover" class="hover:text-neutral-200 transition-colors" data-i18n="navUpload">الاستكشاف</a>
+                </nav>
+                <button id="langToggle" class="text-xs font-bold border border-neutral-700 hover:border-neutral-400 rounded-lg px-3 py-2 text-neutral-300 transition-colors">EN</button>
+            </div>
         </div>
     </header>
 
-    <!-- Featured Banner (Number 1) -->
-    <section id="heroFeaturedSection" class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
-        <div id="heroBannerBg" class="banner-bg" style="background-image: url('https://images.metahub.space/background/medium/tt15239678/img');"></div>
-        
-        <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
+    <!-- Featured Banner -->
+    <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-10">
+        <div id="bannerBg" class="banner-bg"></div>
+        <div class="relative z-10 container mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center gap-12">
             <div class="hidden md:block w-64 flex-shrink-0">
                 <div class="poster-container">
-                    <img id="heroPosterImg" src="https://images.metahub.space/poster/small/tt15239678/img" alt="Featured" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                    <img id="featuredPoster" src="" alt="" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800">
+                    <div id="featuredFallback" class="poster-fallback"></div>
                 </div>
             </div>
 
-            <div class="max-w-2xl mt-8 md:mt-0">
+            <div class="max-w-2xl mt-4 md:mt-0">
                 <div class="flex items-center gap-4 mb-4">
-                    <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
-                    <div class="border-l border-neutral-700 pl-4">
-                        <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
-                        <p class="text-neutral-500 text-sm">Trending Worldwide</p>
+                    <span class="text-neutral-100 font-black text-7xl md:text-8xl">01</span>
+                    <div class="border-s border-neutral-700 ps-4">
+                        <p class="text-neutral-400 text-sm font-medium tracking-widest" data-i18n="current1">المرتبة الأولى حالياً</p>
+                        <p class="text-neutral-500 text-sm" data-i18n="trendingToday">الرائج اليوم</p>
                     </div>
                 </div>
-                
-                <h1 id="heroTitle" class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none">Dune: Part Two</h1>
-                <div id="heroMeta" class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
-                    <span id="heroYear">2024</span>
-                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span id="heroGenres">Sci-Fi / Adventure</span>
-                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span id="heroDownloads">5.4M Downloads</span>
-                </div>
-                
-                <p id="heroOverview" class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl">
-                    Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Experience the epic in verified subtitles.
-                </p>
 
-                <div class="flex items-center gap-4">
-                    <a id="heroDownloadBtn" href="movie.html?id=dune-2&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                <h1 id="featuredTitle" class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none"></h1>
+                <div id="featuredMeta" class="flex items-center flex-wrap gap-x-4 gap-y-2 mb-6 text-neutral-400 text-sm font-medium"></div>
+                <p id="featuredDesc" class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl"></p>
+
+                <div class="flex items-center gap-4 flex-wrap">
+                    <button id="featuredDownload" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download Subtitles
-                    </a>
-                    <a id="heroInfoBtn" href="movie.html?id=dune-2&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
-                        More Info
+                        <span data-i18n="downloadSubs">تحميل الترجمة</span>
+                    </button>
+                    <a id="featuredInfo" href="#" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors flex items-center" data-i18n="moreInfo">
+                        معلومات أكثر
                     </a>
                 </div>
             </div>
@@ -167,221 +136,332 @@
     </section>
 
     <!-- Trending Grid -->
-    <main class="container mx-auto px-8 pt-16 pb-20 relative z-20">
-        
+    <main class="container mx-auto px-4 sm:px-8 pt-16 pb-20 relative z-20">
         <div class="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-                <p class="text-neutral-500 font-medium mb-3 tracking-[0.2em] text-xs">TOP CHARTS</p>
-                <h2 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight">Trending Now</h2>
+                <p class="text-neutral-500 font-medium mb-3 tracking-[0.2em] text-xs" data-i18n="topCharts">أعلى القوائم</p>
+                <h2 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight" data-i18n="trendingNow">الرائج الآن</h2>
             </div>
-            
-            <div class="flex gap-2 flex-wrap">
-                <button onclick="filterTrendingTab('all', this)" class="tab-filter-btn px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors">All</button>
-                <button onclick="filterTrendingTab('movie', this)" class="tab-filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Movies</button>
-                <button onclick="filterTrendingTab('tv', this)" class="tab-filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">TV Shows</button>
-                <button onclick="filterTrendingTab('anime', this)" class="tab-filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Anime</button>
+            <div id="filters" class="flex gap-2 flex-wrap">
+                <button data-filter="all"   class="filter-btn active px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fAll">الكل</button>
+                <button data-filter="movie" class="filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fMovies">أفلام</button>
+                <button data-filter="tv"    class="filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fTv">مسلسلات</button>
+                <button data-filter="anime" class="filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors" data-i18n="fAnime">أنمي</button>
             </div>
         </div>
 
-        <!-- Movies Grid (Dynamic Centralized Top 10) -->
-        <div id="trendingCardsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16">
-            <!-- Cards populated dynamically via /api/trending -->
+        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16"></div>
+
+        <div id="emptyState" class="hidden text-center py-24">
+            <p class="text-5xl mb-4">🎬</p>
+            <p class="text-neutral-300 font-bold text-xl mb-1" data-i18n="noResults">لا توجد نتائج</p>
+            <p class="text-neutral-500 text-sm" data-i18n="noResultsHint">جرّب كلمة بحث مختلفة أو غيّر التصنيف</p>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="border-t border-neutral-900 mt-20 relative z-30 bg-neutral-950">
-        <div class="container mx-auto px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-neutral-600 text-sm">© 2024 Subtile Archive. Designed for cinephiles.</p>
+        <div class="container mx-auto px-4 sm:px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-neutral-600 text-sm"><span id="year"></span> <span data-i18n="footerText">© سبتايل — أرشيف الترجمات. صُمم لعشاق السينما.</span></p>
             <div class="flex gap-8 text-sm text-neutral-500">
-                <a href="#" class="hover:text-neutral-300 transition-colors">Contact</a>
-                <a href="#" class="hover:text-neutral-300 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-neutral-300 transition-colors">DMCA</a>
+                <a href="#" class="hover:text-neutral-300 transition-colors" data-i18n="contact">تواصل</a>
+                <a href="#" class="hover:text-neutral-300 transition-colors" data-i18n="privacy">الخصوصية</a>
+                <a href="#" class="hover:text-neutral-300 transition-colors" data-i18n="DMCA">DMCA</a>
             </div>
         </div>
     </footer>
 
-    <!-- Global Trending Loader & Live Search Script -->
-    <script>
-      let globalTrendingItems = [];
-      let currentTab = 'all';
-
-      document.addEventListener('DOMContentLoaded', () => {
-        loadGlobalTrending();
-        setupSearch();
-      });
-
-      async function loadGlobalTrending() {
-        try {
-          const res = await fetch('/api/trending');
-          if (res.ok) {
-            const data = await res.json();
-            globalTrendingItems = data.trending || [];
-            if (data.featured) {
-              renderFeatured(data.featured);
-            }
-            renderTrendingGrid(globalTrendingItems);
-            return;
-          }
-        } catch (e) {
-          console.error('Failed loading global trending:', e);
-        }
-      }
-
-      function renderFeatured(f) {
-        const bg = document.getElementById('heroBannerBg');
-        if (bg && f.backdrop) bg.style.backgroundImage = `url('${f.backdrop}')`;
-
-        const poster = document.getElementById('heroPosterImg');
-        if (poster && f.poster) poster.src = f.poster;
-
-        const title = document.getElementById('heroTitle');
-        if (title) title.textContent = f.title;
-
-        const year = document.getElementById('heroYear');
-        if (year) year.textContent = f.year;
-
-        const genres = document.getElementById('heroGenres');
-        if (genres && f.genres) genres.textContent = Array.isArray(f.genres) ? f.genres.join(' / ') : f.genres;
-
-        const dl = document.getElementById('heroDownloads');
-        if (dl && f.downloads) dl.textContent = `${f.downloads} Downloads`;
-
-        const overview = document.getElementById('heroOverview');
-        if (overview && f.overview) overview.textContent = f.overview;
-
-        const targetUrl = `movie.html?id=${encodeURIComponent(f.slug || f.id)}&type=${f.type || 'movie'}`;
-        const dlBtn = document.getElementById('heroDownloadBtn');
-        const infoBtn = document.getElementById('heroInfoBtn');
-        if (dlBtn) dlBtn.href = targetUrl;
-        if (infoBtn) infoBtn.href = targetUrl;
-      }
-
-      function renderTrendingGrid(items) {
-        const grid = document.getElementById('trendingCardsGrid');
-        if (!grid) return;
-
-        // Skip rank 1 (which is on the hero banner), show 2 to 10
-        let filtered = items.filter(i => i.rank > 1);
-
-        if (currentTab !== 'all') {
-          filtered = filtered.filter(i => i.type === currentTab);
-        }
-
-        grid.innerHTML = filtered.map(m => {
-          const targetUrl = `movie.html?id=${encodeURIComponent(m.slug || m.id)}&type=${m.type || 'movie'}`;
-
-          return `
-            <a href="${targetUrl}" class="movie-card cursor-pointer group block" data-type="${m.type}">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="${m.poster}" alt="${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">${m.rank}</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
+    <!-- Download Modal -->
+    <div id="modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 modal-backdrop">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl" role="dialog" aria-modal="true">
+            <div class="flex items-start justify-between mb-5">
+                <div>
+                    <h3 id="modalTitle" class="text-xl font-black text-neutral-50"></h3>
+                    <p id="modalSub" class="text-neutral-500 text-sm mt-1"></p>
                 </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${m.language || 'Arabic / EN'}</span>
-                        <span class="text-neutral-600 text-xs">${m.year || ''}</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">${m.title}</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">${m.downloads || '1.5M'} Downloads</p>
-                </div>
-            </a>
-          `;
-        }).join('');
-      }
-
-      function filterTrendingTab(tab, btn) {
-        currentTab = tab;
-        document.querySelectorAll('.tab-filter-btn').forEach(b => {
-          b.className = 'tab-filter-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors';
-        });
-        if (btn) {
-          btn.className = 'tab-filter-btn px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors';
-        }
-        renderTrendingGrid(globalTrendingItems);
-      }
-
-      // Search Logic
-      function setupSearch() {
-        let searchTimer = null;
-        const searchInput = document.getElementById('mainSearchInput');
-        const searchDropdown = document.getElementById('mainSearchDropdown');
-
-        if (!searchInput || !searchDropdown) return;
-
-        searchInput.addEventListener('input', (e) => {
-          const q = e.target.value.trim();
-          if (!q) {
-            searchDropdown.classList.remove('active');
-            return;
-          }
-
-          clearTimeout(searchTimer);
-          searchTimer = setTimeout(async () => {
-            try {
-              const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-              if (res.ok) {
-                const data = await res.json();
-                renderDropdownResults(data.results || []);
-              }
-            } catch (err) {
-              console.error('Search error:', err);
-            }
-          }, 200);
-        });
-
-        searchInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' && searchInput.value.trim()) {
-            window.location.href = `browse.html?q=${encodeURIComponent(searchInput.value.trim())}`;
-          }
-        });
-
-        document.addEventListener('click', (e) => {
-          if (!e.target.closest('#mainSearchInput') && !e.target.closest('#mainSearchDropdown')) {
-            searchDropdown.classList.remove('active');
-          }
-        });
-      }
-
-      function renderDropdownResults(items) {
-        const searchDropdown = document.getElementById('mainSearchDropdown');
-        if (!searchDropdown) return;
-
-        if (!items || items.length === 0) {
-          searchDropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #737373; font-size: 0.85rem;">No results found</div>';
-          searchDropdown.classList.add('active');
-          return;
-        }
-
-        searchDropdown.innerHTML = items.slice(0, 8).map(m => {
-          const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
-          const targetUrl = `movie.html?id=${encodeURIComponent(m.id || m.imdb_id)}&type=${m.type || 'movie'}`;
-
-          return `
-            <div class="search-item" onclick="window.location.href='${targetUrl}'">
-              <img src="${m.poster || 'https://images.metahub.space/poster/small/tt15239678/img'}" alt="${m.title}" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-weight: 600; font-size: 0.88rem; color: #f5f5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
-                <div style="font-size: 0.75rem; color: #737373; display: flex; gap: 8px; margin-top: 2px;">
-                  <span style="color: #60a5fa;">${typeLabel}</span>
-                  <span>${m.year || m.releaseInfo || ''}</span>
-                  ${m.rating ? `<span style="color: #fbbf24;"><i class="fas fa-star" style="font-size:0.7rem;"></i> ${m.rating}</span>` : ''}
-                </div>
-              </div>
+                <button id="modalClose" class="text-neutral-500 hover:text-white transition-colors p-1" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-          `;
-        }).join('');
 
-        searchDropdown.classList.add('active');
-      }
-    </script>
+            <label class="block text-xs font-bold text-neutral-400 mb-2" data-i18n="subLang">لغة الترجمة</label>
+            <div id="langOptions" class="grid grid-cols-2 gap-2 mb-5"></div>
+
+            <label class="block text-xs font-bold text-neutral-400 mb-2" data-i18n="subFormat">صيغة الملف</label>
+            <div id="formatOptions" class="grid grid-cols-3 gap-2 mb-6"></div>
+
+            <div class="flex gap-2 mb-3">
+                <button id="modalDownload" class="flex-1 bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span data-i18n="downloadNow">تحميل الآن</span>
+                </button>
+                <a id="modalMoreDetails" href="#" class="px-4 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold rounded-lg flex items-center justify-center transition-colors text-sm" title="Full Details">
+                    <span data-i18n="moreInfo">معلومات أكثر</span>
+                </a>
+            </div>
+            <p class="text-neutral-600 text-xs text-center mt-3" data-i18n="modalNote">الملفات بصيغة مضغوطة ZIP وتشمل نسخة للصم وضعاف السمع</p>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast fixed bottom-6 inset-x-0 mx-auto w-fit max-w-[90vw] z-[70] bg-neutral-100 text-neutral-900 font-bold text-sm px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        <span id="toastText"></span>
+    </div>
+
+    <!-- Back to top -->
+    <button id="toTop" class="hidden fixed bottom-6 end-6 z-40 w-11 h-11 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-full items-center justify-center transition-colors" aria-label="Back to top">
+        <svg class="w-5 h-5 mx-auto text-neutral-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+    </button>
+
+<script>
+"use strict";
+
+/* ---------------- Data (With Verified Working MetaHub & MAL Posters) ---------------- */
+const TITLES = [
+    { id: "oppenheimer",  title: "Oppenheimer",       year: 2023, genre: { ar: "سيرة / دراما", en: "Biography / Drama" }, type: "movie", lang: "English", dl: "4.2M", featured: true,
+      poster: "https://images.metahub.space/poster/small/tt15398776/img", backdrop: "https://images.metahub.space/background/medium/tt15398776/img",
+      desc: { ar: "قصة ج. روبرت أوبنهايمر ودوره في تطوير القنبلة الذرية خلال الحرب العالمية الثانية. عِش الملحمة بترجمات عالية الجودة.",
+              en: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II. Experience the epic in high-quality subtitles." } },
+    { id: "dune-2",  title: "Dune: Part Two",      year: 2024, genre: { ar: "خيال علمي", en: "Sci-Fi" },     type: "movie", lang: "English", dl: "3.8M", poster: "https://images.metahub.space/poster/small/tt15239678/img" },
+    { id: "the-batman",          title: "The Batman",          year: 2022, genre: { ar: "أكشن / جريمة", en: "Action / Crime" }, type: "movie", lang: "Arabic", dl: "2.9M", poster: "https://images.metahub.space/poster/small/tt1877830/img" },
+    { id: "interstellar",        title: "Interstellar",        year: 2014, genre: { ar: "خيال علمي", en: "Sci-Fi" },     type: "movie", lang: "Arabic",  dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt0816692/img" },
+    { id: "the-last-of-us",      title: "The Last of Us",      year: 2023, genre: { ar: "دراما / رعب", en: "Drama / Horror" }, type: "tv", lang: "Arabic", dl: "1.9M", poster: "https://images.metahub.space/poster/small/tt3581920/img" },
+    { id: "joker",               title: "Joker",               year: 2019, genre: { ar: "جريمة / دراما", en: "Crime / Drama" }, type: "movie", lang: "Arabic", dl: "1.5M", poster: "https://images.metahub.space/poster/small/tt7286456/img" },
+    { id: "attack-on-titan",     title: "Attack on Titan",     year: 2013, genre: { ar: "أنمي / أكشن", en: "Anime / Action" }, type: "anime", lang: "Arabic", dl: "1.45M", poster: "https://images.metahub.space/poster/small/tt2560140/img" },
+    { id: "inception",           title: "Inception",           year: 2010, genre: { ar: "خيال علمي", en: "Sci-Fi" },     type: "movie", lang: "Arabic",  dl: "1.4M", poster: "https://images.metahub.space/poster/small/tt1375666/img" },
+    { id: "breaking-bad",        title: "Breaking Bad",        year: 2008, genre: { ar: "جريمة / دراما", en: "Crime / Drama" }, type: "tv", lang: "Arabic", dl: "1.35M", poster: "https://images.metahub.space/poster/small/tt0903747/img" },
+    { id: "the-dark-knight",     title: "The Dark Knight",     year: 2008, genre: { ar: "أكشن", en: "Action" },          type: "movie", lang: "English", dl: "1.3M", poster: "https://images.metahub.space/poster/small/tt0468569/img" },
+    { id: "parasite",            title: "Parasite",            year: 2019, genre: { ar: "إثارة / دراما", en: "Thriller / Drama" }, type: "movie", lang: "Arabic", dl: "1.1M", poster: "https://images.metahub.space/poster/small/tt6751668/img" },
+    { id: "solo-leveling",   title: "Solo Leveling",   year: 2024, genre: { ar: "أنمي / مغامرة", en: "Anime / Action" },     type: "anime", lang: "Arabic", dl: "1.6M", poster: "https://cdn.myanimelist.net/images/anime/1801/142390l.jpg" },
+    { id: "jujutsu-kaisen",      title: "Jujutsu Kaisen",      year: 2020, genre: { ar: "أنمي / فانتازيا", en: "Anime / Fantasy" }, type: "anime", lang: "Arabic", dl: "920K", poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg" },
+    { id: "house-of-the-dragon",            title: "House of the Dragon",            year: 2024, genre: { ar: "دراما / فانتازيا", en: "Drama / Fantasy" }, type: "tv", lang: "Arabic", dl: "2.1M", poster: "https://images.metahub.space/poster/small/tt11198330/img" },
+];
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+    ar: {
+        brand: "سبتايل", searchPh: "ابحث عن فيلم، مسلسل، أنمي...",
+        navTrending: "الرائج", navLatest: "الأحدث", navUpload: "الاستكشاف",
+        current1: "المرتبة الأولى حالياً", trendingToday: "الرائج اليوم",
+        downloadSubs: "تحميل الترجمة", moreInfo: "معلومات أكثر",
+        topCharts: "أعلى القوائم", trendingNow: "الرائج الآن",
+        fAll: "الكل", fMovies: "أفلام", fTv: "مسلسلات", fAnime: "أنمي",
+        noResults: "لا توجد نتائج", noResultsHint: "جرّب كلمة بحث مختلفة أو غيّر التصنيف",
+        footerText: "© سبتايل — أرشيف الترجمات. صُمم لعشاق السينما.",
+        contact: "تواصل", privacy: "الخصوصية", DMCA: "DMCA",
+        subLang: "لغة الترجمة", subFormat: "صيغة الملف", downloadNow: "تحميل الآن",
+        modalNote: "الملفات بصيغة مضغوطة ZIP وتشمل نسخة للصم وضعاف السمع",
+        downloads: "تحميل", download: "تحميل",
+        toastStart: "بدأ تحميل الترجمة", langName: { Arabic: "العربية", English: "الإنجليزية" },
+        title: "سبتايل | Subtle — الترجمات الرائجة", toggle: "EN", dir: "rtl",
+    },
+    en: {
+        brand: "SUBTILE", searchPh: "Search movies, TV shows, anime...",
+        navTrending: "Trending", navLatest: "Latest", navUpload: "Discover",
+        current1: "CURRENT #1", trendingToday: "Trending Today",
+        downloadSubs: "Download Subtitles", moreInfo: "More Info",
+        topCharts: "TOP CHARTS", trendingNow: "Trending Now",
+        fAll: "All", fMovies: "Movies", fTv: "TV Shows", fAnime: "Anime",
+        noResults: "No results found", noResultsHint: "Try a different search term or category",
+        footerText: "© Subtle — Subtitles Archive. Designed for cinephiles.",
+        contact: "Contact", privacy: "Privacy Policy", DMCA: "DMCA",
+        subLang: "Subtitle Language", subFormat: "File Format", downloadNow: "Download Now",
+        modalNote: "Files are zipped and include an SDH version for the hearing impaired",
+        downloads: "Downloads", download: "Download",
+        toastStart: "Subtitle download started", langName: { Arabic: "Arabic", English: "English" },
+        title: "Subtle — Trending Subtitles", toggle: "ع", dir: "ltr",
+    }
+};
+
+const SUB_LANGS = ["Arabic", "English", "French", "Spanish"];
+const FORMATS = ["SRT", "VTT", "ASS"];
+
+/* ---------------- State ---------------- */
+let lang = localStorage.getItem("subtle-lang") || "ar";
+let activeFilter = "all";
+let searchQuery = "";
+let modalItem = null, modalLang = "Arabic", modalFormat = "SRT";
+
+const t = key => I18N[lang][key];
+const $ = id => document.getElementById(id);
+
+/* ---------------- Render: i18n ---------------- */
+function applyI18n() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = I18N[lang].dir;
+    document.title = t("title");
+    $("langToggle").textContent = t("toggle");
+    document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
+    renderFeatured();
+    renderGrid();
+}
+
+/* ---------------- Render: Featured ---------------- */
+function renderFeatured() {
+    const f = TITLES.find(x => x.featured);
+    $("bannerBg").style.backgroundImage = `url('${f.backdrop}')`;
+    $("featuredTitle").textContent = f.title;
+    $("featuredDesc").textContent = f.desc[lang];
+    $("featuredMeta").innerHTML =
+        `<span>${f.year}</span><span class="w-1 h-1 bg-neutral-600 rounded-full"></span>` +
+        `<span>${f.genre[lang]}</span><span class="w-1 h-1 bg-neutral-600 rounded-full"></span>` +
+        `<span>${f.dl} ${t("downloads")}</span>`;
+    const img = $("featuredPoster"), fb = $("featuredFallback");
+    img.alt = f.title; img.style.display = "";
+    img.onerror = () => { img.style.display = "none"; fb.style.display = "flex"; fb.textContent = f.title; };
+    img.src = f.poster;
+    
+    $("featuredInfo").href = `movie.html?id=${f.id}&type=${f.type}`;
+}
+
+/* ---------------- Render: Grid ---------------- */
+function cardHTML(item, rank) {
+    return `
+    <div class="movie-card cursor-pointer group reveal" data-id="${item.id}" tabindex="0" role="button" aria-label="${item.title}">
+        <div class="relative">
+            <span class="rank-number">${rank}</span>
+            <div class="poster-container">
+                <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/60"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${item.title.replace(/'/g, "\\'")}'">
+                <div class="poster-fallback"></div>
+                <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                    <button class="dl-btn w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        ${t("download")}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${t("langName")[item.lang] || item.lang}</span>
+                <span class="text-neutral-600 text-xs">${item.year}</span>
+            </div>
+            <h3 class="text-base font-bold text-neutral-100 truncate">${item.title}</h3>
+            <p class="text-neutral-500 text-sm mt-0.5">${item.dl} ${t("downloads")}</p>
+        </div>
+    </div>`;
+}
+
+function renderGrid() {
+    const q = searchQuery.trim().toLowerCase();
+    const list = TITLES.filter(x => !x.featured)
+        .filter(x => activeFilter === "all" || x.type === activeFilter)
+        .filter(x => !q || x.title.toLowerCase().includes(q));
+
+    $("grid").innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
+    $("emptyState").classList.toggle("hidden", list.length > 0);
+    observeReveals();
+
+    document.querySelectorAll(".movie-card").forEach(card => {
+        const item = TITLES.find(x => x.id == card.dataset.id);
+        const open = () => openModal(item);
+        card.addEventListener("click", e => { if (!e.target.closest(".dl-btn")) open(); });
+        card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+        card.querySelector(".dl-btn").addEventListener("click", open);
+    });
+}
+
+/* ---------------- Reveal on scroll ---------------- */
+const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); } });
+}, { threshold: 0.1 });
+function observeReveals() { document.querySelectorAll(".reveal:not(.visible)").forEach(el => io.observe(el)); }
+
+/* ---------------- Modal ---------------- */
+function renderModalOptions() {
+    $("langOptions").innerHTML = SUB_LANGS.map(l => `
+        <button data-lang="${l}" class="opt-lang px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors
+            ${l === modalLang ? "bg-neutral-100 text-neutral-900 border-neutral-100" : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:border-neutral-600"}">
+            ${I18N[lang].langName[l] || l}
+        </button>`).join("");
+    $("formatOptions").innerHTML = FORMATS.map(f => `
+        <button data-fmt="${f}" class="opt-fmt px-3 py-2.5 rounded-lg border text-sm font-bold transition-colors
+            ${f === modalFormat ? "bg-neutral-100 text-neutral-900 border-neutral-100" : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:border-neutral-600"}">
+            ${f}
+        </button>`).join("");
+
+    document.querySelectorAll(".opt-lang").forEach(b => b.addEventListener("click", () => { modalLang = b.dataset.lang; renderModalOptions(); }));
+    document.querySelectorAll(".opt-fmt").forEach(b => b.addEventListener("click", () => { modalFormat = b.dataset.fmt; renderModalOptions(); }));
+}
+
+function openModal(item) {
+    modalItem = item;
+    modalLang = item.lang === "Arabic" ? "Arabic" : "Arabic"; // default: Arabic subtitles
+    modalFormat = "SRT";
+    $("modalTitle").textContent = item.title;
+    $("modalSub").textContent = `${item.year} · ${item.genre[lang]}`;
+    $("modalMoreDetails").href = `movie.html?id=${item.id}&type=${item.type}`;
+    renderModalOptions();
+    $("modal").classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+}
+function closeModal() { $("modal").classList.add("hidden"); document.body.style.overflow = ""; }
+
+$("modalClose").addEventListener("click", closeModal);
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeModal();
+    if (e.key === "/" && document.activeElement !== $("searchInput")) { e.preventDefault(); $("searchInput").focus(); }
+});
+
+/* ---------------- Toast & Download ---------------- */
+let toastTimer;
+function showToast(msg) {
+    $("toastText").textContent = msg;
+    $("toast").classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $("toast").classList.remove("show"), 3000);
+}
+
+$("modalDownload").addEventListener("click", () => {
+    const name = `${modalItem.title}.${modalLang}.${modalFormat}`.replace(/\s+/g, "_");
+    const demo = modalFormat === "SRT"
+        ? `1\n00:00:01,000 --> 00:00:04,000\n${modalItem.title} — ${modalLang} subtitle\n\n2\n00:00:05,000 --> 00:00:08,000\nPowered by Subtle\n`
+        : modalFormat === "VTT"
+        ? `WEBVTT\n\n00:00:01.000 --> 00:00:04.000\n${modalItem.title} — ${modalLang} subtitle\n\n00:00:05.000 --> 00:00:08.000\nPowered by Subtle\n`
+        : `[Script Info]\nTitle: ${modalItem.title}\nScriptType: v4.00+\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize\nStyle: Default,Tajawal,20\n\n[Events]\nFormat: Layer, Start, End, Style, Text\nDialogue: 0,0:00:01.00,0:00:04.00,Default,${modalItem.title} — ${modalLang} subtitle\nDialogue: 0,0:00:05.00,0:00:08.00,Default,Powered by Subtle\n`;
+    const ext = modalFormat === "VTT" ? "vtt" : modalFormat === "ASS" ? "ass" : "srt";
+    const blob = new Blob([demo], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${name}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    closeModal();
+    showToast(`${t("toastStart")} — ${modalItem.title}`);
+});
+
+/* ---------------- Events ---------------- */
+$("featuredDownload").addEventListener("click", () => openModal(TITLES.find(x => x.featured)));
+
+$("searchInput").addEventListener("input", e => { searchQuery = e.target.value; renderGrid(); });
+
+document.querySelectorAll(".filter-btn").forEach(btn => btn.addEventListener("click", () => {
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
+    renderGrid();
+}));
+
+$("langToggle").addEventListener("click", () => {
+    lang = lang === "ar" ? "en" : "ar";
+    localStorage.setItem("subtle-lang", lang);
+    applyI18n();
+});
+
+const toTop = $("toTop");
+window.addEventListener("scroll", () => {
+    const show = window.scrollY > 600;
+    toTop.classList.toggle("hidden", !show);
+    toTop.classList.toggle("flex", show);
+}, { passive: true });
+toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+/* ---------------- Init ---------------- */
+$("year").textContent = new Date().getFullYear();
+applyI18n();
+</script>
 </body>
 </html>
