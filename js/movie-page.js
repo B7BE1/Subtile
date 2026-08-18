@@ -9,30 +9,36 @@ let currentEpisode = 'all';
 let loadedSubtitles = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const movieId = urlParams.get('id') || 'dune-2';
-  const movieType = urlParams.get('type') || 'movie';
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('id') || 'dune-2';
+    const movieType = urlParams.get('type') || 'movie';
 
-  // 1. Fetch metadata from API (Cinemeta / Jikan / Local)
-  currentMovie = await loadMetadata(movieId, movieType);
+    // 1. Fetch metadata from API (Cinemeta / Jikan / Local)
+    currentMovie = await loadMetadata(movieId, movieType);
 
-  if (!currentMovie) {
-    currentMovie = MOVIES_DATABASE.find(m => m.id === movieId) || MOVIES_DATABASE[0];
-  }
+    if (!currentMovie) {
+      currentMovie = MOVIES_DATABASE.find(m => m.id === movieId) || MOVIES_DATABASE[0];
+    }
 
-  renderMovieDetails(currentMovie);
+    renderMovieDetails(currentMovie);
 
-  // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
-  const loader = document.getElementById('globalLoader');
-  const container = document.querySelector('.split-container');
-  if (loader) loader.style.opacity = '0';
-  setTimeout(() => {
+    // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
+    const loader = document.getElementById('globalLoader');
+    const container = document.querySelector('.split-container');
+    if (loader) loader.style.opacity = '0';
+    setTimeout(() => {
+      if (loader) loader.style.display = 'none';
+      if (container) container.classList.add('loaded');
+    }, 300);
+
+    // 4. Fetch live subtitles from SubDL API in the background
+    await fetchRealSubtitles(currentMovie);
+  } catch (err) {
+    alert("Error loading page: " + (err.message || err));
+    const loader = document.getElementById('globalLoader');
     if (loader) loader.style.display = 'none';
-    if (container) container.classList.add('loaded');
-  }, 300);
-
-  // 4. Fetch live subtitles from SubDL API in the background
-  await fetchRealSubtitles(currentMovie);
+  }
 });
 
 async function loadMetadata(id, type) {
@@ -40,7 +46,13 @@ async function loadMetadata(id, type) {
   if (local) return local;
 
   try {
-    const res = await fetch(`/api/metadata?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type)}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout
+    const res = await fetch(`/api/metadata?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type)}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       return await res.json();
     }
