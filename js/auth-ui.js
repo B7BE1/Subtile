@@ -282,14 +282,14 @@
     profileLink.href = `profile.html?user=${encodeURIComponent(user.username)}`;
     profileLink.innerHTML = '<i class="fas fa-user-circle"></i> ';
     const profileText = document.createElement('span');
-    Security.setText(profileText, 'ملفي الشخصي');
+    Security.setText(profileText, 'Profile');
     profileLink.appendChild(profileText);
 
     const uploadItem = document.createElement('button');
     uploadItem.className = 'user-menu-item';
-    uploadItem.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> ';
+    uploadItem.innerHTML = '<i class="fas fa-upload"></i> ';
     const uploadText = document.createElement('span');
-    Security.setText(uploadText, 'رفع ترجمة');
+    Security.setText(uploadText, 'Upload Subtitle');
     uploadItem.appendChild(uploadText);
     uploadItem.addEventListener('click', () => {
       dropdown.classList.remove('show');
@@ -303,12 +303,12 @@
     logoutItem.className = 'user-menu-item danger';
     logoutItem.innerHTML = '<i class="fas fa-sign-out-alt"></i> ';
     const logoutText = document.createElement('span');
-    Security.setText(logoutText, 'تسجيل الخروج');
+    Security.setText(logoutText, 'Logout');
     logoutItem.appendChild(logoutText);
     logoutItem.addEventListener('click', () => {
       Auth.logout();
       dropdown.classList.remove('show');
-      showToast('تم تسجيل الخروج.', 'info');
+      showToast('Logged out successfully.');
     });
 
     dropdown.appendChild(profileLink);

@@ -120,13 +120,53 @@ function setupAuthNavbar() {
     try {
       const user = JSON.parse(currentUser);
       slot.innerHTML = `
-        <button class="btn-auth-subdl" onclick="openAuthModal('profile')">
-          <i class="fas fa-user-circle"></i> ${user.username}
-        </button>
+        <div class="user-menu">
+          <button class="user-menu-trigger" onclick="toggleNavUserDropdown(event)">
+            <img src="assets/default-avatar.svg" class="avatar avatar-sm" alt="">
+            <span class="user-menu-name">${user.username}</span>
+            <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+          </button>
+          <div id="navUserDropdown" class="user-menu-dropdown">
+            <a href="profile.html?user=${encodeURIComponent(user.username)}" class="user-menu-item">
+              <i class="fas fa-user-circle"></i> <span>Profile</span>
+            </a>
+            <button class="user-menu-item" onclick="openUploadModal()">
+              <i class="fas fa-upload"></i> <span>Upload Subtitle</span>
+            </button>
+            <div class="user-menu-divider"></div>
+            <button class="user-menu-item danger" onclick="handleLogout()">
+              <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+            </button>
+          </div>
+        </div>
       `;
       return;
     } catch(e){}
   }
+
+  slot.innerHTML = `
+    <button class="btn-auth-subdl" onclick="openAuthModal('login')">
+      <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+    </button>
+  `;
+}
+
+function toggleNavUserDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('navUserDropdown');
+  if (dd) dd.classList.toggle('show');
+}
+
+document.addEventListener('click', () => {
+  const dd = document.getElementById('navUserDropdown');
+  if (dd) dd.classList.remove('show');
+});
+
+function handleLogout() {
+  localStorage.removeItem('subhub_current_user');
+  localStorage.removeItem('subhub_session_token');
+  setupAuthNavbar();
+  showToast('Logged out successfully.');
 }
 
 function openAuthModal(tab = 'login') {
