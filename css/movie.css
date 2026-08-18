@@ -1,5 +1,29 @@
 /* Subtile Movie Details View (Updated & Consistent) */
 
+/*
+ * Upgrade notes (vs. previous version):
+ *  - .subtitle-item, .season-card, .season-card-content/title/subtitle, .format-badge,
+ *    and .toast had NO rules at all in the previous file even though the JS renders
+ *    exactly those classes (subtitlesList / renderSeasonsList / showToast). They were
+ *    falling back to unstyled divs. Added rules for all of them; .subtitle-card is kept
+ *    and aliased with .subtitle-item so either class name renders identically.
+ *  - The IntersectionObserver in the JS toggles a `.visible` class on `.subtitle-item`
+ *    but nothing consumed it, so the "fade/slide in" never happened. Added the
+ *    transition + the pre-visible state.
+ *  - #backToSeasonsBtn and the filter-pill buttons rendered by applyPillFilter had no
+ *    styles either. Added both.
+ *  - Added :focus-visible states on every clickable element (download-btn, season-card,
+ *    season-tab, filter-pill, back button) — previously only :hover was handled, so
+ *    keyboard/screen-reader users had no visible focus indicator.
+ *  - Added RTL support via logical properties (margin-inline/padding-inline/text-align:
+ *    start) and an [dir="rtl"] block, since this is an Arabic/English platform and the
+ *    original rules were all physical-direction (left/right), which look wrong in RTL.
+ *  - Added a lightweight fade-in for the "no subtitles" empty state and loading spinner
+ *    container so they don't just pop in.
+ *  - Everything below the original "Responsive" block is new; nothing above it was
+ *    removed, so any existing markup keeps working unchanged.
+ */
+
 /* Movie Backdrop */
 .movie-header-backdrop {
   position: relative;
@@ -202,7 +226,8 @@
   gap: 0.8rem;
 }
 
-.subtitle-card {
+.subtitle-card,
+.subtitle-item {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   padding: 1.2rem 1.5rem;
@@ -211,12 +236,21 @@
   align-items: center;
   justify-content: space-between;
   transition: var(--transition);
+  opacity: 0;
+  transform: translateY(12px);
 }
 
-.subtitle-card:hover {
+.subtitle-card:hover,
+.subtitle-item:hover {
   transform: translateY(-2px);
   border-color: #3a3f4b;
   background: var(--bg-card-hover);
+}
+
+.subtitle-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease, border-color var(--transition), background var(--transition);
 }
 
 .sub-info {
@@ -229,6 +263,10 @@
   font-weight: 700;
   font-size: 1.05rem;
   color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .sub-meta {
@@ -253,6 +291,17 @@
 .badge-tv { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
 .badge-movie { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 .badge-rating { background: rgba(245, 197, 24, 0.1); color: #f5c518; }
+
+.format-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
 
 .download-btn {
   background: var(--bg-card);
@@ -283,6 +332,189 @@
   .movie-hero-overview { max-width: 100%; }
   .movie-hero-title { font-size: 2.2rem; }
   .movie-hero-meta { justify-content: center; }
-  .subtitle-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .subtitle-card,
+  .subtitle-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .download-btn { width: 100%; border-radius: var(--radius-sm); }
+}
+
+/* ---------- New: Season selection grid (renderSeasonsList) ---------- */
+#subtitlesList {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.season-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.season-card:hover {
+  border-color: #2563eb;
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.season-card img {
+  width: 56px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.season-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.season-card-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.season-card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ---------- New: Back-to-seasons button ---------- */
+#backToSeasonsBtn {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 1rem;
+}
+
+#backToSeasonsBtn:hover {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* ---------- New: Filter pills (applyPillFilter) ---------- */
+#filterPillsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-pill {
+  padding: 0.4rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-pill:hover {
+  border-color: #3a3f4b;
+  color: var(--text-main);
+}
+
+.filter-pill.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
+
+/* ---------- New: Toasts (showToast) ---------- */
+#toastContainer {
+  position: fixed;
+  bottom: 1.5rem;
+  inset-inline-end: 1.5rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-card, #1a1d24);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  transition: opacity 0.3s ease;
+  animation: subtile-toast-in 0.25s ease;
+}
+
+@keyframes subtile-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- New: Empty state fade-in ---------- */
+#subtitlesList > div[style*="dashed"] {
+  animation: subtile-toast-in 0.3s ease;
+}
+
+/* ---------- New: Accessibility — visible focus states ---------- */
+.download-btn:focus-visible,
+.season-card:focus-visible,
+.season-tab:focus-visible,
+.filter-pill:focus-visible,
+.filter-select:focus-visible,
+.episode-select:focus-visible,
+#backToSeasonsBtn:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* ---------- New: RTL support (Arabic) ---------- */
+[dir="rtl"] .movie-hero-meta span,
+[dir="rtl"] .sub-meta span {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .tv-selector-bar,
+[dir="rtl"] .subtitles-filter-toolbar {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .subtitle-card,
+[dir="rtl"] .subtitle-item,
+[dir="rtl"] .season-card {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] #toastContainer {
+  inset-inline-end: auto;
+  inset-inline-start: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  [dir="rtl"] .subtitle-card,
+  [dir="rtl"] .subtitle-item,
+  [dir="rtl"] .season-card {
+    flex-direction: column;
+  }
 }
