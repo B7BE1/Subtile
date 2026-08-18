@@ -207,11 +207,13 @@ function renderMovieDetails(movie) {
 
   // TV / Anime Series Seasons & Episodes Switcher
   const tvSelector = document.getElementById('tvSelectorBar');
-  if (movie.type === 'tv' || (movie.episodes && movie.episodes.length > 0)) {
-    tvSelector.style.display = 'flex';
-    setupTvSelectors(movie);
-  } else {
-    tvSelector.style.display = 'none';
+  if (tvSelector) {
+    if (movie.type === 'tv' || (movie.episodes && movie.episodes.length > 0)) {
+      tvSelector.style.display = 'flex';
+      setupTvSelectors(movie);
+    } else {
+      tvSelector.style.display = 'none';
+    }
   }
 }
 
