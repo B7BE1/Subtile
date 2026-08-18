@@ -155,8 +155,8 @@ function setupTvSelectors(movie) {
   }
 
   tabsContainer.innerHTML = seasons.map(s => `
-    <button class="season-tab-btn ${s === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
-      Season ${s}
+    <button class="season-tab ${s === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
+      الموسم ${s}
     </button>
   `).join('');
 
@@ -167,16 +167,16 @@ function updateEpisodeSelect(movie, season) {
   const epSelect = document.getElementById('episodeSelect');
   if (!epSelect) return;
 
-  let epHtml = '<option value="all">All Episodes / Full Season</option>';
+  let epHtml = '<option value="all">كل الحلقات / الموسم كامل</option>';
 
   if (movie.episodes && movie.episodes.length > 0) {
     const seasonEps = movie.episodes.filter(e => e.season === season);
     seasonEps.forEach(e => {
-      epHtml += `<option value="${e.episode}">Episode ${e.episode} - ${e.title || ''}</option>`;
+      epHtml += `<option value="${e.episode}">الحلقة ${e.episode} - ${e.title || ''}</option>`;
     });
   } else {
     for (let e = 1; e <= 12; e++) {
-      epHtml += `<option value="${e}">Episode ${e}</option>`;
+      epHtml += `<option value="${e}">الحلقة ${e}</option>`;
     }
   }
 
@@ -185,8 +185,8 @@ function updateEpisodeSelect(movie, season) {
 
 function selectSeason(seasonNum) {
   currentSeason = seasonNum;
-  document.querySelectorAll('.season-tab-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', btn.textContent.includes(`Season ${seasonNum}`));
+  document.querySelectorAll('.season-tab').forEach((btn) => {
+    btn.classList.toggle('active', btn.textContent.includes(`الموسم ${seasonNum}`));
   });
   if (currentMovie) updateEpisodeSelect(currentMovie, currentSeason);
   renderSubtitlesList();
@@ -213,7 +213,7 @@ function renderSubtitlesList() {
   let subs = currentMovie.subtitles || [];
 
   if (langFilter !== 'all') {
-    subs = subs.filter(s => s.langCode === langFilter || (s.language && s.language.toLowerCase().includes(langFilter)));
+    subs = subs.filter(s => s.langCode === langFilter || (s.language && s.language.toLowerCase().includes(langFilter)) || (s.langName && s.langName.toLowerCase().includes(langFilter)));
   }
 
   if (qualityFilter !== 'all') {
@@ -221,16 +221,16 @@ function renderSubtitlesList() {
   }
 
   if (countSpan) {
-    countSpan.textContent = `${subs.length} subtitle files available`;
+    countSpan.textContent = `${subs.length} ملفات متاحة`;
   }
 
   if (subs.length === 0) {
     container.innerHTML = `
-      <div style="background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 3rem; text-align: center; color: var(--text-muted);">
-        <i class="fas fa-closed-captioning" style="font-size: 2rem; margin-bottom: 0.8rem; display: block;"></i>
-        <h3>No subtitles found for the selected filter</h3>
-        <p style="margin-top: 0.4rem; font-size: 0.85rem;">Be the first to upload a subtitle for this title!</p>
-        <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload Subtitle</button>
+      <div style="background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-lg); padding: 3rem; text-align: center; color: var(--text-muted);">
+        <i class="fas fa-closed-captioning" style="font-size: 2.5rem; margin-bottom: 0.8rem; display: block; color: var(--accent);"></i>
+        <h3 style="color: var(--text-primary);">لا توجد ترجمات مطابقة للفلاتر المختارة</h3>
+        <p style="margin-top: 0.4rem; font-size: 0.9rem;">كن أول من يرفع ملف ترجمة متوافق لهذا العمل!</p>
+        <button class="btn btn-primary" style="margin-top: 1.2rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> رفع ترجمة الآن</button>
       </div>
     `;
     return;
@@ -238,32 +238,25 @@ function renderSubtitlesList() {
 
   container.innerHTML = subs.map(sub => {
     const safeRelease = (sub.release || 'Subtitle').replace(/'/g, "\\'");
+    const downloadParam = sub.download_url ? encodeURIComponent(sub.download_url) : '';
+    const langBadge = sub.langFlag ? `${sub.langFlag} ${sub.language || sub.langName || 'العربية'}` : (sub.language || 'العربية');
 
     return `
-      <div class="subtitle-item-card">
-        <div class="sub-card-left">
-          <div class="lang-flag-box">
-            <span>${sub.langFlag || '🌐'}</span>
-            <span class="lang-flag-label">${(sub.langName || sub.language || 'SUB').toUpperCase()}</span>
-          </div>
-          <div class="sub-details">
-            <div class="sub-release-title">
-              <span>${sub.release}</span>
-              <span class="badge badge-quality">${sub.quality || 'HD'}</span>
-            </div>
-            <div class="sub-meta-tags">
-              <span><i class="fas fa-user-edit"></i> ${sub.uploader || 'Community'}</span>
-              <span><i class="fas fa-file-code"></i> ${sub.format || 'SRT'}</span>
-              <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()} downloads</span>
-              <span><i class="far fa-calendar-alt"></i> ${sub.date || 'Recent'}</span>
-            </div>
+      <div class="subtitle-card">
+        <div class="sub-info">
+          <div class="sub-release">${sub.release}</div>
+          <div class="sub-meta">
+            <span class="badge badge-lang">${langBadge}</span>
+            <span class="badge badge-quality">${sub.quality || 'HD'}</span>
+            <span><i class="fas fa-user"></i> ${sub.uploader || 'Subtile Team'}</span>
+            <span><i class="fas fa-file-code"></i> ${sub.format || 'SRT'}</span>
+            <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()} تحميل</span>
+            <span><i class="far fa-clock"></i> ${sub.date || 'مؤخراً'}</span>
           </div>
         </div>
-        <div class="sub-card-actions">
-          <button class="btn-auth-subdl" style="padding: 0.45rem 1rem;" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}')">
-            <i class="fas fa-download"></i> Download (${sub.format || 'SRT'})
-          </button>
-        </div>
+        <button class="download-btn" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format || 'SRT'}', '${downloadParam}')" title="تحميل الترجمة">
+          <i class="fas fa-download"></i>
+        </button>
       </div>
     `;
   }).join('');
