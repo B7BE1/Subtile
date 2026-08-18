@@ -126,7 +126,7 @@ const MOVIES_DATABASE = [
     year: 2024,
     rating: 8.5,
     genres: ["Action", "Adventure", "Fantasy"],
-    poster: "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg",
+    poster: "https://cdn.myanimelist.net/images/anime/1801/142390l.jpg",
     backdrop: "https://images.metahub.space/background/medium/tt21209876/img",
     overview: "In a world where hunters must battle deadly monsters, weak hunter Sung Jinwoo discovers a quest only he can see.",
     imdbId: "tt21209876",
