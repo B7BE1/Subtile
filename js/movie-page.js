@@ -154,6 +154,7 @@ async function loadMetadata(id, type) {
           const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
           return {
             id: `anime-${a.id}`,
+            slug: attrs.slug,
             title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle,
             type: 'anime',
             year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
@@ -328,13 +329,14 @@ function renderMovieDetails(movie) {
 
   const meta = document.getElementById('movieMeta');
   if (meta) {
-    const imdbId = movie.imdb_id || movie.imdbId;
+    const imdbId = movie.imdb_id || movie.imdbId || (movie.id && movie.id.startsWith('tt') ? movie.id : null);
     meta.innerHTML = `
       <div class="rating-circle">
         <span>${escapeHtml(movie.rating || 'N/A')}</span>
       </div>
-      <div class="meta-item"><i class="fas fa-clock"></i> ${movie.type === 'tv' ? 'TV Series' : 'Movie'}</div>
-      ${imdbId ? `<div class="meta-item"><a href="https://www.imdb.com/title/${encodeURIComponent(imdbId)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
+      <div class="meta-item"><i class="fas fa-clock"></i> ${movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Series' : 'Movie')}</div>
+      ${imdbId && !imdbId.startsWith('anime') ? `<div class="meta-item"><a href="https://www.imdb.com/title/${encodeURIComponent(imdbId)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
+      ${movie.type === 'anime' && movie.slug ? `<div class="meta-item"><a href="https://kitsu.io/anime/${encodeURIComponent(movie.slug)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fas fa-external-link-alt" style="color:#fd755c"></i> Kitsu</a></div>` : ''}
     `;
   }
 
