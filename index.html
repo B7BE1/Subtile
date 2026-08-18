@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SubHub | موقع تحميل ترجمات الأفلام والمسلسلات</title>
   <meta name="description" content="منصة تحميل أحدث ترجمات الأفلام والمسلسلات باللغة العربية والإنجليزية بجودات BluRay و WEB-DL و 4K">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Luxury Navigation Bar -->
   <header class="navbar">
     <a href="index.html" class="logo-container">
       <span class="logo-badge">SUB</span>
@@ -25,156 +28,77 @@
 
     <div class="nav-actions">
       <button class="btn btn-secondary" onclick="openUploadModal()"><i class="fas fa-cloud-upload-alt"></i> رفع ترجمة</button>
-      <div id="navAuthSlot"></div>
+      <div id="navAuthSlot">
+        <button class="btn btn-primary" onclick="openAuthModal('login')"><i class="fas fa-user"></i> تسجيل الدخول</button>
+      </div>
     </div>
   </header>
 
-  <!-- Hero & Big Search Section -->
+  <!-- Hero Spotlight Section -->
   <section class="hero">
-    <h1 class="hero-title">ابحث عن <span class="gradient-text">ترجمات الأفلام والمسلسلات</span></h1>
-    <p class="hero-subtitle">أكبر منصة لتحميل ترجمات الأفلام والمسلسلات بجميع الجودات والنسخ المتوافقة</p>
+    <div class="hero-badge-top">
+      <i class="fas fa-sparkles"></i> أكثر من 50,000 ملف ترجمة سينمائي متوافق
+    </div>
+
+    <h1 class="hero-title">عالمك الأول لـ <span class="gradient-text">ترجمات الأفلام والمسلسلات</span></h1>
+    <p class="hero-subtitle">تصفح وحمل أحدث الترجمات العربية والإنجليزية بأعلى دقة وتوافق تام مع نسخ BluRay و 4K WEB-DL</p>
 
     <div class="search-wrapper">
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
-        <input type="text" id="heroSearchInput" class="search-input" placeholder="اكتب اسم الفيلم أو المسلسل (مثال: Dune, Oppenheimer, Breaking Bad)..." autocomplete="off">
+        <input type="text" id="heroSearchInput" class="search-input" placeholder="ابحث باسم الفيلم، المسلسل، أو رمز IMDb (مثال: Dune, Oppenheimer, tt15239678)..." autocomplete="off">
         <select id="searchTypeFilter" class="search-type-selector">
-          <option value="all">الكل</option>
-          <option value="movie">أفلام</option>
-          <option value="tv">مسلسلات</option>
+          <option value="all">كل الأعمال</option>
+          <option value="movie">أفلام 🎬</option>
+          <option value="tv">مسلسلات 📺</option>
         </select>
-        <button class="btn btn-primary" onclick="performSearch()">بحث</button>
+        <button class="btn btn-primary" onclick="performSearch()">بحث سريع</button>
       </div>
 
       <!-- Live Search Results Dropdown -->
       <div id="searchResultsDropdown" class="search-results-dropdown"></div>
+
+      <!-- Quick Search Hot Tags -->
+      <div class="quick-tags">
+        <span class="quick-tag-label">الأكثر بحثاً:</span>
+        <button class="quick-tag-btn" onclick="quickSearch('Dune: Part Two')">🔥 Dune 2</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Oppenheimer')">⚡ Oppenheimer</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Breaking Bad')">🧪 Breaking Bad</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Attack on Titan')">⚔️ Attack on Titan</button>
+        <button class="quick-tag-btn" onclick="quickSearch('The Batman')">🦇 The Batman</button>
+      </div>
     </div>
   </section>
 
   <!-- Main Content Container -->
   <main class="container">
     
-    <!-- Trending Movies & TV Shows Section -->
+    <!-- Trending Section -->
     <section id="trending">
       <div class="section-header">
-        <h2 class="section-title">الأعمال الشائعة</h2>
-        <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" onclick="filterTrending('all')">الكل</button>
-          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" onclick="filterTrending('movie')">أفلام</button>
-          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" onclick="filterTrending('tv')">مسلسلات</button>
+        <h2 class="section-title">الأعمال السينمائية الشائعة</h2>
+        <div style="display: flex; gap: 0.6rem;">
+          <button class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.4rem 1rem;" onclick="filterTrending('all')">الكل</button>
+          <button class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.4rem 1rem;" onclick="filterTrending('movie')">أفلام</button>
+          <button class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.4rem 1rem;" onclick="filterTrending('tv')">مسلسلات</button>
         </div>
       </div>
 
       <div id="moviesGrid" class="movie-grid"></div>
     </section>
 
-    <!-- Recent Subtitles Uploads Section -->
+    <!-- Recent Subtitles Modern Card Feed -->
     <section id="recent">
       <div class="section-header">
-        <h2 class="section-title">أحدث ملفات الترجمة المرفوعة</h2>
+        <h2 class="section-title">أحدث ملفات الترجمة المنشورة</h2>
       </div>
 
-      <div class="subtitles-table-wrapper">
-        <table class="subtitles-table">
-          <thead>
-            <tr>
-              <th>اللغة</th>
-              <th>العمل والنسخة</th>
-              <th>النوع والجودة</th>
-              <th>المترجم</th>
-              <th>التحميلات</th>
-              <th>تحميل</th>
-            </tr>
-          </thead>
-          <tbody id="recentSubtitlesBody"></tbody>
-        </table>
-      </div>
+      <div id="recentSubtitlesFeed" class="subtitles-card-feed"></div>
     </section>
 
   </main>
 
-  <!-- Auth Modal: Login / Register / Forgot Password -->
-  <div id="authModal" class="modal-backdrop">
-    <div class="modal-content" style="max-width: 420px;">
-      <div class="modal-header">
-        <h3 class="modal-title"><i class="fas fa-clapperboard"></i> مرحبًا بك في SubHub</h3>
-        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
-      </div>
-
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab active" data-tab="login">تسجيل الدخول</button>
-        <button type="button" class="auth-tab" data-tab="register">إنشاء حساب</button>
-        <div class="auth-tab-indicator"></div>
-      </div>
-
-      <!-- Login Panel -->
-      <div class="auth-panel active" data-panel="login">
-        <form id="loginForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="loginIdentifier">اسم المستخدم أو البريد الإلكتروني</label>
-            <input type="text" id="loginIdentifier" class="form-control" autocomplete="username" required>
-            <div class="form-error" id="loginIdentifierError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="loginPassword">كلمة المرور</label>
-            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
-            <div class="form-error" id="loginPasswordError"></div>
-          </div>
-          <button type="submit" id="loginSubmitBtn" class="btn btn-primary auth-submit-btn">تسجيل الدخول</button>
-        </form>
-        <p class="auth-switch-link">نسيت كلمة المرور؟ <a href="#" data-auth-tab-trigger="forgot">إعادة تعيينها</a></p>
-      </div>
-
-      <!-- Register Panel -->
-      <div class="auth-panel" data-panel="register">
-        <form id="registerForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="regUsername">اسم المستخدم</label>
-            <input type="text" id="regUsername" class="form-control" autocomplete="username" required>
-            <div class="form-error" id="regUsernameError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="regEmail">البريد الإلكتروني</label>
-            <input type="email" id="regEmail" class="form-control" autocomplete="email" required>
-            <div class="form-error" id="regEmailError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="regPassword">كلمة المرور</label>
-            <input type="password" id="regPassword" class="form-control" autocomplete="new-password" required>
-            <div class="password-strength">
-              <div class="password-strength-bar"></div>
-              <div class="password-strength-bar"></div>
-              <div class="password-strength-bar"></div>
-              <div class="password-strength-bar"></div>
-            </div>
-            <div class="form-error" id="regPasswordError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="regPasswordConfirm">تأكيد كلمة المرور</label>
-            <input type="password" id="regPasswordConfirm" class="form-control" autocomplete="new-password" required>
-            <div class="form-error" id="regPasswordConfirmError"></div>
-          </div>
-          <button type="submit" id="registerSubmitBtn" class="btn btn-primary auth-submit-btn">إنشاء حساب</button>
-        </form>
-      </div>
-
-      <!-- Forgot Password Panel -->
-      <div class="auth-panel" data-panel="forgot">
-        <p class="form-hint" style="margin-bottom: 1rem;">أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.</p>
-        <form id="forgotForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="forgotEmail">البريد الإلكتروني</label>
-            <input type="email" id="forgotEmail" class="form-control" autocomplete="email" required>
-            <div class="form-error" id="forgotEmailError"></div>
-          </div>
-          <button type="submit" id="forgotSubmitBtn" class="btn btn-primary auth-submit-btn">إرسال رابط إعادة التعيين</button>
-        </form>
-        <p class="auth-switch-link">تذكرت كلمة المرور؟ <a href="#" data-auth-tab-trigger="login">تسجيل الدخول</a></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upload Subtitle Modal -->
+  <!-- Upload Modal -->
   <div id="uploadModal" class="modal-backdrop">
     <div class="modal-content">
       <div class="modal-header">
@@ -209,10 +133,50 @@
           <label class="form-label">اسم المترجم / رافع الترجمة</label>
           <input type="text" class="form-control" placeholder="اسمك أو الفريق" required>
         </div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.8rem;">
           <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">إلغاء</button>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> رفع الترجمة الآن</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> نشر الترجمة</button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-user-circle"></i> حساب SubHub</h3>
+        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+      </div>
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: rgba(255,255,255,0.05); padding: 0.3rem; border-radius: var(--radius-md);">
+        <button id="authTabLogin" class="btn btn-secondary" style="flex: 1; padding: 0.4rem;" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+        <button id="authTabRegister" class="btn btn-secondary" style="flex: 1; padding: 0.4rem;" onclick="switchAuthTab('register')">حساب جديد</button>
+      </div>
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">اسم المستخدم أو البريد</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="username or email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">دخول</button>
+      </form>
+      <form id="registerForm" style="display: none;" onsubmit="handleRegisterSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">اسم المستخدم</label>
+          <input type="text" id="regUsername" class="form-control" placeholder="اسمك المستعار" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="email@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">إنشاء الحساب</button>
       </form>
     </div>
   </div>
@@ -227,15 +191,14 @@
       <a href="#trending">الأعمال الشائعة</a>
       <a href="#recent">أحدث الترجمات</a>
     </div>
-    <p>© 2026 SubHub - منصة ترجمات الأفلام والمسلسلات مفتوحة المصدر</p>
+    <p>© 2026 SubHub - منصة ترجمات الأفلام والمسلسلات السينمائية الفاخرة</p>
   </footer>
 
   <!-- Scripts -->
   <script src="js/security.js"></script>
+  <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/auth-ui.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/tmdb-service.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
