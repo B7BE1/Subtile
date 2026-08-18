@@ -63,8 +63,8 @@ export default async function handler(req, res) {
     const [movieRes, seriesRes, animeRes] = await Promise.all([moviePromise, seriesPromise, animePromise]);
 
     // Process Top 10 Movies
-    const movies = (movieRes.metas || []).slice(0, 10).map((m, idx) => ({
-      rank: idx + 1,
+    let movies = (movieRes.metas || []).slice(0, 10).map((m, idx) => ({
+      rank: idx + 2, // Shift rank since we're inserting Spider-Man at #1
       id: m.id,
       title: m.name,
       year: parseInt(m.year) || 2025,
@@ -77,6 +77,27 @@ export default async function handler(req, res) {
       downloads: `${(4.8 - (idx * 0.3)).toFixed(1)}M`,
       lang: 'English'
     }));
+
+    // Inject Spider-Man: No Way Home as #1
+    movies.unshift({
+      rank: 1,
+      id: "tt10872600",
+      title: "Spider-Man: No Way Home",
+      year: 2021,
+      type: "movie",
+      genre: "Action / Adventure",
+      rating: "8.2",
+      poster: "https://images.metahub.space/poster/small/tt10872600/img",
+      backdrop: "https://images.metahub.space/background/medium/tt10872600/img",
+      desc: "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear.",
+      downloads: "5.5M",
+      lang: "English"
+    });
+    
+    // Ensure we strictly have 10 items
+    movies = movies.slice(0, 10);
+    // Fix ranks
+    movies.forEach((m, i) => m.rank = i + 1);
 
     // Process Top 10 TV Series
     const tv = (seriesRes.metas || []).slice(0, 10).map((s, idx) => ({
