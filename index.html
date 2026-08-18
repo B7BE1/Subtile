@@ -1,176 +1,488 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subtile</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtile - Trending Now</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; }
+        .nav-blur { backdrop-filter: blur(16px); background: rgba(10, 10, 10, 0.85); }
+        
+        /* Banner Background with Fade-out effect */
+        .banner-bg {
+            background-size: cover;
+            background-position: center top;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+            opacity: 0.6;
+        }
+        
+        /* Perfect Poster Aspect Ratio */
+        .poster-container { position: relative; padding-bottom: 150%; /* 2:3 Aspect Ratio */ }
+        .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+        
+        /* Rank Number Styling */
+        .rank-number {
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 6rem;
+            line-height: 0.8;
+            color: transparent;
+            -webkit-text-stroke: 2px #333;
+            position: absolute;
+            left: -10px;
+            bottom: -15px;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Card Hover Effects */
+        .movie-card { position: relative; z-index: 1; transition: transform 0.3s ease; }
+        .movie-card:hover { transform: translateY(-5px); }
+        .movie-card:hover .poster-img { filter: brightness(0.3); }
+        .movie-card:hover .overlay-content { opacity: 1; }
+        .overlay-content { opacity: 0; transition: opacity 0.3s ease; }
+
+        /* Search Dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 18, 0.96);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            max-height: 380px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+        }
+        .search-dropdown.active { display: block; }
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .search-item:last-child { border-bottom: none; }
+        .search-item:hover { background: rgba(255, 255, 255, 0.08); }
+        .search-item img {
+            width: 36px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-neutral-950 text-white overflow-x-hidden">
 
-  <!-- Top Header -->
-  <header class="subdl-header">
-    <a href="index.html" class="subdl-logo">
-      <span class="logo-badge">SUBTILE</span>
-    </a>
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-50 nav-blur border-b border-neutral-800/50">
+        <div class="container mx-auto px-8 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-neutral-100 rounded-md flex items-center justify-center">
+                    <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </div>
+                <span class="text-lg font-bold tracking-tight text-neutral-300 hidden sm:block">SUBTITLE</span>
+            </a>
+            
+            <div class="flex-1 max-w-xl mx-8 relative">
+                <div class="relative">
+                    <input type="text" id="mainSearchInput" placeholder="Search movies, TV shows, anime..." autocomplete="off" class="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-600">
+                    <svg class="absolute right-4 top-3 w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <div id="mainSearchDropdown" class="search-dropdown"></div>
+            </div>
 
-    <ul class="subdl-nav">
-      <li><a href="index.html" class="subdl-nav-link active">Latest</a></li>
-      <li><a href="#mostDownloaded" class="subdl-nav-link">Trends</a></li>
-      <li><a href="#mostDownloaded" class="subdl-nav-link">Leaderboard</a></li>
-      <li><a href="https://github.com/B7BE1/Subtile" target="_blank" class="subdl-nav-link">Community</a></li>
-    </ul>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
+                <a href="index.html" class="text-white border-b border-neutral-100 pb-1">Trending</a>
+                <a href="browse.html" class="hover:text-neutral-200 transition-colors">Catalog</a>
+                <a href="browse.html?type=anime" class="hover:text-neutral-200 transition-colors">Anime</a>
+            </nav>
+        </div>
+    </header>
 
-    <div class="subdl-header-actions">
-      <div id="navAuthSlot">
-        <button class="btn-auth-subdl" onclick="openAuthModal('login')">
-          <i class="fas fa-sign-in-alt"></i> Login / Sign Up
-        </button>
-      </div>
-      <button class="btn-icon-subdl" onclick="openUploadModal()" title="Upload Subtitle">
-        <i class="fas fa-upload"></i>
-      </button>
-    </div>
-  </header>
+    <!-- Featured Banner (Number 1) -->
+    <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
+        <div class="banner-bg" style="background-image: url('https://image.tmdb.org/t/p/original/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg');"></div>
+        
+        <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
+            <div class="hidden md:block w-64 flex-shrink-0">
+                <div class="poster-container">
+                    <img src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="Oppenheimer" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15398776/img';">
+                </div>
+            </div>
 
-  <!-- Hero / Search Area -->
-  <div class="hero-search-area">
-    <!-- Search bar (drop into your hero, English copy) -->
-    <div class="search-wrapper">
-      <div class="search-box">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" id="heroSearchInput" class="search-input" placeholder="Search Movies and TV shows or IMDb ID" autocomplete="off">
-      </div>
-      <div id="searchResultsDropdown" class="search-results-dropdown"></div>
-    </div>
-  </div>
+            <div class="max-w-2xl mt-8 md:mt-0">
+                <div class="flex items-center gap-4 mb-4">
+                    <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
+                    <div class="border-l border-neutral-700 pl-4">
+                        <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
+                        <p class="text-neutral-500 text-sm">Trending Today</p>
+                    </div>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none">Oppenheimer</h1>
+                <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
+                    <span>2023</span>
+                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                    <span>Biography / Drama</span>
+                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                    <span>4.2M Downloads</span>
+                </div>
+                
+                <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl">
+                    The story of J. Robert Oppenheimer’s role in the development of the atomic bomb during World War II. Experience the epic in high-quality subtitles.
+                </p>
 
-  <!-- Main Container -->
-  <main class="subdl-container">
-
-    <!-- Most Downloaded section -->
-    <section id="mostDownloaded">
-      <div class="section-header">
-        <h2 class="section-title">Most Downloaded</h2>
-        <a href="browse.html" class="section-view-all">View all &rarr;</a>
-      </div>
-      <div id="mostDownloadedGrid" class="movie-grid">
-        <!-- JS will populate dynamic cards -->
-      </div>
+                <div class="flex items-center gap-4">
+                    <a href="movie.html?id=oppenheimer&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download Subtitles
+                    </a>
+                    <a href="movie.html?id=oppenheimer&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
+                        More Info
+                    </a>
+                </div>
+            </div>
+        </div>
     </section>
 
-  </main>
+    <!-- Trending Grid -->
+    <main class="container mx-auto px-8 pt-16 pb-20 relative z-20">
+        
+        <div class="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+                <p class="text-neutral-500 font-medium mb-3 tracking-[0.2em] text-xs">TOP CHARTS</p>
+                <h2 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight">Trending Now</h2>
+            </div>
+            
+            <div class="flex gap-2 flex-wrap">
+                <a href="browse.html" class="px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors">All</a>
+                <a href="browse.html?type=movie" class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Movies</a>
+                <a href="browse.html?type=tv" class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">TV Shows</a>
+                <a href="browse.html?type=anime" class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors">Anime</a>
+            </div>
+        </div>
 
-  <!-- Auth Modal -->
-  <div id="authModal" class="modal-backdrop">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Subtile Account</h3>
-        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
-      </div>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
-        <button id="authTabLogin" class="btn-subdl-submit" style="flex: 1; padding: 0.4rem;" onclick="switchAuthTab('login')">Login</button>
-        <button id="authTabRegister" class="btn-auth-subdl" style="flex: 1; padding: 0.4rem; justify-content: center;" onclick="switchAuthTab('register')">Register</button>
-      </div>
-      <form id="loginForm" onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label class="form-label">Username or Email</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="username" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-subdl-submit" style="margin-top: 0.5rem;">Sign In</button>
-      </form>
-      <form id="registerForm" style="display: none;" onsubmit="handleRegisterSubmit(event)">
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input type="text" id="regUsername" class="form-control" placeholder="username" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" id="regEmail" class="form-control" placeholder="email@example.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-subdl-submit" style="margin-top: 0.5rem;">Create Account</button>
-      </form>
-    </div>
-  </div>
+        <!-- Movies Grid (Top 10) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16">
+            
+            <!-- Card 2 -->
+            <a href="movie.html?id=dune-2&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">2</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Dune Part Two" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
+                        <span class="text-neutral-600 text-xs">2024</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Dune: Part Two</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">3.8M Downloads</p>
+                </div>
+            </a>
 
-  <!-- Upload Modal -->
-  <div id="uploadModal" class="modal-backdrop">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Upload Subtitle</h3>
-        <button class="modal-close" onclick="closeUploadModal()">&times;</button>
-      </div>
-      <form id="uploadForm" onsubmit="handleUploadSubtitle(event)">
-        <div class="form-group">
-          <label class="form-label">Movie / TV Show Title</label>
-          <input type="text" class="form-control" placeholder="e.g. Dune: Part Two" required>
-        </div>
-        <div class="form-group" style="display: flex; gap: 0.8rem;">
-          <div style="flex: 1;">
-            <label class="form-label">Language</label>
-            <select class="form-control">
-              <option value="Arabic">Arabic</option>
-              <option value="English">English</option>
-              <option value="French">French</option>
-              <option value="Spanish">Spanish</option>
-            </select>
-          </div>
-          <div style="flex: 1;">
-            <label class="form-label">Release Name</label>
-            <input type="text" class="form-control" placeholder="1080p.BluRay.x264" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Subtitle File (.srt / .zip)</label>
-          <input type="file" accept=".srt,.zip,.vtt" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Translator / Uploader</label>
-          <input type="text" class="form-control" placeholder="Your name or team" required>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem;">
-          <button type="button" class="btn-auth-subdl" onclick="closeUploadModal()">Cancel</button>
-          <button type="submit" class="btn-subdl-submit" style="width: auto; padding: 0.5rem 1.2rem;">Upload</button>
-        </div>
-      </form>
-    </div>
-  </div>
+            <!-- Card 3 -->
+            <a href="movie.html?id=the-batman&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">3</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg" alt="The Batman" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt1877830/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2022</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">The Batman</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">2.9M Downloads</p>
+                </div>
+            </a>
 
-  <!-- Toast Container -->
-  <div id="toastContainer" class="toast-container"></div>
+            <!-- Card 4 -->
+            <a href="movie.html?id=interstellar&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">4</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Interstellar" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt0816692/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2014</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Interstellar</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">2.1M Downloads</p>
+                </div>
+            </a>
 
-  <!-- Footer -->
-  <footer class="subdl-footer">
-    <ul class="subdl-footer-links">
-      <li><a href="#">Filter Languages</a></li>
-      <li><a href="#">Advertise</a></li>
-      <li><a href="#">Search and Download API</a></li>
-      <li><a href="#">DMCA</a></li>
-      <li><a href="#">Terms</a></li>
-    </ul>
-    <div style="color: var(--text-muted);">
-      &copy; 2026 Subtile
-    </div>
-  </footer>
+            <!-- Card 5 -->
+            <a href="movie.html?id=tt7286456&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">5</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg" alt="Joker" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt7286456/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2019</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Joker</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">1.5M Downloads</p>
+                </div>
+            </a>
 
-  <!-- Scripts -->
-  <script src="js/security.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/tmdb-service.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/auth-ui.js"></script>
-  <script src="js/app.js"></script>
+            <!-- Card 6 -->
+            <a href="movie.html?id=tt1375666&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">6</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg" alt="Inception" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt1375666/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2010</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Inception</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">1.4M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 7 -->
+            <a href="movie.html?id=tt0468569&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">7</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" alt="The Dark Knight" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt0468569/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">English</span>
+                        <span class="text-neutral-600 text-xs">2008</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">The Dark Knight</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">1.3M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 8 -->
+            <a href="movie.html?id=tt6751668&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">8</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" alt="Parasite" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt6751668/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2019</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Parasite</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">1.1M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 9 -->
+            <a href="movie.html?id=tt1856101&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">9</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg" alt="Blade Runner 2049" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt1856101/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">English</span>
+                        <span class="text-neutral-600 text-xs">2017</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Blade Runner 2049</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">980K Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 10 -->
+            <a href="movie.html?id=tt2582802&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <span class="rank-number">10</span>
+                    <div class="poster-container">
+                        <img src="https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg" alt="Whiplash" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt2582802/img';">
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2014</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Whiplash</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">850K Downloads</p>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-neutral-900 mt-20 relative z-30 bg-neutral-950">
+        <div class="container mx-auto px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-neutral-600 text-sm">© 2024 Subtile Archive. Designed for cinephiles.</p>
+            <div class="flex gap-8 text-sm text-neutral-500">
+                <a href="#" class="hover:text-neutral-300 transition-colors">Contact</a>
+                <a href="#" class="hover:text-neutral-300 transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-neutral-300 transition-colors">DMCA</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Live Search Script -->
+    <script>
+      let searchTimer = null;
+      const searchInput = document.getElementById('mainSearchInput');
+      const searchDropdown = document.getElementById('mainSearchDropdown');
+
+      if (searchInput && searchDropdown) {
+        searchInput.addEventListener('input', (e) => {
+          const q = e.target.value.trim();
+          if (!q) {
+            searchDropdown.classList.remove('active');
+            return;
+          }
+
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(async () => {
+            try {
+              const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+              if (res.ok) {
+                const data = await res.json();
+                renderDropdownResults(data.results || []);
+              }
+            } catch (err) {
+              console.error('Search error:', err);
+            }
+          }, 200);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && searchInput.value.trim()) {
+            window.location.href = `browse.html?q=${encodeURIComponent(searchInput.value.trim())}`;
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('#mainSearchInput') && !e.target.closest('#mainSearchDropdown')) {
+            searchDropdown.classList.remove('active');
+          }
+        });
+      }
+
+      function renderDropdownResults(items) {
+        if (!items || items.length === 0) {
+          searchDropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #737373; font-size: 0.85rem;">No results found</div>';
+          searchDropdown.classList.add('active');
+          return;
+        }
+
+        searchDropdown.innerHTML = items.slice(0, 8).map(m => {
+          const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
+          const targetUrl = `movie.html?id=${encodeURIComponent(m.id || m.imdb_id)}&type=${m.type || 'movie'}`;
+
+          return `
+            <div class="search-item" onclick="window.location.href='${targetUrl}'">
+              <img src="${m.poster || 'https://images.metahub.space/poster/small/tt15239678/img'}" alt="${m.title}" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 600; font-size: 0.88rem; color: #f5f5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
+                <div style="font-size: 0.75rem; color: #737373; display: flex; gap: 8px; margin-top: 2px;">
+                  <span style="color: #60a5fa;">${typeLabel}</span>
+                  <span>${m.year || m.releaseInfo || ''}</span>
+                  ${m.rating ? `<span style="color: #fbbf24;"><i class="fas fa-star" style="font-size:0.7rem;"></i> ${m.rating}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        searchDropdown.classList.add('active');
+      }
+    </script>
 </body>
 </html>
