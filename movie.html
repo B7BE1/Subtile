@@ -3,611 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subtile | Dune: Part Two Subtitles</title>
+  <title>Subtile | Premium 3D Cinema UI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
     :root {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
-      --bg-card: #ffffff;
-      --bg-accent: #fff7ed;
-      --border-color: #e2e8f0;
-      --text-primary: #0f172a;
-      --text-muted: #64748b;
-      --accent: #f97316; /* Dune Orange */
-      --accent-hover: #ea580c;
-      --accent-light: #fed7aa;
-      --accent-glow: rgba(249, 115, 22, 0.15);
-      --success: #10b981;
+      --bg-black: #050507;
+      --bg-dark: #0a0a0c;
+      --bg-card-glass: rgba(15, 15, 18, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      --text-primary: #ffffff;
+      --text-muted: #8a8a92;
+      --accent: #ffffff;
       --danger: #ef4444;
       --radius-lg: 1.5rem;
       --radius-md: 0.75rem;
       --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', sans-serif;
-      background-color: var(--bg-primary);
       color: var(--text-primary);
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
-      background-image: 
-        radial-gradient(circle at 10% 10%, rgba(249, 115, 22, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+      background-color: var(--bg-black);
     }
 
-    /* Scrollbar Styling */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg-primary); }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-    /* Navbar */
-    .navbar {
+    /* Split Layout Container */
+    .split-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.2rem 5%;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-      transition: var(--transition);
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      text-decoration: none;
-      color: var(--text-primary);
-    }
-
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent), #fbbf24);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      color: white;
-      box-shadow: 0 4px 15px var(--accent-glow);
-      transition: transform 0.3s ease;
-    }
-    .brand-logo:hover .brand-icon { transform: rotate(-10deg) scale(1.1); }
-
-    .brand-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .brand-name span { color: var(--accent); }
-
-    .nav-links {
-      display: flex;
-      gap: 2.5rem;
-      list-style: none;
-    }
-
-    .nav-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: var(--transition);
+      min-height: 100vh;
       position: relative;
     }
-    .nav-link:hover { color: var(--text-primary); }
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 0;
-      width: 0;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: var(--transition);
-    }
-    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-    .nav-link.active { color: var(--text-primary); }
 
-    .nav-actions { display: flex; align-items: center; gap: 1.5rem; }
-
-    /* Buttons */
-    .btn {
-      padding: 0.8rem 1.8rem;
-      border-radius: 50px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-family: inherit;
-      font-size: 0.9rem;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 4px 15px var(--accent-glow);
-    }
-    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 8px 20px var(--accent-glow); }
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-accent); }
-
-    /* Hero Section - Integrated Light Card */
-    .hero-section {
-      max-width: 1200px;
-      margin: 2.5rem auto;
-      padding: 0 5%;
-      animation: floatIn 1s ease;
-    }
-
-    .movie-card-hero {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.08);
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 2.5rem;
-      padding: 2.5rem;
-      position: relative;
-      border: 1px solid var(--border-color);
-    }
-
-    .hero-poster-container {
-      position: relative;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    }
-
-    .movie-hero-poster {
-      width: 100%;
-      height: 450px;
-      object-fit: cover;
-      transition: transform 0.8s ease;
-    }
-    .movie-card-hero:hover .movie-hero-poster { transform: scale(1.05); }
-
-    .hero-details {
+    /* Left Side (Movie Details - Centered & Clear) */
+    .left-panel {
+      background-color: var(--bg-black);
+      width: 45%;
+      padding: 8rem 4rem 4rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      align-items: center; /* Centered content */
+      position: relative;
+      z-index: 2;
     }
 
-    .hero-tags {
-      display: flex;
-      gap: 0.8rem;
-      margin-bottom: 1rem;
+    /* Fade Overlay */
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: -100px;
+      width: 200px;
+      background: linear-gradient(to right, var(--bg-black) 20%, transparent 100%);
+      z-index: 3;
+      pointer-events: none;
     }
 
+    .left-content {
+      max-width: 400px;
+      width: 100%;
+      text-align: center; /* Clear centered text */
+      animation: slideInLeft 1s ease;
+    }
+
+    .movie-poster {
+      width: 100%;
+      max-width: 300px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+      margin: 0 auto 2.5rem;
+      transform: rotate(0deg); /* Straightened for clarity */
+      transition: transform 0.5s ease;
+      border: 1px solid var(--border-color);
+      filter: grayscale(20%);
+    }
+    .left-content:hover .movie-poster { transform: scale(1.02); filter: grayscale(0%); }
+
+    .movie-tags { display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center; }
     .tag {
-      padding: 0.4rem 1rem;
-      background: var(--bg-accent);
-      color: var(--accent);
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      padding: 0.3rem 0.8rem; background: transparent; color: var(--text-muted);
+      border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; border: 1px solid var(--border-color);
     }
 
-    .movie-hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 3.5rem;
-      font-weight: 700;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-      color: var(--text-primary);
+    .movie-title {
+      font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 900;
+      line-height: 1.1; margin-bottom: 1.5rem; color: white; letter-spacing: -0.03em;
     }
 
-    .movie-hero-meta {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      font-size: 1rem;
-      align-items: center;
+    .movie-meta { display: flex; gap: 1.5rem; margin-bottom: 2rem; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; align-items: center; justify-content: center; }
+    .meta-item { display: flex; align-items: center; gap: 0.4rem; }
+    
+    .rating-token {
+      width: 50px; height: 50px; border-radius: 50%; background: black;
+      box-shadow: 0 0 0 2px white, inset 0 0 0 4px black;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rating-token span { font-weight: 900; font-size: 1rem; color: white; }
+
+    .movie-desc {
+      color: var(--text-muted); margin-bottom: 2rem; line-height: 1.8; font-size: 1.05rem;
+      text-align: center; /* Removed border for cleaner look */
     }
 
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .meta-item i { color: var(--accent); }
-
-    .rating-circle {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: conic-gradient(var(--success) 86%, #e2e8f0 86%);
+    /* Right Side (Banner & 3D Subtitles List) */
+    .right-panel {
+      width: 55%;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
+      padding: 8rem 4rem 4rem;
+      z-index: 1;
+      overflow: hidden;
+      perspective: 1500px;
     }
-    .rating-circle::before {
-      content: '';
+
+    .banner-bg {
       position: absolute;
-      inset: 6px;
-      background: var(--bg-secondary);
-      border-radius: 50%;
-    }
-    .rating-circle span {
-      position: relative;
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--success);
-    }
-
-    .movie-hero-overview {
-      color: var(--text-muted);
-      font-size: 1.1rem;
-      line-height: 1.8;
-      margin-bottom: 2rem;
-      max-width: 90%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://image.tmdb.org/t/p/original/8Y43POKjjKDGI9MH89NW0NAzzp8.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(90%) brightness(0.3) contrast(1.2);
+      z-index: -2;
+      transition: transform 0.3s ease-out;
     }
 
-    .hero-actions { display: flex; gap: 1rem; }
-
-    /* Main Content */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 5% 4rem;
+    .banner-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to right, var(--bg-black) 0%, rgba(5,5,7,0.4) 15%, rgba(5,5,7,0.2) 50%, rgba(5,5,7,0.8) 100%);
+      z-index: -1;
     }
 
-    /* Filters Toolbar */
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1.5rem;
+    .list-wrapper {
+      width: 100%;
+      max-width: 600px;
+      transform-style: preserve-3d;
+      transform: rotateX(5deg);
+      transition: transform 0.1s ease-out;
     }
 
     .filter-pills {
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
+      display: flex; gap: 0.6rem; margin-bottom: 2rem; flex-wrap: wrap;
+      transform: translateZ(40px);
     }
-
     .pill {
-      padding: 0.6rem 1.4rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+      padding: 0.6rem 1.2rem; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color); border-radius: 50px; cursor: pointer;
+      transition: var(--transition); font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
     }
+    .pill:hover { border-color: var(--border-hover); color: white; background: rgba(255,255,255,0.1); }
+    .pill.active { background: white; color: black; border-color: white; }
 
-    .pill:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-color: var(--accent); color: var(--accent); }
-    .pill.active { background: var(--text-primary); color: white; border-color: var(--text-primary); }
-
-    .sort-dropdown {
-      position: relative;
-    }
-    .sort-dropdown select {
-      appearance: none;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: 0.7rem 2.5rem 0.7rem 1.2rem;
-      border-radius: 50px;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      outline: none;
-      color: var(--text-primary);
-      transition: var(--transition);
-    }
-    .sort-dropdown select:hover { border-color: var(--accent); }
-    .sort-dropdown i {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: var(--text-muted);
-    }
-
-    /* Subtitles List */
     .subtitles-list {
       display: grid;
-      gap: 1.5rem;
+      gap: 1.2rem;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+      transform: translateZ(20px);
     }
 
-    .subtitle-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: 1.8rem 2rem;
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-      animation: slideInUp 0.6s ease backwards;
+    .subtitles-list::-webkit-scrollbar { width: 4px; }
+    .subtitles-list::-webkit-scrollbar-track { background: transparent; }
+    .subtitles-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    .subtitle-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem; background: var(--bg-card-glass); backdrop-filter: blur(15px) saturate(150%);
+      border-radius: var(--radius-md); transition: var(--transition);
+      border: 1px solid var(--border-color); opacity: 0; transform: translateX(30px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .subtitle-item.visible { opacity: 1; transform: translateX(0); }
+
+    .subtitle-item:hover {
+      background: rgba(255,255,255,0.08); border-color: var(--border-hover);
+      transform: translateX(-5px) translateZ(20px) !important;
     }
 
-    .subtitle-card:nth-child(1) { animation-delay: 0.1s; }
-    .subtitle-card:nth-child(2) { animation-delay: 0.2s; }
-    .subtitle-card:nth-child(3) { animation-delay: 0.3s; }
-
-    .subtitle-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 5px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transition: transform 0.3s ease;
-    }
-
-    .subtitle-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-      border-color: transparent;
-    }
-    .subtitle-card:hover::before { transform: scaleY(1); }
-
-    .sub-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
+    .sub-info { display: flex; flex-direction: column; gap: 0.5rem; }
     .sub-release {
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      font-weight: 700; font-size: 1.1rem; color: white; display: flex; align-items: center; gap: 0.8rem; letter-spacing: -0.02em;
     }
-
     .format-badge {
-      background: var(--bg-accent);
-      color: var(--accent);
-      padding: 0.3rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 800;
+      background: white; color: black; padding: 0.2rem 0.6rem; border-radius: 6px;
+      font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
     }
-
-    .sub-meta {
-      display: flex;
-      gap: 1.5rem;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .meta-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.3rem 0.8rem;
-      background: var(--bg-primary);
-      border-radius: 50px;
-      font-weight: 600;
-    }
-    .meta-badge i { font-size: 0.9rem; }
-
-    .actions-group {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .download-stats {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      border-left: 1px solid var(--border-color);
-      padding-left: 1.5rem;
-    }
-    .download-stats span { display: block; font-weight: 800; color: var(--text-primary); font-size: 1.2rem; }
-
+    .sub-meta { display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text-muted); }
+    
     .download-btn {
-      background: var(--bg-primary);
-      color: var(--accent);
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 1.2rem;
+      background: rgba(255,255,255,0.05); color: white; width: 45px; height: 45px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; text-decoration: none; transition: var(--transition);
       border: 1px solid var(--border-color);
     }
+    .download-btn:hover { background: white; color: black; transform: scale(1.1); border-color: transparent; }
 
-    .download-btn:hover {
-      background: var(--accent);
-      color: white;
-      transform: rotate(15deg) scale(1.1);
-      box-shadow: 0 5px 20px var(--accent-glow);
-      border-color: transparent;
+    /* Navbar */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem;
+      background: rgba(5, 5, 7, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
     }
+    .brand-logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; color: var(--text-primary); }
+    .brand-icon {
+      width: 42px; height: 42px; background: white; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: black; transition: transform 0.3s ease;
+    }
+    .brand-logo:hover .brand-icon { transform: rotate(-10deg) scale(1.1); }
+    .brand-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 800; }
+
+    .nav-actions { display: flex; align-items: center; gap: 1rem; }
+    .btn {
+      padding: 0.8rem 1.8rem; border-radius: 50px; border: none; font-weight: 600; cursor: pointer;
+      transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; font-family: inherit; font-size: 0.85rem;
+    }
+    .btn-primary { background: white; color: black; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
+    .btn-outline { background: transparent; color: white; border: 1px solid var(--border-color); }
+    .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.05); }
 
     /* Modal */
     .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(10px);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(15px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;
     }
-
     .modal-backdrop.active { display: flex; animation: fadeIn 0.3s ease; }
-
     .modal-content {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 550px;
-      padding: 2.5rem;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.2);
-      animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
+      background: #121214; border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+      width: 100%; max-width: 500px; padding: 2.5rem; animation: scaleIn 0.4s ease; box-shadow: 0 40px 80px rgba(0,0,0,0.8);
     }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      color: var(--text-primary);
-    }
-
-    .modal-close {
-      background: var(--bg-primary);
-      border: none;
-      color: var(--text-muted);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 1rem;
-    }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: white; }
+    .modal-close { background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
     .modal-close:hover { background: var(--danger); color: white; transform: rotate(90deg); }
-
     .form-group { margin-bottom: 1.5rem; }
-    .form-label { display: block; margin-bottom: 0.6rem; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-label { display: block; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .form-control {
-      width: 100%;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      padding: 0.9rem 1.2rem;
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-family: inherit;
-      transition: var(--transition);
-      font-size: 0.95rem;
+      width: 100%; background: #000; border: 1px solid var(--border-color); padding: 0.9rem 1.2rem;
+      border-radius: var(--radius-md); color: white; font-family: inherit; outline: none; transition: 0.3s;
     }
-    .form-control:focus { outline: none; border-color: var(--accent); background: var(--bg-secondary); box-shadow: 0 0 0 4px var(--accent-glow); }
-
-    /* Toast */
-    .toast-container {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      z-index: 3000;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .toast {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--success);
-      padding: 1.2rem 1.8rem;
-      border-radius: var(--radius-md);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      min-width: 300px;
-      animation: slideInRight 0.4s ease;
-    }
-    .toast i { color: var(--success); font-size: 1.2rem; }
-
-    /* Footer */
-    .footer {
-      border-top: 1px solid var(--border-color);
-      padding: 3rem 5%;
-      text-align: center;
-      color: var(--text-muted);
-      margin-top: 2rem;
-      background: var(--bg-secondary);
-    }
-
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 2.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .footer-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    .footer-links a:hover { color: var(--accent); }
+    .form-control:focus { border-color: white; background: #050507; box-shadow: 0 0 0 3px rgba(255,255,255,0.1); }
 
     /* Animations */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideInUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes floatIn { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
     /* Responsive */
-    @media (max-width: 968px) {
-      .nav-links, .nav-actions .btn-outline { display: none; }
-      .movie-card-hero { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.5rem; }
-      .hero-poster-container { width: 250px; margin: 0 auto; }
-      .movie-hero-poster { height: 350px; }
-      .movie-hero-title { font-size: 2.2rem; }
-      .subtitle-card { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-      .actions-group { width: 100%; justify-content: space-between; }
-      .download-stats { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; text-align: left; }
+    @media (max-width: 1024px) {
+      .split-container { flex-direction: column; }
+      .left-panel, .right-panel { width: 100%; padding: 8rem 1.5rem 4rem; }
+      .left-panel::after { display: none; }
+      .left-content { text-align: center; max-width: 100%; }
+      .movie-title { font-size: 3rem; }
+      .right-panel { min-height: auto; }
+      .list-wrapper { transform: rotateX(0deg) !important; }
+      .filter-pills, .subtitles-list { transform: translateZ(0px) !important; }
     }
   </style>
 </head>
@@ -619,205 +286,173 @@
       <div class="brand-icon"><i class="fas fa-closed-captioning"></i></div>
       <div class="brand-name">Sub<span>tile</span></div>
     </a>
-
-    <ul class="nav-links">
-      <li><a href="index.html" class="nav-link active">Home</a></li>
-      <li><a href="#" class="nav-link">Trending</a></li>
-      <li><a href="#" class="nav-link">Latest</a></li>
-    </ul>
-
     <div class="nav-actions">
       <button class="btn btn-outline" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload</button>
+      <button class="btn btn-primary">Premium</button>
     </div>
   </header>
 
-  <!-- Hero Section (Integrated Card) -->
-  <section class="hero-section">
-    <div class="movie-card-hero">
-      <div class="hero-poster-container">
-        <img id="moviePoster" src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-hero-poster">
-      </div>
-      <div class="hero-details">
-        <div id="movieTags" class="hero-tags">
+  <!-- Main Split Layout -->
+  <div class="split-container">
+    
+    <!-- Left Panel (Work Info - Centered & Clear) -->
+    <aside class="left-panel">
+      <div class="left-content">
+        <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-poster">
+        
+        <div class="movie-tags">
           <span class="tag">2024</span>
           <span class="tag">Sci-Fi</span>
-        </div>
-        <h1 id="movieTitle" class="movie-hero-title">Dune: Part Two</h1>
-        
-        <div id="movieMeta" class="movie-hero-meta">
-          <div class="rating-circle">
-            <span>8.6</span>
-          </div>
-          <div class="meta-item"><i class="fas fa-calendar-alt"></i> March 1, 2024</div>
+          <span class="tag">Action</span>
         </div>
         
-        <p id="movieOverview" class="movie-hero-overview">
-          Loading overview...
+        <h1 class="movie-title">Dune: Part Two</h1>
+        
+        <div class="movie-meta">
+          <div class="rating-token"><span>8.6</span></div>
+          <div class="meta-item"><i class="fas fa-clock"></i> 2h 46m</div>
+          <div class="meta-item"><i class="fas fa-language"></i> EN</div>
+        </div>
+        
+        <p class="movie-desc">
+          Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe.
         </p>
+      </div>
+    </aside>
+
+    <!-- Right Panel (Banner & Floating 3D Subtitles List) -->
+    <main class="right-panel" id="rightPanel">
+      <div class="banner-bg" id="bannerBg"></div>
+      <div class="banner-overlay"></div>
+
+      <!-- 3D List Wrapper -->
+      <div class="list-wrapper" id="listWrapper">
         
-        <div class="hero-actions">
-          <button class="btn btn-primary"><i class="fas fa-play"></i> Watch Trailer</button>
-          <button class="btn btn-outline"><i class="fas fa-bookmark"></i> Add to List</button>
+        <div class="filter-pills">
+          <div class="pill active">All</div>
+          <div class="pill">Arabic</div>
+          <div class="pill">English</div>
+          <div class="pill">4K</div>
+          <div class="pill">1080p</div>
+        </div>
+
+        <div class="subtitles-list" id="subList">
+          <!-- Items injected by JS -->
         </div>
       </div>
-    </div>
-  </section>
+    </main>
 
-  <!-- Main Content -->
-  <main class="container">
-    
-    <!-- Filters Toolbar -->
-    <div class="toolbar">
-      <div id="filterPillsContainer" class="filter-pills">
-        <div class="pill active" data-filter="all">All Subtitles</div>
-        <div class="pill" data-filter="lang:en">English</div>
-        <div class="pill" data-filter="lang:ar">Arabic</div>
-        <div class="pill" data-filter="quality:4K">4K UHD</div>
-        <div class="pill" data-filter="quality:1080p">1080p</div>
-        <div class="pill" data-filter="quality:720p">720p</div>
-      </div>
+  </div>
 
-      <div class="sort-dropdown">
-        <select>
-          <option>Most Downloaded</option>
-          <option>Latest</option>
-          <option>Alphabetical</option>
-        </select>
-        <i class="fas fa-sort"></i>
-      </div>
-    </div>
-
-    <!-- Subtitles List -->
-    <div id="subtitlesList" class="subtitles-list">
-      <!-- Generated by JS -->
-    </div>
-
-  </main>
-
-  <!-- Upload Modal -->
+  <!-- Modal -->
   <div id="uploadModal" class="modal-backdrop">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">Upload Subtitle</h3>
         <button class="modal-close" onclick="closeUploadModal()"><i class="fas fa-times"></i></button>
       </div>
-      <form id="uploadForm" onsubmit="handleUploadSubtitle(event)">
+      <form onsubmit="handleUpload(event)">
         <div class="form-group">
           <label class="form-label">Movie / TV Show</label>
           <input type="text" class="form-control" value="Dune: Part Two (2024)" readonly>
-        </div>
-        <div class="form-group" style="display: flex; gap: 1rem;">
-          <div style="flex: 1;">
-            <label class="form-label">Language</label>
-            <select class="form-control">
-              <option>English</option>
-              <option>Arabic</option>
-              <option>French</option>
-              <option>Spanish</option>
-            </select>
-          </div>
-          <div style="flex: 1;">
-            <label class="form-label">Format</label>
-            <select class="form-control">
-              <option>SRT</option>
-              <option>VTT</option>
-              <option>ZIP</option>
-            </select>
-          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Release Version</label>
           <input type="text" class="form-control" placeholder="e.g., 1080p.BluRay.x264" required>
         </div>
-        <div class="form-group">
-          <label class="form-label">Uploader Name</label>
-          <input type="text" class="form-control" placeholder="Your name or team" required>
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+          <div style="flex:1">
+            <label class="form-label">Language</label>
+            <select class="form-control"><option>English</option><option>Arabic</option></select>
+          </div>
+          <div style="flex:1">
+            <label class="form-label">Format</label>
+            <select class="form-control"><option>SRT</option><option>ZIP</option></select>
+          </div>
         </div>
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-          <button type="button" class="btn btn-outline" onclick="closeUploadModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit</button>
-        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem;"><i class="fas fa-paper-plane"></i> Submit File</button>
       </form>
     </div>
   </div>
 
-  <!-- Toast Container -->
-  <div id="toastContainer" class="toast-container"></div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-links">
-      <a href="#">Home</a>
-      <a href="#">About Us</a>
-      <a href="#">FAQ</a>
-      <a href="#">Contact</a>
-      <a href="#">Privacy Policy</a>
-    </div>
-    <p>© 2024 Subtile. Premium Subtitles Platform. All rights reserved.</p>
-  </footer>
-
   <script>
-    // Modal Control
-    function openUploadModal() {
-      document.getElementById('uploadModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
+    // Mock Data
+    const subtitles = [
+      { release: "Dune.Part.Two.2024.720p.HD", format: "SRT", lang: "Arabic", flag: "SA", author: "Translator Pro", downloads: "12.4k" },
+      { release: "Dune.Part.Two.2024.1080p.BluRay", format: "ZIP", lang: "Arabic", flag: "SA", author: "Sub Team X", downloads: "8.9k" },
+      { release: "Dune.Part.Two.2024.2160p.4K.UHD", format: "SRT", lang: "English", flag: "GB", author: "Official", downloads: "24.1k" },
+      { release: "Dune.Part.Two.2024.1080p.WEB-DL", format: "SRT", lang: "English", flag: "US", author: "Crawler", downloads: "15.3k" },
+      { release: "Dune.Part.Two.2024.720p.WEBRip", format: "SRT", lang: "Arabic", flag: "EG", author: "Pro Subs", downloads: "5.2k" }
+    ];
 
-    function closeUploadModal() {
-      document.getElementById('uploadModal').classList.remove('active');
-      document.body.style.overflow = 'auto';
-    }
-
-    // Close modal on backdrop click
-    document.getElementById('uploadModal').addEventListener('click', function(e) {
-      if (e.target === this) closeUploadModal();
+    // Render List
+    const list = document.getElementById('subList');
+    subtitles.forEach((sub) => {
+      const item = document.createElement('div');
+      item.className = 'subtitle-item';
+      item.innerHTML = `
+        <div class="sub-info">
+          <div class="sub-release">
+            ${sub.release}
+            <span class="format-badge">${sub.format}</span>
+          </div>
+          <div class="sub-meta">
+            <span><i class="fas fa-flag"></i> ${sub.lang} (${sub.flag})</span>
+            <span><i class="fas fa-user"></i> ${sub.author}</span>
+            <span><i class="fas fa-download"></i> ${sub.downloads}</span>
+          </div>
+        </div>
+        <a href="#" class="download-btn"><i class="fas fa-download"></i></a>
+      `;
+      list.appendChild(item);
     });
 
-    // Mock submit handler
-    function handleUploadSubtitle(e) {
-      e.preventDefault();
-      closeUploadModal();
-      showToast('Subtitle uploaded successfully!', 'success');
-    }
-
-    // Filter Pills UI Logic
-    document.querySelectorAll('.pill').forEach(pill => {
-      pill.addEventListener('click', function() {
-        this.parentNode.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        this.classList.add('active');
-        if (typeof window.applyPillFilter === 'function') {
-          window.applyPillFilter(this.getAttribute('data-filter'));
+    // Scroll/Load Reveal Animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, Array.from(entry.target.parentNode.children).indexOf(entry.target) * 100);
+          observer.unobserve(entry.target);
         }
       });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.subtitle-item').forEach(item => observer.observe(item));
+
+    // 3D Mouse Parallax (Rotation X & Y)
+    const rightPanel = document.getElementById('rightPanel');
+    const listWrapper = document.getElementById('listWrapper');
+    const bannerBg = document.getElementById('bannerBg');
+
+    rightPanel.addEventListener('mousemove', (e) => {
+      const rect = rightPanel.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      
+      listWrapper.style.transform = `rotateY(${x * 12}deg) rotateX(${5 - (y * 12)}deg)`;
+      bannerBg.style.transform = `scale(1.1) translate(${x * -20}px, ${y * -20}px)`;
     });
 
-    // Premium Toast Notification System
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      
-      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <div>
-          <strong style="display:block; color: #0f172a; margin-bottom: 2px;">${type === 'success' ? 'Success' : 'Error'}</strong>
-          ${message}
-        </div>
-      `;
-      
-      container.appendChild(toast);
-      
-      // Auto remove after 3 seconds
-      setTimeout(() => {
-        toast.style.animation = 'slideInRight 0.3s ease reverse';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
+    rightPanel.addEventListener('mouseleave', () => {
+      listWrapper.style.transform = `rotateY(0deg) rotateX(5deg)`;
+      bannerBg.style.transform = `scale(1.1) translate(0, 0)`;
+    });
+
+    // Modal Logic
+    function openUploadModal() { document.getElementById('uploadModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeUploadModal() { document.getElementById('uploadModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+    document.getElementById('uploadModal').addEventListener('click', function(e) { if(e.target === this) closeUploadModal(); });
+    function handleUpload(e) { e.preventDefault(); closeUploadModal(); alert('Uploaded successfully!'); }
+
+    // Filter Pills Interaction
+    document.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', function() {
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
   </script>
-  <script src="js/security.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/tmdb-service.js"></script>
-  <script src="js/movie-page.js"></script>
 </body>
 </html>
