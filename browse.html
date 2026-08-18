@@ -109,14 +109,17 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
             <div>
                 <p class="text-neutral-500 font-bold mb-2 tracking-[0.2em] text-xs uppercase">Complete Archive</p>
-                <h1 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight">Discover & Browse</h1>
+                <div class="flex items-center gap-4">
+                    <h1 class="text-4xl md:text-5xl font-black text-neutral-50 tracking-tight">Discover & Browse</h1>
+                    <span id="itemsCountBadge" class="text-sm bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-full text-neutral-400 font-semibold">0 titles</span>
+                </div>
             </div>
             
             <div class="flex gap-2 flex-wrap" id="browseCategoryFilters">
-                <button data-cat="all" class="filter-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">All Titles</button>
-                <button data-cat="movie" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">Movies</button>
-                <button data-cat="tv" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">TV Shows</button>
-                <button data-cat="anime" class="filter-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all">Anime</button>
+                <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('all', this)">All Titles</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('movie', this)">Movies</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('tv', this)">TV Shows</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('anime', this)">Anime</button>
             </div>
         </div>
 
@@ -129,6 +132,10 @@
             <p class="text-neutral-500 text-sm">Try searching for another movie, series or anime title</p>
         </div>
 
+        <!-- Infinite Loading Spinner -->
+        <div id="loadingSpinner" class="hidden flex justify-center items-center py-12">
+            <i class="fas fa-circle-notch fa-spin text-3xl text-neutral-500"></i>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -144,154 +151,6 @@
     </footer>
 
     <script src="js/data.js"></script>
-    <script>
-        let CATALOG = [
-            { id: "tt15398776",  title: "Oppenheimer",       year: 2023, genre: "Biography / Drama", type: "movie", rating: 8.9, poster: "https://images.metahub.space/poster/small/tt15398776/img" },
-            { id: "tt15239678",  title: "Dune: Part Two",      year: 2024, genre: "Sci-Fi / Adventure", type: "movie", rating: 8.6, poster: "https://images.metahub.space/poster/small/tt15239678/img" },
-            { id: "tt1877830",   title: "The Batman",          year: 2022, genre: "Action / Crime", type: "movie", rating: 7.8, poster: "https://images.metahub.space/poster/small/tt1877830/img" },
-            { id: "tt0816692",   title: "Interstellar",        year: 2014, genre: "Sci-Fi / Adventure", type: "movie", rating: 8.7, poster: "https://images.metahub.space/poster/small/tt0816692/img" },
-            { id: "tt1375666",   title: "Inception",           year: 2010, genre: "Sci-Fi / Thriller", type: "movie", rating: 8.8, poster: "https://images.metahub.space/poster/small/tt1375666/img" },
-            { id: "tt0468569",   title: "The Dark Knight",     year: 2008, genre: "Action / Crime", type: "movie", rating: 9.0, poster: "https://images.metahub.space/poster/small/tt0468569/img" },
-            { id: "tt7286456",   title: "Joker",               year: 2019, genre: "Crime / Drama", type: "movie", rating: 8.4, poster: "https://images.metahub.space/poster/small/tt7286456/img" },
-            { id: "tt6751668",   title: "Parasite",            year: 2019, genre: "Thriller / Drama", type: "movie", rating: 8.5, poster: "https://images.metahub.space/poster/small/tt6751668/img" },
-            { id: "tt0137523",   title: "Fight Club",          year: 1999, genre: "Drama", type: "movie", rating: 8.8, poster: "https://images.metahub.space/poster/small/tt0137523/img" },
-            { id: "tt0110912",   title: "Pulp Fiction",        year: 1994, genre: "Crime / Drama", type: "movie", rating: 8.9, poster: "https://images.metahub.space/poster/small/tt0110912/img" },
-            { id: "tt0172495",   title: "Gladiator",           year: 2000, genre: "Action / Drama", type: "movie", rating: 8.5, poster: "https://images.metahub.space/poster/small/tt0172495/img" },
-            { id: "tt21064510",  title: "Gladiator II",        year: 2024, genre: "Action / Drama", type: "movie", rating: 7.9, poster: "https://images.metahub.space/poster/small/tt21064510/img" },
-            { id: "tt18411490",  title: "Alien: Romulus",      year: 2024, genre: "Horror / Sci-Fi", type: "movie", rating: 7.3, poster: "https://images.metahub.space/poster/small/tt18411490/img" },
-            { id: "tt0903747",   title: "Breaking Bad",        year: 2008, genre: "Crime / Drama", type: "tv", rating: 9.5, poster: "https://images.metahub.space/poster/small/tt0903747/img" },
-            { id: "tt3032476",   title: "Better Call Saul",    year: 2015, genre: "Crime / Drama", type: "tv", rating: 9.0, poster: "https://images.metahub.space/poster/small/tt3032476/img" },
-            { id: "tt0944947",   title: "Game of Thrones",     year: 2011, genre: "Fantasy / Drama", type: "tv", rating: 9.2, poster: "https://images.metahub.space/poster/small/tt0944947/img" },
-            { id: "tt11198330",  title: "House of the Dragon", year: 2022, genre: "Fantasy / Drama", type: "tv", rating: 8.4, poster: "https://images.metahub.space/poster/small/tt11198330/img" },
-            { id: "tt4574334",   title: "Stranger Things",     year: 2016, genre: "Sci-Fi / Horror", type: "tv", rating: 8.7, poster: "https://images.metahub.space/poster/small/tt4574334/img" },
-            { id: "tt3581920",   title: "The Last of Us",      year: 2023, genre: "Drama / Horror", type: "tv", rating: 8.8, poster: "https://images.metahub.space/poster/small/tt3581920/img" },
-            { id: "tt1190634",   title: "The Boys",            year: 2019, genre: "Action / Sci-Fi", type: "tv", rating: 8.7, poster: "https://images.metahub.space/poster/small/tt1190634/img" },
-            { id: "tt15435876",  title: "The Penguin",         year: 2024, genre: "Crime / Drama", type: "tv", rating: 8.8, poster: "https://images.metahub.space/poster/small/tt15435876/img" },
-            { id: "tt2442560",   title: "Peaky Blinders",      year: 2013, genre: "Crime / Drama", type: "tv", rating: 8.8, poster: "https://images.metahub.space/poster/small/tt2442560/img" },
-            { id: "anime-16498", title: "Attack on Titan",     year: 2013, genre: "Anime / Action", type: "anime", rating: 9.0, poster: "https://media.kitsu.app/anime/poster_images/7442/large.jpg" },
-            { id: "anime-52991", title: "Solo Leveling",       year: 2024, genre: "Anime / Action", type: "anime", rating: 8.5, poster: "https://media.kitsu.app/anime/46231/poster_image/large-cdadff31f42490b9f48a035939a01a92.jpeg" },
-            { id: "anime-40748", title: "Jujutsu Kaisen",      year: 2020, genre: "Anime / Fantasy", type: "anime", rating: 8.6, poster: "https://media.kitsu.app/anime/42765/poster_image/large-5ce19551c1a6cf995b378205b9149b5c.jpeg" },
-            { id: "anime-38000", title: "Demon Slayer",        year: 2019, genre: "Anime / Action", type: "anime", rating: 8.7, poster: "https://media.kitsu.app/anime/poster_images/41370/large.jpg" },
-            { id: "anime-1535",  title: "Death Note",          year: 2006, genre: "Anime / Mystery", type: "anime", rating: 9.0, poster: "https://media.kitsu.app/anime/poster_images/1376/large.jpg" },
-            { id: "anime-5114",  title: "Fullmetal Alchemist", year: 2009, genre: "Anime / Adventure", type: "anime", rating: 9.1, poster: "https://media.kitsu.app/anime/poster_images/100/large.jpg" },
-            { id: "anime-11061", title: "Hunter x Hunter",     year: 2011, genre: "Anime / Adventure", type: "anime", rating: 9.0, poster: "https://media.kitsu.app/anime/poster_images/6448/large.jpg" },
-            { id: "anime-37521", title: "Vinland Saga",        year: 2019, genre: "Anime / Drama", type: "anime", rating: 8.7, poster: "https://media.kitsu.app/anime/poster_images/41084/large.jpg" },
-            { id: "anime-44511", title: "Chainsaw Man",        year: 2022, genre: "Anime / Action", type: "anime", rating: 8.5, poster: "https://media.kitsu.app/anime/43806/poster_image/large-815d6008fb3b56f4291b9f0ffa05cd8f.jpeg" },
-            { id: "anime-9253",  title: "Steins;Gate",         year: 2011, genre: "Anime / Sci-Fi", type: "anime", rating: 9.1, poster: "https://media.kitsu.app/anime/poster_images/5646/large.jpg" },
-            { id: "anime-21",    title: "One Piece",           year: 1999, genre: "Anime / Adventure", type: "anime", rating: 8.7, poster: "https://media.kitsu.app/anime/poster_images/12/large.jpg" },
-            { id: "anime-20",    title: "Naruto",              year: 2002, genre: "Anime / Action", type: "anime", rating: 8.0, poster: "https://media.kitsu.app/anime/poster_images/1555/large.jpg" },
-            { id: "anime-269",   title: "Bleach",              year: 2004, genre: "Anime / Action", type: "anime", rating: 8.2, poster: "https://media.kitsu.app/anime/poster_images/244/large.jpg" }
-        ];
-
-        let activeCat = "all";
-        let searchQ = "";
-
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("q")) {
-            searchQ = params.get("q");
-            document.getElementById("browseSearchInput").value = searchQ;
-        }
-
-        async function loadLiveCatalog() {
-            try {
-                const res = await fetch('/api/trending');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.trending && data.trending.length > 0) {
-                        CATALOG = data.trending;
-                    }
-                }
-            } catch (e) {
-                console.warn('Using local fallback:', e);
-            }
-            renderCatalog();
-        }
-
-        function renderCatalog() {
-            const q = searchQ.trim().toLowerCase();
-            const filtered = CATALOG.filter(item => {
-                const matchCat = activeCat === "all" || item.type === activeCat;
-                const matchQ = !q || item.title.toLowerCase().includes(q) || (item.genre && item.genre.toLowerCase().includes(q));
-                return matchCat && matchQ;
-            });
-
-            const grid = document.getElementById("catalogGrid");
-            const empty = document.getElementById("catalogEmpty");
-
-            if (filtered.length === 0) {
-                grid.innerHTML = "";
-                empty.classList.remove("hidden");
-                return;
-            }
-
-            empty.classList.add("hidden");
-            grid.innerHTML = filtered.map(item => `
-                <a href="movie.html?id=${item.id}&type=${item.type}" class="movie-card group cursor-pointer block">
-                    <div class="poster-container mb-3">
-                        <img src="${item.poster}" alt="${item.title}" class="poster-img shadow-xl shadow-black/80" loading="lazy">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-3 z-30">
-                            <div class="w-full bg-white text-neutral-950 text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-lg">
-                                <i class="fas fa-download"></i> View Subtitles
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-neutral-500 text-xs">${item.year}</span>
-                        <span class="text-neutral-600">•</span>
-                        <span class="text-neutral-400 text-xs font-semibold"><i class="fas fa-star text-amber-400 text-[10px]"></i> ${item.rating}</span>
-                    </div>
-                    <h3 class="text-sm font-bold text-neutral-100 truncate">${item.title}</h3>
-                </a>
-            `).join("");
-        }
-
-        // Live Search Input & Dropdown
-        const input = document.getElementById("browseSearchInput");
-        const dropdown = document.getElementById("browseSearchDropdown");
-
-        input.addEventListener("input", (e) => {
-            searchQ = e.target.value;
-            renderCatalog();
-
-            const val = searchQ.trim().toLowerCase();
-            if (!val) {
-                dropdown.classList.remove("active");
-                return;
-            }
-
-            const matches = CATALOG.filter(m => m.title.toLowerCase().includes(val)).slice(0, 6);
-            if (matches.length > 0) {
-                dropdown.innerHTML = matches.map(m => `
-                    <a href="movie.html?id=${m.id}&type=${m.type}" class="search-item">
-                        <img src="${m.poster}" alt="${m.title}">
-                        <div>
-                            <div class="font-bold text-sm text-neutral-100">${m.title}</div>
-                            <div class="text-xs text-neutral-400">${m.year} • ${m.type.toUpperCase()} • Rating: ${m.rating}</div>
-                        </div>
-                    </a>
-                `).join("");
-                dropdown.classList.add("active");
-            } else {
-                dropdown.classList.remove("active");
-            }
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove("active");
-            }
-        });
-
-        // Category Filter Buttons
-        document.querySelectorAll("#browseCategoryFilters button").forEach(btn => {
-            btn.addEventListener("click", () => {
-                activeCat = btn.dataset.cat;
-                document.querySelectorAll("#browseCategoryFilters button").forEach(b => b.classList.toggle("active", b === btn));
-                renderCatalog();
-            });
-        });
-
-        loadLiveCatalog();
-    </script>
+    <script src="js/browse.js"></script>
 </body>
 </html>
