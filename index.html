@@ -295,7 +295,6 @@
 
         try {
           const promises = [];
-          const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
 
           if (type === 'all' || type === 'tv') {
             promises.push(
@@ -304,7 +303,7 @@
                 .then(d => (d.metas || []).slice(0, 10).map(m => ({
                   id: m.imdb_id || m.id, title: m.name, type: 'tv', 
                   year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
-                  poster: m.poster || \`https://images.metahub.space/poster/small/\${m.id}/img\`
+                  poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
                 })))
                 .catch(() => [])
             );
@@ -317,7 +316,7 @@
                 .then(d => (d.metas || []).slice(0, 10).map(m => ({
                   id: m.imdb_id || m.id, title: m.name, type: 'movie',
                   year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
-                  poster: m.poster || \`https://images.metahub.space/poster/small/\${m.id}/img\`
+                  poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
                 })))
                 .catch(() => [])
             );
@@ -328,7 +327,7 @@
               fetch(`https://api.jikan.moe/v4/top/anime?limit=10`)
                 .then(r => r.ok ? r.json() : { data: [] })
                 .then(d => (d.data || []).map(a => ({
-                  id: \`anime-\${a.mal_id}\`, title: a.title_english || a.title, type: 'anime',
+                  id: `anime-${a.mal_id}`, title: a.title_english || a.title, type: 'anime',
                   year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
                   poster: (a.images && a.images.webp && a.images.webp.large_image_url) || ''
                 })))
@@ -350,16 +349,16 @@
 
           grid.innerHTML = results.map((m, index) => {
             const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
-            const targetUrl = \`movie.html?id=\${encodeURIComponent(m.id)}&type=\${m.type}\`;
+            const targetUrl = `movie.html?id=${encodeURIComponent(m.id)}&type=${m.type}`;
             // Fake downloads just for the UI
             const fakeDl = (Math.random() * 5 + 1).toFixed(1) + 'M Downloads';
             
-            return \`
-              <a href="\${targetUrl}" class="movie-card cursor-pointer group block">
+            return `
+              <a href="${targetUrl}" class="movie-card cursor-pointer group block">
                   <div class="relative">
                       <div class="poster-container">
-                          <img src="\${m.poster}" alt="\${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                          <span class="rank-number">\${index + 2}</span>
+                          <img src="${m.poster}" alt="${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                          <span class="rank-number">${index + 2}</span>
                           <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
                               <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -370,14 +369,14 @@
                   </div>
                   <div class="mt-4">
                       <div class="flex items-center gap-2 mb-1">
-                          <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">\${typeLabel}</span>
-                          <span class="text-neutral-600 text-xs">\${m.year || ''}</span>
+                          <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${typeLabel}</span>
+                          <span class="text-neutral-600 text-xs">${m.year || ''}</span>
                       </div>
-                      <h3 class="text-base font-bold text-neutral-100 truncate">\${m.title}</h3>
-                      <p class="text-neutral-500 text-sm mt-0.5">\${fakeDl}</p>
+                      <h3 class="text-base font-bold text-neutral-100 truncate">${m.title}</h3>
+                      <p class="text-neutral-500 text-sm mt-0.5">${fakeDl}</p>
                   </div>
               </a>
-            \`;
+            `;
           }).join('');
 
         } catch (err) {
