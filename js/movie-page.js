@@ -62,6 +62,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (currentMovie.type === 'tv' || currentMovie.type === 'anime') {
       renderSeasonsList(currentMovie);
     } else {
+      const seasonsContainer = document.getElementById('seasonsListView');
+      const subtitlesContainer = document.getElementById('subtitlesListView');
+      const viewTitle = document.getElementById('viewTitle');
+      const filters = document.getElementById('filterPillsContainer');
+      const backBtn = document.getElementById('backToSeasonsBtn');
+
+      if (seasonsContainer) seasonsContainer.style.display = 'none';
+      if (subtitlesContainer) subtitlesContainer.style.display = 'block';
+      if (viewTitle) viewTitle.innerText = 'Available Subtitles';
+      if (filters) filters.style.display = '';
+      if (backBtn) backBtn.style.display = 'none'; // No back button for movies
+
       await fetchRealSubtitles(currentMovie);
     }
   } catch (err) {
@@ -105,6 +117,21 @@ function wireUpEventDelegation() {
       const seasonCard = e.target.closest('.season-card');
       if (seasonCard && seasonCard.dataset.season !== undefined) {
         loadSeasonSubtitles(Number(seasonCard.dataset.season));
+      }
+    });
+  }
+
+  // Filter Pills Interaction
+  const filterContainer = document.getElementById('filterPillsContainer');
+  if (filterContainer) {
+    filterContainer.addEventListener('click', (e) => {
+      const pill = e.target.closest('.pill');
+      if (pill) {
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        if (typeof window.applyPillFilter === 'function') {
+          window.applyPillFilter(pill.getAttribute('data-filter'));
+        }
       }
     });
   }
