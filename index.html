@@ -30,27 +30,29 @@
         .poster-container { position: relative; padding-bottom: 150%; /* 2:3 Aspect Ratio */ }
         .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
         
-        /* Rank Number Styling */
+        /* Rank Number Styling - Directly Overlaying on the Poster */
         .rank-number {
             font-family: 'Inter', sans-serif;
             font-weight: 900;
-            font-size: 6rem;
+            font-size: 5.5rem;
             line-height: 0.8;
-            color: transparent;
-            -webkit-text-stroke: 2px #333;
+            color: #ffffff;
+            -webkit-text-stroke: 3px #0a0a0a;
+            text-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.8);
             position: absolute;
-            left: -10px;
-            bottom: -15px;
-            z-index: 0;
+            left: -8px;
+            bottom: -10px;
+            z-index: 25;
             pointer-events: none;
+            user-select: none;
         }
         
         /* Card Hover Effects */
         .movie-card { position: relative; z-index: 1; transition: transform 0.3s ease; }
         .movie-card:hover { transform: translateY(-5px); }
-        .movie-card:hover .poster-img { filter: brightness(0.3); }
+        .movie-card:hover .poster-img { filter: brightness(0.35); }
         .movie-card:hover .overlay-content { opacity: 1; }
-        .overlay-content { opacity: 0; transition: opacity 0.3s ease; }
+        .overlay-content { opacity: 0; transition: opacity 0.3s ease; z-index: 30; }
 
         /* Search Dropdown */
         .search-dropdown {
@@ -98,7 +100,7 @@
                 <div class="w-8 h-8 bg-neutral-100 rounded-md flex items-center justify-center">
                     <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </div>
-                <span class="text-lg font-bold tracking-tight text-neutral-300 hidden sm:block">SUBTITLE</span>
+                <span class="text-lg font-bold tracking-tight text-neutral-300 hidden sm:block">SUBTILE</span>
             </a>
             
             <div class="flex-1 max-w-xl mx-8 relative">
@@ -117,14 +119,14 @@
         </div>
     </header>
 
-    <!-- Featured Banner (Number 1) -->
+    <!-- Featured Banner (Number 1: Dune Part Two) -->
     <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
-        <div class="banner-bg" style="background-image: url('https://image.tmdb.org/t/p/original/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg');"></div>
+        <div class="banner-bg" style="background-image: url('https://images.metahub.space/background/medium/tt15239678/img');"></div>
         
         <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
             <div class="hidden md:block w-64 flex-shrink-0">
                 <div class="poster-container">
-                    <img src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="Oppenheimer" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15398776/img';">
+                    <img src="https://images.metahub.space/poster/small/tt15239678/img" alt="Dune: Part Two" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800">
                 </div>
             </div>
 
@@ -133,29 +135,29 @@
                     <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
                     <div class="border-l border-neutral-700 pl-4">
                         <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
-                        <p class="text-neutral-500 text-sm">Trending Today</p>
+                        <p class="text-neutral-500 text-sm">Trending Worldwide</p>
                     </div>
                 </div>
                 
-                <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none">Oppenheimer</h1>
+                <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none">Dune: Part Two</h1>
                 <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
-                    <span>2023</span>
+                    <span>2024</span>
                     <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span>Biography / Drama</span>
+                    <span>Sci-Fi / Adventure</span>
                     <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span>4.2M Downloads</span>
+                    <span>5.4M Downloads</span>
                 </div>
                 
                 <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl">
-                    The story of J. Robert Oppenheimer’s role in the development of the atomic bomb during World War II. Experience the epic in high-quality subtitles.
+                    Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Experience the epic in verified subtitles.
                 </p>
 
                 <div class="flex items-center gap-4">
-                    <a href="movie.html?id=oppenheimer&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                    <a href="movie.html?id=dune-2&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Download Subtitles
                     </a>
-                    <a href="movie.html?id=oppenheimer&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
+                    <a href="movie.html?id=dune-2&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
                         More Info
                     </a>
                 </div>
@@ -180,16 +182,64 @@
             </div>
         </div>
 
-        <!-- Movies Grid (Top 10) -->
+        <!-- Movies Grid (Top 10 Currently Trending) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16">
             
-            <!-- Card 2 -->
-            <a href="movie.html?id=dune-2&type=movie" class="movie-card cursor-pointer group block">
+            <!-- Card 2: Backrooms -->
+            <a href="movie.html?id=tt26657236&type=movie" class="movie-card cursor-pointer group block">
                 <div class="relative">
-                    <span class="rank-number">2</span>
                     <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Dune Part Two" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                        <img src="https://images.metahub.space/poster/small/tt26657236/img" alt="Backrooms" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">2</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
+                        <span class="text-neutral-600 text-xs">2026</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">The Backrooms</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">3.9M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 3: The Odyssey -->
+            <a href="movie.html?id=tt33764258&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <div class="poster-container">
+                        <img src="https://images.metahub.space/poster/small/tt33764258/img" alt="The Odyssey" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">3</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2026</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">The Odyssey</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">3.2M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 4: Alien: Romulus -->
+            <a href="movie.html?id=tt18412256&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <div class="poster-container">
+                        <img src="https://images.metahub.space/poster/small/tt18412256/img" alt="Alien: Romulus" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">4</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
                             <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 Download
@@ -202,18 +252,42 @@
                         <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
                         <span class="text-neutral-600 text-xs">2024</span>
                     </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Dune: Part Two</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">3.8M Downloads</p>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Alien: Romulus</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">2.8M Downloads</p>
                 </div>
             </a>
 
-            <!-- Card 3 -->
-            <a href="movie.html?id=the-batman&type=movie" class="movie-card cursor-pointer group block">
+            <!-- Card 5: The Penguin -->
+            <a href="movie.html?id=tt15435876&type=tv" class="movie-card cursor-pointer group block">
                 <div class="relative">
-                    <span class="rank-number">3</span>
                     <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg" alt="The Batman" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt1877830/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                        <img src="https://images.metahub.space/poster/small/tt15435876/img" alt="The Penguin" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">5</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">TV Series</span>
+                        <span class="text-neutral-600 text-xs">2024</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">The Penguin</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">2.4M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 6: House of the Dragon -->
+            <a href="movie.html?id=tt11198330&type=tv" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <div class="poster-container">
+                        <img src="https://images.metahub.space/poster/small/tt11198330/img" alt="House of the Dragon" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">6</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
                             <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 Download
@@ -224,92 +298,20 @@
                 <div class="mt-4">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2022</span>
+                        <span class="text-neutral-600 text-xs">Season 2</span>
                     </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">The Batman</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">2.9M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 4 -->
-            <a href="movie.html?id=interstellar&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <span class="rank-number">4</span>
-                    <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Interstellar" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt0816692/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2014</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Interstellar</h3>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">House of the Dragon</h3>
                     <p class="text-neutral-500 text-sm mt-0.5">2.1M Downloads</p>
                 </div>
             </a>
 
-            <!-- Card 5 -->
-            <a href="movie.html?id=tt7286456&type=movie" class="movie-card cursor-pointer group block">
+            <!-- Card 7: Gladiator II -->
+            <a href="movie.html?id=tt9218128&type=movie" class="movie-card cursor-pointer group block">
                 <div class="relative">
-                    <span class="rank-number">5</span>
                     <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg" alt="Joker" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt7286456/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2019</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Joker</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">1.5M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 6 -->
-            <a href="movie.html?id=tt1375666&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <span class="rank-number">6</span>
-                    <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg" alt="Inception" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt1375666/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2010</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Inception</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">1.4M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 7 -->
-            <a href="movie.html?id=tt0468569&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <span class="rank-number">7</span>
-                    <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" alt="The Dark Knight" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt0468569/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                        <img src="https://images.metahub.space/poster/small/tt9218128/img" alt="Gladiator II" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">7</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
                             <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 Download
@@ -320,20 +322,68 @@
                 <div class="mt-4">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">English</span>
-                        <span class="text-neutral-600 text-xs">2008</span>
+                        <span class="text-neutral-600 text-xs">2024</span>
                     </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">The Dark Knight</h3>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Gladiator II</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">1.8M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 8: Solo Leveling -->
+            <a href="movie.html?id=tt21209876&type=anime" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <div class="poster-container">
+                        <img src="https://cdn.myanimelist.net/images/anime/1801/142390l.jpg" alt="Solo Leveling" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">8</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Anime</span>
+                        <span class="text-neutral-600 text-xs">2024</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Solo Leveling</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">1.6M Downloads</p>
+                </div>
+            </a>
+
+            <!-- Card 9: Beetlejuice Beetlejuice -->
+            <a href="movie.html?id=tt2049403&type=movie" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <div class="poster-container">
+                        <img src="https://images.metahub.space/poster/small/tt2049403/img" alt="Beetlejuice Beetlejuice" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">9</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
+                        <span class="text-neutral-600 text-xs">2024</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Beetlejuice Beetlejuice</h3>
                     <p class="text-neutral-500 text-sm mt-0.5">1.3M Downloads</p>
                 </div>
             </a>
 
-            <!-- Card 8 -->
-            <a href="movie.html?id=tt6751668&type=movie" class="movie-card cursor-pointer group block">
+            <!-- Card 10: Inside Out 2 -->
+            <a href="movie.html?id=tt22022452&type=movie" class="movie-card cursor-pointer group block">
                 <div class="relative">
-                    <span class="rank-number">8</span>
                     <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" alt="Parasite" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt6751668/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                        <img src="https://images.metahub.space/poster/small/tt22022452/img" alt="Inside Out 2" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">10</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
                             <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 Download
@@ -343,59 +393,11 @@
                 </div>
                 <div class="mt-4">
                     <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2019</span>
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic / EN</span>
+                        <span class="text-neutral-600 text-xs">2024</span>
                     </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Parasite</h3>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">Inside Out 2</h3>
                     <p class="text-neutral-500 text-sm mt-0.5">1.1M Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 9 -->
-            <a href="movie.html?id=tt1856101&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <span class="rank-number">9</span>
-                    <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg" alt="Blade Runner 2049" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt1856101/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">English</span>
-                        <span class="text-neutral-600 text-xs">2017</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Blade Runner 2049</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">980K Downloads</p>
-                </div>
-            </a>
-
-            <!-- Card 10 -->
-            <a href="movie.html?id=tt2582802&type=movie" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <span class="rank-number">10</span>
-                    <div class="poster-container">
-                        <img src="https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg" alt="Whiplash" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt2582802/img';">
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Arabic</span>
-                        <span class="text-neutral-600 text-xs">2014</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">Whiplash</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">850K Downloads</p>
                 </div>
             </a>
 
