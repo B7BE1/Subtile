@@ -120,50 +120,8 @@
         </div>
     </header>
 
-    <!-- Featured Banner (Initial State) -->
+    <!-- Featured Banner -->
     <section id="homeHeroBanner" class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
-        <div class="banner-bg" style="background-image: url('https://images.metahub.space/background/medium/tt0468569/img'); filter: brightness(0.4);"></div>
-        
-        <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
-            <div class="hidden md:block w-64 flex-shrink-0">
-                <div class="poster-container">
-                    <img src="https://images.metahub.space/poster/small/tt0468569/img" alt="The Dark Knight" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800">
-                </div>
-            </div>
-
-            <div class="max-w-2xl mt-8 md:mt-0">
-                <div class="flex items-center gap-4 mb-4">
-                    <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
-                    <div class="border-l border-neutral-700 pl-4">
-                        <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
-                        <p class="text-neutral-500 text-sm">Trending Worldwide</p>
-                    </div>
-                </div>
-                
-                <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">The Dark Knight</h1>
-                <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
-                    <span>2008</span>
-                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span>Action / Crime</span>
-                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span>9.0M Downloads</span>
-                </div>
-                
-                <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                    When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.
-                </p>
-
-                <div class="flex items-center gap-4">
-                    <a href="movie.html?id=tt0468569&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download Subtitles
-                    </a>
-                    <a href="movie.html?id=tt0468569&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
-                        More Info
-                    </a>
-                </div>
-            </div>
-        </div>
     </section>
 
     <!-- Trending Grid -->
@@ -205,7 +163,129 @@
         </div>
     </footer>
 
-    <!-- Live Search Script -->
+    <script>
+      const INITIAL_FALLBACK_DATA = [
+        { id: "tt0468569", title: "The Dark Knight", type: "movie", year: "2008", poster: "https://images.metahub.space/poster/small/tt0468569/img", backdrop: "https://images.metahub.space/background/medium/tt0468569/img", description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.", genres: ["Action"] },
+        { id: "tt0111161", title: "The Shawshank Redemption", type: "movie", year: "1994", poster: "https://images.metahub.space/poster/small/tt0111161/img", backdrop: "https://images.metahub.space/background/medium/tt0111161/img", description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.", genres: ["Drama"] },
+        { id: "tt0137523", title: "Fight Club", type: "movie", year: "1999", poster: "https://images.metahub.space/poster/small/tt0137523/img", backdrop: "https://images.metahub.space/background/medium/tt0137523/img", description: "An insomniac office worker and a devil-may-care soap maker form an underground fight club that evolves into much more.", genres: ["Drama"] },
+        { id: "tt0109830", title: "Forrest Gump", type: "movie", year: "1994", poster: "https://images.metahub.space/poster/small/tt0109830/img", backdrop: "https://images.metahub.space/background/medium/tt0109830/img", description: "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75.", genres: ["Drama"] },
+        { id: "tt0110912", title: "Pulp Fiction", type: "movie", year: "1994", poster: "https://images.metahub.space/poster/small/tt0110912/img", backdrop: "https://images.metahub.space/background/medium/tt0110912/img", description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.", genres: ["Crime"] },
+        { id: "tt0120737", title: "The Lord of the Rings: The Fellowship of the Ring", type: "movie", year: "2001", poster: "https://images.metahub.space/poster/small/tt0120737/img", backdrop: "https://images.metahub.space/background/medium/tt0120737/img", description: "A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.", genres: ["Action"] },
+        { id: "tt0167260", title: "The Lord of the Rings: The Return of the King", type: "movie", year: "2003", poster: "https://images.metahub.space/poster/small/tt0167260/img", backdrop: "https://images.metahub.space/background/medium/tt0167260/img", description: "Gandalf and Aragorn lead the World of Men against Sauron's army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.", genres: ["Action"] },
+        { id: "tt1375666", title: "Inception", type: "movie", year: "2010", poster: "https://images.metahub.space/poster/small/tt1375666/img", backdrop: "https://images.metahub.space/background/medium/tt1375666/img", description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.", genres: ["Action"] },
+        { id: "tt0068646", title: "The Godfather", type: "movie", year: "1972", poster: "https://images.metahub.space/poster/small/tt0068646/img", backdrop: "https://images.metahub.space/background/medium/tt0068646/img", description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.", genres: ["Crime"] },
+        { id: "tt0816692", title: "Interstellar", type: "movie", year: "2014", poster: "https://images.metahub.space/poster/small/tt0816692/img", backdrop: "https://images.metahub.space/background/medium/tt0816692/img", description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.", genres: ["Adventure"] },
+        { id: "tt0903747", title: "Breaking Bad", type: "tv", year: "2008", poster: "https://images.metahub.space/poster/small/tt0903747/img", backdrop: "https://images.metahub.space/background/medium/tt0903747/img", description: "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.", genres: ["Crime"] }
+      ];
+
+      // Instant Synchronous Render Helper
+      function renderTrendingUI(results, gridElement) {
+        if (!results || results.length === 0) return;
+
+        // 1. Render Hero Banner
+        const hero = results[0];
+        const heroSection = document.getElementById('homeHeroBanner');
+        const heroUrl = `movie.html?id=${encodeURIComponent(hero.id)}&type=${hero.type}`;
+        const heroTypeLabel = hero.type === 'anime' ? 'Anime' : (hero.type === 'tv' ? 'TV Series' : 'Movie');
+        
+        heroSection.innerHTML = `
+          <div class="banner-bg" style="background-image: url('${hero.backdrop || hero.poster}'); filter: brightness(0.4);"></div>
+          <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
+              <div class="hidden md:block w-64 flex-shrink-0">
+                  <div class="poster-container">
+                      <img src="${hero.poster}" alt="${hero.title}" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                  </div>
+              </div>
+
+              <div class="max-w-2xl mt-8 md:mt-0">
+                  <div class="flex items-center gap-4 mb-4">
+                      <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
+                      <div class="border-l border-neutral-700 pl-4">
+                          <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
+                          <p class="text-neutral-500 text-sm">Trending Worldwide</p>
+                      </div>
+                  </div>
+                  
+                  <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${hero.title}</h1>
+                  <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
+                      <span>${hero.year || ''}</span>
+                      <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                      <span>${hero.genres && hero.genres.length > 0 ? hero.genres[0] : heroTypeLabel}</span>
+                      <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                      <span>${(Math.random() * 5 + 1).toFixed(1)}M Downloads</span>
+                  </div>
+                  
+                  <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                      ${hero.description || 'Experience the epic trending title with perfectly synced and verified Arabic subtitles. Download directly below.'}
+                  </p>
+
+                  <div class="flex items-center gap-4">
+                      <a href="${heroUrl}" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                          Download Subtitles
+                      </a>
+                      <a href="${heroUrl}" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
+                          More Info
+                      </a>
+                  </div>
+              </div>
+          </div>
+        `;
+
+        // 2. Render Grid
+        const gridItems = results.slice(1, 11);
+        gridElement.innerHTML = gridItems.map((m, index) => {
+          const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
+          const targetUrl = `movie.html?id=${encodeURIComponent(m.id)}&type=${m.type}`;
+          const fakeDl = (Math.random() * 5 + 1).toFixed(1) + 'M Downloads';
+          
+          return `
+            <a href="${targetUrl}" class="movie-card cursor-pointer group block">
+                <div class="relative">
+                    <div class="poster-container">
+                        <img src="${m.poster}" alt="${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                        <span class="rank-number">${index + 2}</span>
+                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
+                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${typeLabel}</span>
+                        <span class="text-neutral-600 text-xs">${m.year || ''}</span>
+                    </div>
+                    <h3 class="text-base font-bold text-neutral-100 truncate">${m.title}</h3>
+                    <p class="text-neutral-500 text-sm mt-0.5">${fakeDl}</p>
+                </div>
+            </a>
+          `;
+        }).join('');
+      }
+
+      // Execute immediately during parsing! ZERO FLICKER!
+      (function() {
+        const cacheKey = `subtile_trending_all_v3`;
+        let dataToRender = INITIAL_FALLBACK_DATA; // Fallback so there's never an empty screen
+        
+        try {
+          const stored = localStorage.getItem(cacheKey);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && parsed.length >= 11) {
+              dataToRender = parsed;
+            }
+          }
+        } catch(e) {}
+        
+        const gridElement = document.getElementById('homeTrendingGrid');
+        renderTrendingUI(dataToRender, gridElement);
+      })();
+    </script>
+
     <script>
       let searchTimer = null;
       const searchInput = document.getElementById('mainSearchInput');
@@ -275,121 +355,26 @@
         searchDropdown.classList.add('active');
       }
 
-      // Helper to render both hero and grid
-      function renderTrendingUI(results, grid) {
-        if (!results || results.length === 0) return;
-
-        // 1. Render Hero Banner (index 0)
-        const hero = results[0];
-        const heroSection = document.getElementById('homeHeroBanner');
-        const heroUrl = `movie.html?id=${encodeURIComponent(hero.id)}&type=${hero.type}`;
-        const heroTypeLabel = hero.type === 'anime' ? 'Anime' : (hero.type === 'tv' ? 'TV Series' : 'Movie');
-        
-        heroSection.innerHTML = `
-          <div class="banner-bg" style="background-image: url('${hero.backdrop || hero.poster}'); filter: brightness(0.4);"></div>
-          <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
-              <div class="hidden md:block w-64 flex-shrink-0">
-                  <div class="poster-container">
-                      <img src="${hero.poster}" alt="${hero.title}" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                  </div>
-              </div>
-
-              <div class="max-w-2xl mt-8 md:mt-0">
-                  <div class="flex items-center gap-4 mb-4">
-                      <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
-                      <div class="border-l border-neutral-700 pl-4">
-                          <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
-                          <p class="text-neutral-500 text-sm">Trending Worldwide</p>
-                      </div>
-                  </div>
-                  
-                  <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${hero.title}</h1>
-                  <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
-                      <span>${hero.year || ''}</span>
-                      <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                      <span>${hero.genres && hero.genres.length > 0 ? hero.genres[0] : heroTypeLabel}</span>
-                      <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                      <span>${(Math.random() * 5 + 1).toFixed(1)}M Downloads</span>
-                  </div>
-                  
-                  <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                      ${hero.description || 'Experience the epic trending title with perfectly synced and verified Arabic subtitles. Download directly below.'}
-                  </p>
-
-                  <div class="flex items-center gap-4">
-                      <a href="${heroUrl}" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
-                          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                          Download Subtitles
-                      </a>
-                      <a href="${heroUrl}" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
-                          More Info
-                      </a>
-                  </div>
-              </div>
-          </div>
-        `;
-
-        // 2. Render Grid (index 1 to 10)
-        const gridItems = results.slice(1, 11);
-        grid.innerHTML = gridItems.map((m, index) => {
-          const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
-          const targetUrl = `movie.html?id=${encodeURIComponent(m.id)}&type=${m.type}`;
-          const fakeDl = (Math.random() * 5 + 1).toFixed(1) + 'M Downloads';
-          
-          return `
-            <a href="${targetUrl}" class="movie-card cursor-pointer group block">
-                <div class="relative">
-                    <div class="poster-container">
-                        <img src="${m.poster}" alt="${m.title}" class="poster-img shadow-2xl shadow-black/60" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-                        <span class="rank-number">${index + 2}</span>
-                        <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                            <button class="w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="bg-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${typeLabel}</span>
-                        <span class="text-neutral-600 text-xs">${m.year || ''}</span>
-                    </div>
-                    <h3 class="text-base font-bold text-neutral-100 truncate">${m.title}</h3>
-                    <p class="text-neutral-500 text-sm mt-0.5">${fakeDl}</p>
-                </div>
-            </a>
-          `;
-        }).join('');
-      }
-
-      // Home Page Trending Logic
+      // Home Page Trending Logic (Background fetch / Tabs)
       async function filterHomeTrending(type, btn, isInitialLoad = false) {
-        // Update active tab styles
-        document.querySelectorAll('#homeFilterPills .home-tab').forEach(b => {
-          b.className = "home-tab px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors";
-        });
         if (btn) {
+          document.querySelectorAll('#homeFilterPills .home-tab').forEach(b => {
+            b.className = "home-tab px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium hover:bg-neutral-800 hover:text-neutral-100 transition-colors";
+          });
           btn.className = "home-tab active px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 text-sm font-semibold transition-colors";
         }
 
         const grid = document.getElementById('homeTrendingGrid');
-        const cacheKey = `subtile_trending_${type}_v2`;
+        const cacheKey = `subtile_trending_${type}_v3`;
         
-        // Attempt to load from cache instantly
         let cachedData = null;
         try {
           const stored = localStorage.getItem(cacheKey);
-          if (stored) {
-            cachedData = JSON.parse(stored);
-            if (cachedData && cachedData.length > 0) {
-              renderTrendingUI(cachedData, grid);
-            }
-          }
+          if (stored) cachedData = JSON.parse(stored);
         } catch(e) {}
 
-        // Show loader only if we don't have cached data and it's not the initial load
-        if (!cachedData) {
+        // If not initial load and we click a tab without cache, show loader
+        if (!isInitialLoad && (!cachedData || cachedData.length < 11)) {
           grid.innerHTML = `
             <div style="grid-column: 1 / -1; padding: 4rem; text-align: center; color: var(--text-muted);">
               <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
@@ -456,35 +441,30 @@
           const settled = await Promise.all(promises);
           let results = settled.flat();
           
-          // Filter out Dune if user doesn't want it!
           results = results.filter(m => !m.title.toLowerCase().includes('dune'));
 
           results.sort(() => Math.random() - 0.5);
-          results = results.slice(0, 11); // need 1 for hero + 10 for grid
+          results = results.slice(0, 11);
 
           if (results.length > 0) {
-            // Save to cache
+            // Save to cache silently
             localStorage.setItem(cacheKey, JSON.stringify(results));
             
-            // Only re-render if we didn't have cache, OR if it's a tab click (not initial background fetch)
-            if (!cachedData || !isInitialLoad) {
+            // Only force re-render if user clicked a tab manually (!isInitialLoad)
+            // If it's just background fetch, we don't re-render to avoid flicker
+            if (!isInitialLoad) {
               renderTrendingUI(results, grid);
             }
-          } else if (!cachedData) {
-            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;">No trending data available.</div>';
           }
 
         } catch (err) {
           console.error(err);
-          if (!cachedData) {
-            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ef4444;">Failed to load trending data.</div>';
-          }
         }
       }
 
-      // Initial load
-      window.addEventListener('DOMContentLoaded', () => {
-        filterHomeTrending('all', document.querySelector('#homeFilterPills .home-tab'), true);
+      // Start background fetch to silently update cache without causing flicker
+      window.addEventListener('load', () => {
+        filterHomeTrending('all', null, true);
       });
     </script>
 </body>
