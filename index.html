@@ -265,13 +265,12 @@
 "use strict";
 
 let CURRENT_CATEGORY = "movie"; // 'movie' | 'tv' | 'anime'
-let CATEGORY_DATA = {
+const CATEGORY_DATA = {
     movie: [],
     tv: [],
     anime: []
 };
 
-let searchQuery = "";
 const $ = id => document.getElementById(id);
 
 async function fetchLiveTrending() {
@@ -380,11 +379,9 @@ function cardHTML(item, rank) {
 
 function renderGrid(customList) {
     const list = customList || (CATEGORY_DATA[CURRENT_CATEGORY] || []).slice(1);
-    const q = searchQuery.trim().toLowerCase();
-    const filtered = list.filter(x => !q || x.title.toLowerCase().includes(q));
-
-    $("grid").innerHTML = filtered.map((item, i) => cardHTML(item, i + 2)).join("");
-    $("emptyState").classList.toggle("hidden", filtered.length > 0);
+    
+    $("grid").innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
+    $("emptyState").classList.toggle("hidden", list.length === 0);
     observeReveals();
 }
 
@@ -416,11 +413,10 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 function observeReveals() { document.querySelectorAll(".reveal:not(.visible)").forEach(el => io.observe(el)); }
 
-$("searchInput").addEventListener("input", e => { searchQuery = e.target.value; renderGrid(); });
-
 $("searchInput").addEventListener("keydown", e => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-        window.location.href = `browse.html?q=${encodeURIComponent(searchQuery.trim())}`;
+    const val = e.target.value.trim();
+    if (e.key === "Enter" && val) {
+        window.location.href = `browse.html?q=${encodeURIComponent(val)}`;
     }
 });
 
