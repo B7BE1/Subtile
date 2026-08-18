@@ -142,15 +142,51 @@ async function loadMetadata(id, type) {
   if (local) return local;
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout
-    const res = await fetch(`/api/metadata?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type)}`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      return await res.json();
+    if (type === 'anime') {
+      const kitsuId = id.replace('anime-', '');
+      const res = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`);
+      if (res.ok) {
+        const d = await res.json();
+        if (d.data) {
+          const a = d.data;
+          const attrs = a.attributes || {};
+          const posterUrl = (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || '';
+          const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
+          return {
+            id: `anime-${a.id}`,
+            title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle,
+            type: 'anime',
+            year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
+            poster: posterUrl,
+            backdrop: bgUrl,
+            overview: attrs.synopsis || '',
+            genres: ['Anime'],
+            rating: attrs.averageRating ? (attrs.averageRating / 10).toFixed(1) : 'N/A',
+            episodes: Array.from({length: attrs.episodeCount || 12}, (_, i) => ({season: 1, episode: i+1}))
+          };
+        }
+      }
+    } else {
+      const cType = type === 'tv' ? 'series' : 'movie';
+      const res = await fetch(`https://v3-cinemeta.strem.io/meta/${cType}/${id}.json`);
+      if (res.ok) {
+        const d = await res.json();
+        if (d.meta) {
+          const m = d.meta;
+          return {
+            id: m.imdb_id || m.id,
+            title: m.name,
+            type: type,
+            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
+            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`,
+            backdrop: m.background || `https://images.metahub.space/background/medium/${m.id}/img`,
+            overview: m.description || '',
+            genres: m.genres || [type === 'tv' ? 'TV Series' : 'Movie'],
+            rating: m.imdbRating || 'N/A',
+            episodes: (m.videos || []).map(v => ({season: v.season, episode: v.episode}))
+          };
+        }
+      }
     }
   } catch (e) {
     console.error('Failed to load live metadata:', e);
