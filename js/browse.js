@@ -31,21 +31,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) searchInput.value = q;
     triggerLiveCatalogSearch(q);
   } else {
-    triggerLiveTrending(currentTypeFilter);
+    triggerLiveTrending(currentTypeFilter, currentPage);
   }
   setupAuthNavbar();
 });
 
+let currentPage = 1;
+let isFetching = false;
+let hasMore = true;
+
 // Fetch real trending/top data without API Keys
-async function triggerLiveTrending(type) {
+async function triggerLiveTrending(type, page = 1) {
+  if (isFetching || !hasMore) return;
+  isFetching = true;
+  const spinner = document.getElementById('loadingSpinner');
+  if (spinner) spinner.classList.remove('hidden');
+
   try {
     const promises = [];
+    // Cinemeta uses skip (e.g. 0, 50, 100). We'll fetch 50 items per page.
+    const skip = (page - 1) * 50;
 
     if (type === 'all' || type === 'movie') {
       promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`)
+        fetch(`https://v3-cinemeta.strem.io/catalog/movie/top/skip=${skip}.json`)
           .then(r => r.ok ? r.json() : { metas: [] })
-          .then(d => (d.metas || []).slice(0, 20).map(m => ({
+          .then(d => (d.metas || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
             type: 'movie',
@@ -59,9 +70,9 @@ async function triggerLiveTrending(type) {
 
     if (type === 'all' || type === 'tv') {
       promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`)
+        fetch(`https://v3-cinemeta.strem.io/catalog/series/top/skip=${skip}.json`)
           .then(r => r.ok ? r.json() : { metas: [] })
-          .then(d => (d.metas || []).slice(0, 20).map(m => ({
+          .then(d => (d.metas || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
             type: 'tv',
@@ -76,7 +87,7 @@ async function triggerLiveTrending(type) {
     if (type === 'all' || type === 'anime') {
       const query = `
         query {
-          Page(page: 1, perPage: 20) {
+          Page(page: ${page}, perPage: 50) {
             media(type: ANIME, sort: TRENDING_DESC) {
               id
               title { romaji english }
@@ -107,28 +118,66 @@ async function triggerLiveTrending(type) {
     }
 
     const settled = await Promise.all(promises);
-    liveSearchResults = settled.flat();
+    const newResults = settled.flat();
+    
+    if (newResults.length === 0) {
+        hasMore = false;
+    }
 
-    if (liveSearchResults.length === 0) {
+    if (page === 1) {
+      liveSearchResults = newResults;
+    } else {
+      liveSearchResults.push(...newResults);
+    }
+
+    if (liveSearchResults.length === 0 && page === 1) {
       liveSearchResults = [...MOVIES_DATABASE];
     }
   } catch (e) {
     console.error("Fetch Error:", e);
-    liveSearchResults = [...MOVIES_DATABASE];
+    if (page === 1) liveSearchResults = [...MOVIES_DATABASE];
   }
+  
+  isFetching = false;
+  if (spinner) spinner.classList.add('hidden');
   renderCatalog();
 }
 
+window.addEventListener('scroll', () => {
+    if (currentSearchQuery) return; // Disable infinite scroll during search
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY >= scrollableHeight - 800) {
+        if (!isFetching && hasMore) {
+            currentPage++;
+            triggerLiveTrending(currentTypeFilter, currentPage);
+        }
+    }
+});
+
 function renderCatalog() {
   const grid = document.getElementById('catalogGrid');
+  const empty = document.getElementById('catalogEmpty');
   const countBadge = document.getElementById('itemsCountBadge');
-  if (!grid) return;
 
-  let list = liveSearchResults.length > 0 ? [...liveSearchResults] : [...MOVIES_DATABASE];
+  if (!grid || !empty) return;
 
-  if (currentTypeFilter !== 'all') {
-    list = list.filter(item => item.type === currentTypeFilter);
+  const results = liveSearchResults.filter(item => {
+    if (currentTypeFilter !== 'all' && item.type !== currentTypeFilter) return false;
+    return true;
+  });
+
+  if (countBadge) {
+      countBadge.innerText = `${results.length} titles`;
   }
+
+  if (results.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  empty.classList.add('hidden');
+  let list = [...results];
 
   if (currentSort === 'rating') {
     list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -185,8 +234,12 @@ function filterCatalog(type, btn) {
   document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   
+  currentPage = 1;
+  hasMore = true;
+  liveSearchResults = [];
+  
   if (!currentSearchQuery) {
-    triggerLiveTrending(type);
+    triggerLiveTrending(type, currentPage);
   } else {
     renderCatalog();
   }
@@ -199,9 +252,12 @@ function onCatalogSearch() {
   currentSearchQuery = input.value.trim();
   clearTimeout(browseDebounceTimer);
 
+  currentPage = 1;
+  hasMore = true;
+
   if (!currentSearchQuery) {
     liveSearchResults = [];
-    triggerLiveTrending(currentTypeFilter);
+    triggerLiveTrending(currentTypeFilter, currentPage);
     return;
   }
 
