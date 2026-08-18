@@ -264,13 +264,49 @@
 <script>
 "use strict";
 
-let CURRENT_CATEGORY = "movie"; // 'movie' | 'tv' | 'anime'
-const CATEGORY_DATA = {
-    movie: [],
-    tv: [],
-    anime: []
+const DEFAULT_CATEGORY_DATA = {
+    movie: [
+        { rank: 1, id: "tt0816692", title: "Interstellar", year: 2014, type: "movie", genre: "Sci-Fi / Adventure", rating: "8.7", poster: "https://images.metahub.space/poster/small/tt0816692/img", backdrop: "https://images.metahub.space/background/medium/tt0816692/img", desc: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot is tasked with piloting a spacecraft to find a new home.", downloads: "4.8M", lang: "English" },
+        { rank: 2, id: "tt1375666", title: "Inception", year: 2010, type: "movie", genre: "Sci-Fi / Action", rating: "8.8", poster: "https://images.metahub.space/poster/small/tt1375666/img", backdrop: "https://images.metahub.space/background/medium/tt1375666/img", desc: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.", downloads: "4.5M", lang: "English" },
+        { rank: 3, id: "tt0468569", title: "The Dark Knight", year: 2008, type: "movie", genre: "Action / Crime", rating: "9.0", poster: "https://images.metahub.space/poster/small/tt0468569/img", backdrop: "https://images.metahub.space/background/medium/tt0468569/img", desc: "When the menace known as the Joker wreaks havoc and chaos on Gotham City, Batman must accept one of the greatest psychological tests.", downloads: "4.2M", lang: "English" },
+        { rank: 4, id: "tt7286456", title: "Joker", year: 2019, type: "movie", genre: "Crime / Drama", rating: "8.4", poster: "https://images.metahub.space/poster/small/tt7286456/img", backdrop: "https://images.metahub.space/background/medium/tt7286456/img", desc: "During the 1980s, a failed stand-up comedian is driven insane and turns to a life of crime and chaos in Gotham City.", downloads: "3.9M", lang: "English" },
+        { rank: 5, id: "tt6751668", title: "Parasite", year: 2019, type: "movie", genre: "Thriller / Drama", rating: "8.5", poster: "https://images.metahub.space/poster/small/tt6751668/img", backdrop: "https://images.metahub.space/background/medium/tt6751668/img", desc: "Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.", downloads: "3.6M", lang: "Korean" },
+        { rank: 6, id: "tt0111161", title: "The Shawshank Redemption", year: 1994, type: "movie", genre: "Drama / Crime", rating: "9.3", poster: "https://images.metahub.space/poster/small/tt0111161/img", backdrop: "https://images.metahub.space/background/medium/tt0111161/img", desc: "Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion.", downloads: "3.3M", lang: "English" },
+        { rank: 7, id: "tt0109830", title: "Forrest Gump", year: 1994, type: "movie", genre: "Drama / Romance", rating: "8.8", poster: "https://images.metahub.space/poster/small/tt0109830/img", backdrop: "https://images.metahub.space/background/medium/tt0109830/img", desc: "The history of the United States from the 1950s to the '70s unfolds from the perspective of an Alabama man with an IQ of 75.", downloads: "3.0M", lang: "English" },
+        { rank: 8, id: "tt0137523", title: "Fight Club", year: 1999, type: "movie", genre: "Drama / Thriller", rating: "8.8", poster: "https://images.metahub.space/poster/small/tt0137523/img", backdrop: "https://images.metahub.space/background/medium/tt0137523/img", desc: "An insomniac office worker and a devil-may-care soap maker form an underground fight club that evolves into much more.", downloads: "2.7M", lang: "English" },
+        { rank: 9, id: "tt0133093", title: "The Matrix", year: 1999, type: "movie", genre: "Sci-Fi / Action", rating: "8.7", poster: "https://images.metahub.space/poster/small/tt0133093/img", backdrop: "https://images.metahub.space/background/medium/tt0133093/img", desc: "When a beautiful stranger leads computer hacker Neo to a forbidding underworld, he discovers the shocking truth--the life he knows is an elaborate deception.", downloads: "2.4M", lang: "English" },
+        { rank: 10, id: "tt0110912", title: "Pulp Fiction", year: 1994, type: "movie", genre: "Crime / Drama", rating: "8.9", poster: "https://images.metahub.space/poster/small/tt0110912/img", backdrop: "https://images.metahub.space/background/medium/tt0110912/img", desc: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.", downloads: "2.1M", lang: "English" }
+    ],
+    tv: [
+        { rank: 1, id: "tt3581920", title: "The Last of Us", year: 2023, type: "tv", genre: "Drama / Horror", rating: "8.8", poster: "https://images.metahub.space/poster/small/tt3581920/img", backdrop: "https://images.metahub.space/background/medium/tt3581920/img", desc: "After a global pandemic destroys civilization, a hardened survivor takes charge of a 14-year-old girl who may be humanity's last hope.", downloads: "4.1M", lang: "English" },
+        { rank: 2, id: "tt0903747", title: "Breaking Bad", year: 2008, type: "tv", genre: "Crime / Drama", rating: "9.5", poster: "https://images.metahub.space/poster/small/tt0903747/img", backdrop: "https://images.metahub.space/background/medium/tt0903747/img", desc: "A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine with a former student.", downloads: "3.9M", lang: "English" },
+        { rank: 3, id: "tt11198330", title: "House of the Dragon", year: 2024, type: "tv", genre: "Drama / Fantasy", rating: "8.4", poster: "https://images.metahub.space/poster/small/tt11198330/img", backdrop: "https://images.metahub.space/background/medium/tt11198330/img", desc: "An internal succession war within House Targaryen at the height of its power, 172 years before the birth of Daenerys Targaryen.", downloads: "3.7M", lang: "English" },
+        { rank: 4, id: "tt0944947", title: "Game of Thrones", year: 2011, type: "tv", genre: "Action / Drama", rating: "9.2", poster: "https://images.metahub.space/poster/small/tt0944947/img", backdrop: "https://images.metahub.space/background/medium/tt0944947/img", desc: "Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.", downloads: "3.5M", lang: "English" },
+        { rank: 5, id: "tt4574334", title: "Stranger Things", year: 2016, type: "tv", genre: "Drama / Fantasy", rating: "8.7", poster: "https://images.metahub.space/poster/small/tt4574334/img", backdrop: "https://images.metahub.space/background/medium/tt4574334/img", desc: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.", downloads: "3.3M", lang: "English" },
+        { rank: 6, id: "tt1190634", title: "The Boys", year: 2019, type: "tv", genre: "Action / Sci-Fi", rating: "8.7", poster: "https://images.metahub.space/poster/small/tt1190634/img", backdrop: "https://images.metahub.space/background/medium/tt1190634/img", desc: "A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers.", downloads: "3.0M", lang: "English" },
+        { rank: 7, id: "tt15435876", title: "The Penguin", year: 2024, type: "tv", genre: "Crime / Drama", rating: "8.8", poster: "https://images.metahub.space/poster/small/tt15435876/img", backdrop: "https://images.metahub.space/background/medium/tt15435876/img", desc: "Following the events of The Batman, Oz Cobb strives to seize the reins of the criminal underworld in Gotham City.", downloads: "2.8M", lang: "English" },
+        { rank: 8, id: "tt2442560", title: "Peaky Blinders", year: 2013, type: "tv", genre: "Crime / Drama", rating: "8.8", poster: "https://images.metahub.space/poster/small/tt2442560/img", backdrop: "https://images.metahub.space/background/medium/tt2442560/img", desc: "A gangster family epic set in 1900s England, centering on a gang who sew razor blades in the peaks of their caps, and their fierce boss Tommy Shelby.", downloads: "2.5M", lang: "English" },
+        { rank: 9, id: "tt0460649", title: "How I Met Your Mother", year: 2005, type: "tv", genre: "Comedy / Romance", rating: "8.3", poster: "https://images.metahub.space/poster/small/tt0460649/img", backdrop: "https://images.metahub.space/background/medium/tt0460649/img", desc: "A father recounts to his children - through a series of flashbacks - the journey he and his four best friends took leading up to him meeting their mother.", downloads: "2.2M", lang: "English" },
+        { rank: 10, id: "tt1475582", title: "Sherlock", year: 2010, type: "tv", genre: "Crime / Drama", rating: "9.1", poster: "https://images.metahub.space/poster/small/tt1475582/img", backdrop: "https://images.metahub.space/background/medium/tt1475582/img", desc: "A modern update finds the famous sleuth and his doctor partner solving crime in 21st century London.", downloads: "2.0M", lang: "English" }
+    ],
+    anime: [
+        { rank: 1, id: "anime-16498", title: "Attack on Titan", year: 2013, type: "anime", genre: "Anime / Action", rating: "9.0", poster: "https://media.kitsu.app/anime/poster_images/7442/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/7442/large.jpg", desc: "After his hometown is destroyed and his mother is killed, young Eren Jaeger vows to cleanse the earth of the giant humanoid Titans.", downloads: "3.8M", lang: "Japanese" },
+        { rank: 2, id: "anime-52991", title: "Solo Leveling", year: 2024, type: "anime", genre: "Anime / Action", rating: "8.5", poster: "https://media.kitsu.app/anime/46231/poster_image/large-cdadff31f42490b9f48a035939a01a92.jpeg", backdrop: "https://media.kitsu.app/anime/46231/poster_image/large-cdadff31f42490b9f48a035939a01a92.jpeg", desc: "In a world where hunters must battle deadly monsters, weak hunter Sung Jinwoo discovers a quest only he can see.", downloads: "3.6M", lang: "Japanese" },
+        { rank: 3, id: "anime-40748", title: "Jujutsu Kaisen", year: 2020, type: "anime", genre: "Anime / Fantasy", rating: "8.6", poster: "https://media.kitsu.app/anime/42765/poster_image/large-5ce19551c1a6cf995b378205b9149b5c.jpeg", backdrop: "https://media.kitsu.app/anime/42765/poster_image/large-5ce19551c1a6cf995b378205b9149b5c.jpeg", desc: "A boy swallows a cursed talisman and becomes cursed himself. He enters a shaman's school to locate all of Sukuna's fingers.", downloads: "3.4M", lang: "Japanese" },
+        { rank: 4, id: "anime-38000", title: "Demon Slayer", year: 2019, type: "anime", genre: "Anime / Action", rating: "8.7", poster: "https://media.kitsu.app/anime/poster_images/41370/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/41370/large.jpg", desc: "A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko, who is turning into a demon herself.", downloads: "3.2M", lang: "Japanese" },
+        { rank: 5, id: "anime-1535", title: "Death Note", year: 2006, type: "anime", genre: "Anime / Mystery", rating: "9.0", poster: "https://media.kitsu.app/anime/poster_images/1376/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/1376/large.jpg", desc: "An intelligent high school student goes on a secret crusade to eliminate criminals from the world after discovering a notebook capable of killing anyone.", downloads: "3.0M", lang: "Japanese" },
+        { rank: 6, id: "anime-5114", title: "Fullmetal Alchemist", year: 2009, type: "anime", genre: "Anime / Adventure", rating: "9.1", poster: "https://media.kitsu.app/anime/poster_images/100/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/100/large.jpg", desc: "Two brothers search for a Philosopher's Stone after an attempt to revive their deceased mother goes awry and leaves them in damaged physical forms.", downloads: "2.8M", lang: "Japanese" },
+        { rank: 7, id: "anime-11061", title: "Hunter x Hunter", year: 2011, type: "anime", genre: "Anime / Adventure", rating: "9.0", poster: "https://media.kitsu.app/anime/poster_images/6448/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/6448/large.jpg", desc: "Gon Freecss aspires to become a Hunter, an exceptional being capable of greatness. With his friends and his potential, he seeks for his father.", downloads: "2.6M", lang: "Japanese" },
+        { rank: 8, id: "anime-37521", title: "Vinland Saga", year: 2019, type: "anime", genre: "Anime / Drama", rating: "8.7", poster: "https://media.kitsu.app/anime/poster_images/41084/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/41084/large.jpg", desc: "Thorfinn pursues a journey with his father's killer in order to take revenge and end his life in a duel as an honorable warrior.", downloads: "2.4M", lang: "Japanese" },
+        { rank: 9, id: "anime-44511", title: "Chainsaw Man", year: 2022, type: "anime", genre: "Anime / Action", rating: "8.5", poster: "https://media.kitsu.app/anime/43806/poster_image/large-815d6008fb3b56f4291b9f0ffa05cd8f.jpeg", backdrop: "https://media.kitsu.app/anime/43806/poster_image/large-815d6008fb3b56f4291b9f0ffa05cd8f.jpeg", desc: "Following a betrayal, a young man left for the dead is reborn as a powerful devil-human hybrid known as Chainsaw Man.", downloads: "2.2M", lang: "Japanese" },
+        { rank: 10, id: "anime-9253", title: "Steins;Gate", year: 2011, type: "anime", genre: "Anime / Sci-Fi", rating: "9.1", poster: "https://media.kitsu.app/anime/poster_images/5646/large.jpg", backdrop: "https://media.kitsu.app/anime/poster_images/5646/large.jpg", desc: "After discovering time travel, a university student and his colleagues must use their knowledge of it to stop an evil organization.", downloads: "2.0M", lang: "Japanese" }
+    ]
 };
 
+let CURRENT_CATEGORY = "movie"; // 'movie' | 'tv' | 'anime'
+let CATEGORY_DATA = JSON.parse(JSON.stringify(DEFAULT_CATEGORY_DATA));
+
+let searchQuery = "";
 const $ = id => document.getElementById(id);
 
 async function fetchLiveTrending() {
@@ -278,14 +314,14 @@ async function fetchLiveTrending() {
         const res = await fetch('/api/trending');
         if (res.ok) {
             const data = await res.json();
-            if (data.categories) {
+            if (data.categories && data.categories.movie && data.categories.movie.length > 0) {
                 CATEGORY_DATA = data.categories;
+                renderActiveCategory();
             }
         }
     } catch (e) {
         console.warn('API error, using local fallback:', e);
     }
-    renderActiveCategory();
 }
 
 function switchCategory(cat) {
@@ -437,6 +473,7 @@ toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smoot
 
 $("year").textContent = new Date().getFullYear();
 updateAuthNav();
+renderActiveCategory();
 fetchLiveTrending();
 </script>
 </body>
