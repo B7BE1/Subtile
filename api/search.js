@@ -1,76 +1,85 @@
 /**
- * Subtile - Hybrid Search Serverless API
- * Searches both local Supabase database and TMDB API.
+ * Universal Search API (Cinemeta for Movies/Series + Jikan for Anime)
  */
 
 export default async function handler(req, res) {
-  const { query, type = 'multi' } = req.query;
+  const { q, type = 'all' } = req.query;
 
-  if (!query) return res.status(400).json({ error: 'Query is required' });
-
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
-  const tmdbKey = process.env.TMDB_API_KEY;
-
-  let combinedResults = [];
-
-  // 1. Search local Supabase database if credentials exist
-  if (supabaseUrl && supabaseKey) {
-    try {
-      const headers = {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`
-      };
-      const sbRes = await fetch(
-        `${supabaseUrl}/rest/v1/media_titles?or=(title.ilike.*${encodeURIComponent(query)}*,arabic_title.ilike.*${encodeURIComponent(query)}*)&limit=10`,
-        { headers }
-      );
-      if (sbRes.ok) {
-        const localRows = await sbRes.json();
-        if (Array.isArray(localRows)) {
-          combinedResults = localRows.map(row => ({
-            id: row.tmdb_id || row.id,
-            title: row.title,
-            arabic_title: row.arabic_title,
-            type: row.type,
-            year: row.year ? String(row.year) : '',
-            rating: row.rating ? Number(row.rating).toFixed(1) : '8.5',
-            poster_path: row.poster,
-            overview: row.overview || '',
-            source: 'local_db'
-          }));
-        }
-      }
-    } catch (e) {
-      console.warn('Supabase local search warning:', e.message);
-    }
+  if (!q) {
+    return res.status(400).json({ error: 'Search query "q" is required' });
   }
 
-  // 2. Search TMDB API
-  if (tmdbKey) {
-    try {
-      const searchType = type === 'all' ? 'multi' : type;
-      const TMDB_URL = `https://api.themoviedb.org/3/search/${searchType}?api_key=${tmdbKey}&query=${encodeURIComponent(query)}&language=ar-SA`;
-      const response = await fetch(TMDB_URL);
-      
-      if (response.ok) {
-        const tmdbData = await response.json();
-        const tmdbResults = tmdbData.results || [];
-        
-        // Merge without duplicates by TMDB ID
-        const existingIds = new Set(combinedResults.map(r => String(r.id)));
-        for (const item of tmdbResults) {
-          if (!existingIds.has(String(item.id))) {
-            combinedResults.push(item);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('TMDB Search API Error:', error);
-    }
-  }
+  const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
 
-  // Set Edge Cache (1 hour)
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-  return res.status(200).json({ results: combinedResults });
+  try {
+    const searchPromises = [];
+
+    // Search Cinemeta Movies
+    if (type === 'all' || type === 'movie') {
+      const pMovie = fetch(`https://v3-cinemeta.strem.io/catalog/movie/top/search=${encodeURIComponent(q)}.json`, {
+        headers: { 'User-Agent': USER_AGENT }
+      })
+      .then(r => r.ok ? r.json() : { metas: [] })
+      .then(d => (d.metas || []).map(m => ({
+        id: m.imdb_id || m.id,
+        title: m.name,
+        year: parseInt(m.year) || null,
+        type: 'movie',
+        rating: parseFloat(m.imdbRating) || 0,
+        poster: m.poster || '',
+        genres: m.genres || []
+      })))
+      .catch(() => []);
+      searchPromises.push(pMovie);
+    }
+
+    // Search Cinemeta Series
+    if (type === 'all' || type === 'tv' || type === 'series') {
+      const pSeries = fetch(`https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(q)}.json`, {
+        headers: { 'User-Agent': USER_AGENT }
+      })
+      .then(r => r.ok ? r.json() : { metas: [] })
+      .then(d => (d.metas || []).map(m => ({
+        id: m.imdb_id || m.id,
+        title: m.name,
+        year: parseInt(m.year) || null,
+        type: 'tv',
+        rating: parseFloat(m.imdbRating) || 0,
+        poster: m.poster || '',
+        genres: m.genres || []
+      })))
+      .catch(() => []);
+      searchPromises.push(pSeries);
+    }
+
+    // Search Jikan Anime
+    if (type === 'all' || type === 'anime') {
+      const pAnime = fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=8`, {
+        headers: { 'User-Agent': USER_AGENT }
+      })
+      .then(r => r.ok ? r.json() : { data: [] })
+      .then(d => (d.data || []).map(a => ({
+        id: `anime-${a.mal_id}`,
+        mal_id: a.mal_id,
+        title: a.title_english || a.title,
+        year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+        type: 'anime',
+        rating: parseFloat(a.score) || 0,
+        poster: (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '',
+        genres: (a.genres || []).map(g => g.name)
+      })))
+      .catch(() => []);
+      searchPromises.push(pAnime);
+    }
+
+    const settled = await Promise.all(searchPromises);
+    const results = settled.flat();
+
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    return res.status(200).json({ query: q, count: results.length, results });
+
+  } catch (error) {
+    console.error('Search API Error:', error);
+    return res.status(500).json({ error: 'Search failed' });
+  }
 }
