@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subtile - Find and Download Subtitles for Movies and TV Shows</title>
-  <meta name="description" content="Find perfect subtitles in any language for all your favorite films and shows. Download synced subtitles for BluRay, WEB-DL, and 4K.">
+  <title>Subtile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +12,7 @@
 </head>
 <body>
 
-  <!-- SubDL Top Header -->
+  <!-- Top Header -->
   <header class="subdl-header">
     <a href="index.html" class="subdl-logo">
       <span class="logo-badge">SUBTILE</span>
@@ -21,10 +20,9 @@
 
     <ul class="subdl-nav">
       <li><a href="index.html" class="subdl-nav-link active">Latest</a></li>
-      <li><a href="#trending" class="subdl-nav-link">Trends</a></li>
-      <li><a href="#trending" class="subdl-nav-link">Leaderboard</a></li>
-      <li><a href="#recent" class="subdl-nav-link">Plugins</a></li>
-      <li><a href="https://github.com/B7BE1/Subtile" target="_blank" class="subdl-nav-link">Community</a></li>
+      <li><a href="#" class="subdl-nav-link">Trends</a></li>
+      <li><a href="#" class="subdl-nav-link">Leaderboard</a></li>
+      <li><a href="#" class="subdl-nav-link">Community</a></li>
     </ul>
 
     <div class="subdl-header-actions">
@@ -42,156 +40,12 @@
     </div>
   </header>
 
-  <!-- SubDL Exact Hero Section -->
-  <section class="subdl-hero">
-    <div class="subdl-hero-content">
-      <h1 class="subdl-hero-title">
-        Find perfect subtitles in any language for all your favorite films and shows!
-      </h1>
-
-      <!-- Search Input -->
-      <div class="subdl-search-container">
-        <div class="subdl-search-box">
-          <input type="text" id="heroSearchInput" class="subdl-search-input" placeholder="Search Movies and TV shows or IMDb ID" autocomplete="off">
-          <button class="subdl-search-filter-btn" onclick="performSearch()" title="Search">
-            <i class="fas fa-sliders-h"></i>
-          </button>
-        </div>
-
-        <!-- Live Dropdown -->
-        <div id="searchResultsDropdown" class="subdl-search-dropdown"></div>
-      </div>
-
-      <!-- Trends List -->
-      <div class="subdl-trends-list">
-        <div class="subdl-trends-label">
-          <i class="fas fa-bolt"></i> Trends:
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <span class="subdl-trend-item" onclick="quickSearch('Dune: Part Two')">Dune: Part Two</span>
-          <span class="subdl-trend-item" onclick="quickSearch('Oppenheimer')">Oppenheimer</span>
-          <span class="subdl-trend-item" onclick="quickSearch('Breaking Bad')">Breaking Bad</span>
-          <span class="subdl-trend-item" onclick="quickSearch('Attack on Titan')">Attack on Titan</span>
-          <span class="subdl-trend-item" onclick="quickSearch('The Batman')">The Batman</span>
-          <span class="subdl-trend-item" onclick="quickSearch('Interstellar')">Interstellar</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SubDL Main Content -->
-  <main class="subdl-container">
-    
-    <!-- Popular Latest Subtitles Section -->
-    <section id="trending">
-      <div class="subdl-section-header">
-        <h2 class="subdl-section-title">Popular Latest Subtitles</h2>
-        <a href="#trending" class="subdl-view-all">View all &rarr;</a>
-      </div>
-
-      <div id="moviesGrid" class="subdl-movie-grid">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-
-    <!-- Recent Subtitles Feed -->
-    <section id="recent">
-      <div class="subdl-section-header">
-        <h2 class="subdl-section-title">Recent Subtitle Uploads</h2>
-        <a href="#recent" class="subdl-view-all">View all &rarr;</a>
-      </div>
-
-      <div id="recentSubtitlesFeed" style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 3rem;">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-
+  <!-- Clean Canvas Container (Ready to build piece by piece) -->
+  <main class="subdl-container" id="mainContent">
+    <!-- Blank clean area ready for your input -->
   </main>
 
-  <!-- Auth Modal -->
-  <div id="authModal" class="modal-backdrop">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Subtile Account</h3>
-        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
-      </div>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
-        <button id="authTabLogin" class="btn-subdl-submit" style="flex: 1; padding: 0.4rem;" onclick="switchAuthTab('login')">Login</button>
-        <button id="authTabRegister" class="btn-auth-subdl" style="flex: 1; padding: 0.4rem; justify-content: center;" onclick="switchAuthTab('register')">Register</button>
-      </div>
-      <form id="loginForm" onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label class="form-label">Username or Email</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="username" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-subdl-submit" style="margin-top: 0.5rem;">Sign In</button>
-      </form>
-      <form id="registerForm" style="display: none;" onsubmit="handleRegisterSubmit(event)">
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input type="text" id="regUsername" class="form-control" placeholder="username" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" id="regEmail" class="form-control" placeholder="email@example.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-subdl-submit" style="margin-top: 0.5rem;">Create Account</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Upload Modal -->
-  <div id="uploadModal" class="modal-backdrop">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Upload Subtitle</h3>
-        <button class="modal-close" onclick="closeUploadModal()">&times;</button>
-      </div>
-      <form id="uploadForm" onsubmit="handleUploadSubtitle(event)">
-        <div class="form-group">
-          <label class="form-label">Movie / TV Show Title</label>
-          <input type="text" class="form-control" placeholder="e.g. Dune: Part Two" required>
-        </div>
-        <div class="form-group" style="display: flex; gap: 0.8rem;">
-          <div style="flex: 1;">
-            <label class="form-label">Language</label>
-            <select class="form-control">
-              <option value="Arabic">Arabic</option>
-              <option value="English">English</option>
-              <option value="French">French</option>
-              <option value="Spanish">Spanish</option>
-            </select>
-          </div>
-          <div style="flex: 1;">
-            <label class="form-label">Release Name</label>
-            <input type="text" class="form-control" placeholder="1080p.BluRay.x264" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Subtitle File (.srt / .zip)</label>
-          <input type="file" accept=".srt,.zip,.vtt" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Translator / Uploader</label>
-          <input type="text" class="form-control" placeholder="Your name or team" required>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem;">
-          <button type="button" class="btn-auth-subdl" onclick="closeUploadModal()">Cancel</button>
-          <button type="submit" class="btn-subdl-submit" style="width: auto; padding: 0.5rem 1.2rem;">Upload</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Toast -->
+  <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- SubDL Bottom Navigation -->
@@ -204,7 +58,7 @@
       <li><a href="#">Terms</a></li>
     </ul>
     <div style="color: var(--text-muted);">
-      &copy; 2026 Subtile - Subtitles Platform
+      &copy; 2026 Subtile
     </div>
   </footer>
 
@@ -213,6 +67,5 @@
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/auth-ui.js"></script>
-  <script src="js/app.js"></script>
 </body>
 </html>
