@@ -236,12 +236,17 @@ async function loadMetadata(id, type) {
         }
       }
 
-      // AniList GraphQL Fallback (handles AniList IDs like 185874 or unindexed MAL entries)
+      // AniList GraphQL Fallback (handles unindexed/rate-limited MAL entries).
+      // malId here is a MyAnimeList id (stripped from the "anime-" prefix
+      // used throughout this app), NOT an AniList internal id — those are
+      // different numbering schemes. Must query by idMal, not id, or this
+      // silently returns an unrelated anime whenever the two happen to
+      // collide. (Same bug, same fix, as lib/metadata/sources/anilist.js.)
       try {
         const numId = parseInt(malId, 10);
         const alQuery = `
-          query ($id: Int) {
-            Media(id: $id, type: ANIME) {
+          query ($idMal: Int) {
+            Media(idMal: $idMal, type: ANIME) {
               id
               idMal
               title { english romaji userPreferred }
@@ -259,7 +264,7 @@ async function loadMetadata(id, type) {
         const alRes = await fetch('https://graphql.anilist.co', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ query: alQuery, variables: { id: numId } }),
+          body: JSON.stringify({ query: alQuery, variables: { idMal: numId } }),
           signal: controller.signal
         });
         if (alRes.ok) {
