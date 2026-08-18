@@ -11,16 +11,91 @@ let browseDebounceTimer = null;
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const q = urlParams.get('q');
+  const typeParam = urlParams.get('type');
+  
+  if (typeParam) {
+    currentTypeFilter = typeParam;
+    const typeBtn = document.querySelector(`.filter-tab-btn[onclick*="'${typeParam}'"]`);
+    if (typeBtn) {
+      document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+      typeBtn.classList.add('active');
+    }
+  }
+
   if (q) {
     currentSearchQuery = q;
     const searchInput = document.getElementById('catalogSearchInput');
     if (searchInput) searchInput.value = q;
     triggerLiveCatalogSearch(q);
   } else {
-    renderCatalog();
+    // If no search, fetch trending items based on type!
+    triggerLiveTrending(currentTypeFilter);
   }
   setupAuthNavbar();
 });
+
+async function triggerLiveTrending(type) {
+  try {
+    const promises = [];
+    const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
+
+    if (type === 'all' || type === 'tv') {
+      promises.push(
+        fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+          .then(r => r.ok ? r.json() : { metas: [] })
+          .then(d => (d.metas || []).slice(0, 15).map(m => ({
+            id: m.imdb_id || m.id, imdb_id: m.imdb_id || m.id, title: m.name, type: 'tv', 
+            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
+            rating: parseFloat(m.imdbRating) || 8.5,
+            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
+          })))
+          .catch(() => [])
+      );
+    }
+
+    if (type === 'all' || type === 'movie') {
+      promises.push(
+        fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+          .then(r => r.ok ? r.json() : { metas: [] })
+          .then(d => (d.metas || []).slice(0, 15).map(m => ({
+            id: m.imdb_id || m.id, imdb_id: m.imdb_id || m.id, title: m.name, type: 'movie',
+            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
+            rating: parseFloat(m.imdbRating) || 8.0,
+            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
+          })))
+          .catch(() => [])
+      );
+    }
+
+    if (type === 'all' || type === 'anime') {
+      promises.push(
+        fetch(`https://api.jikan.moe/v4/top/anime?limit=15`, { headers: { 'User-Agent': USER_AGENT } })
+          .then(r => r.ok ? r.json() : { data: [] })
+          .then(d => (d.data || []).map(a => ({
+            id: `anime-${a.mal_id}`, mal_id: a.mal_id, title: a.title_english || a.title, type: 'anime',
+            year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+            rating: parseFloat(a.score) || 8.0,
+            poster: (a.images && a.images.webp && a.images.webp.large_image_url) || ''
+          })))
+          .catch(() => [])
+      );
+    }
+
+    const settled = await Promise.all(promises);
+    liveSearchResults = settled.flat();
+    
+    // Sort by rating to mix them up
+    liveSearchResults.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+    if (liveSearchResults.length === 0) {
+      // Fallback if API fails
+      liveSearchResults = [...MOVIES_DATABASE];
+    }
+  } catch (e) {
+    liveSearchResults = [...MOVIES_DATABASE];
+  }
+  renderCatalog();
+}
 
 function renderCatalog() {
   const grid = document.getElementById('catalogGrid');
@@ -107,7 +182,13 @@ function filterCatalog(type, btn) {
   currentTypeFilter = type;
   document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderCatalog();
+  
+  if (!currentSearchQuery) {
+    // If not searching, fetch the specific top catalog live!
+    triggerLiveTrending(type);
+  } else {
+    renderCatalog();
+  }
 }
 
 function onCatalogSearch() {
