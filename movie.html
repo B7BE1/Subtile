@@ -298,23 +298,23 @@
     <!-- Left Panel (Large Rectangle - Work Info) -->
     <aside class="left-panel">
       <div class="left-content">
-        <img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-poster">
+        <img id="moviePoster" src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-poster">
         
-        <div class="movie-tags">
+        <div id="movieTags" class="movie-tags">
           <span class="tag">2024</span>
           <span class="tag">Sci-Fi</span>
           <span class="tag">Action</span>
         </div>
         
-        <h1 class="movie-title">Dune: Part Two</h1>
+        <h1 id="movieTitle" class="movie-title">Dune: Part Two</h1>
         
-        <div class="movie-meta">
+        <div id="movieMeta" class="movie-meta">
           <div class="rating-token"><span>8.6</span></div>
           <div class="meta-item"><i class="fas fa-clock"></i> 2h 46m</div>
           <div class="meta-item"><i class="fas fa-language"></i> EN</div>
         </div>
         
-        <p class="movie-desc">
+        <p id="movieOverview" class="movie-desc">
           Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe.
         </p>
       </div>
@@ -322,22 +322,22 @@
 
     <!-- Right Panel (Lists) -->
     <main class="right-panel">
-      <div class="banner-bg"></div>
+      <div id="movieBackdropSection" class="banner-bg"></div>
       <div class="banner-overlay"></div>
 
       <div class="list-wrapper">
         
         <!-- Top: 5 Small Rectangles (Filters) -->
-        <div class="filter-pills">
-          <div class="pill active">All</div>
-          <div class="pill">Arabic</div>
-          <div class="pill">English</div>
-          <div class="pill">4K</div>
-          <div class="pill">1080p</div>
+        <div id="filterPillsContainer" class="filter-pills">
+          <div class="pill active" data-filter="all">All</div>
+          <div class="pill" data-filter="lang:ar">Arabic</div>
+          <div class="pill" data-filter="lang:en">English</div>
+          <div class="pill" data-filter="quality:4K">4K</div>
+          <div class="pill" data-filter="quality:1080p">1080p</div>
         </div>
 
         <!-- Bottom: 5 Long Rectangles (Subtitle Items) -->
-        <div class="subtitles-list" id="subList">
+        <div class="subtitles-list" id="subtitlesList">
           <!-- Items injected by JS -->
         </div>
       </div>
@@ -377,53 +377,6 @@
   </div>
 
   <script>
-    // Mock Data (5 Items)
-    const subtitles = [
-      { release: "Dune.Part.Two.2024.2160p.4K.UHD", format: "SRT", lang: "English", flag: "GB", author: "Official", downloads: "24.1k" },
-      { release: "Dune.Part.Two.2024.1080p.WEB-DL", format: "SRT", lang: "English", flag: "US", author: "Crawler", downloads: "15.3k" },
-      { release: "Dune.Part.Two.2024.1080p.BluRay", format: "ZIP", lang: "Arabic", flag: "SA", author: "Sub Team X", downloads: "8.9k" },
-      { release: "Dune.Part.Two.2024.720p.HD", format: "SRT", lang: "Arabic", flag: "SA", author: "Translator Pro", downloads: "12.4k" },
-      { release: "Dune.Part.Two.2024.720p.WEBRip", format: "SRT", lang: "Arabic", flag: "EG", author: "Pro Subs", downloads: "5.2k" }
-    ];
-
-    // Render List
-    const list = document.getElementById('subList');
-    subtitles.forEach((sub) => {
-      const item = document.createElement('div');
-      item.className = 'subtitle-item';
-      item.innerHTML = `
-        <div class="sub-info">
-          <div class="sub-release">
-            ${sub.release}
-            <span class="format-badge">${sub.format}</span>
-          </div>
-          <div class="sub-meta">
-            <span><i class="fas fa-flag"></i> ${sub.lang} (${sub.flag})</span>
-            <span><i class="fas fa-user"></i> ${sub.author}</span>
-            <span><i class="fas fa-download"></i> ${sub.downloads}</span>
-          </div>
-        </div>
-        <a href="#" class="download-btn"><i class="fas fa-download"></i></a>
-      `;
-      list.appendChild(item);
-    });
-
-    // Independent Scroll Reveal Animation
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Add a slight random delay for each item to make it feel independent
-          const delay = Math.random() * 300;
-          setTimeout(() => {
-            entry.target.classList.add('visible');
-          }, delay);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.subtitle-item').forEach(item => observer.observe(item));
-
     // Modal Logic
     function openUploadModal() { document.getElementById('uploadModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeUploadModal() { document.getElementById('uploadModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
@@ -435,8 +388,17 @@
       pill.addEventListener('click', function() {
         document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         this.classList.add('active');
+        if (typeof window.applyPillFilter === 'function') {
+          window.applyPillFilter(this.getAttribute('data-filter'));
+        }
       });
     });
   </script>
+  <script src="js/security.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/auth-ui.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/tmdb-service.js"></script>
+  <script src="js/movie-page.js"></script>
 </body>
 </html>

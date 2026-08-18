@@ -274,11 +274,11 @@ function renderSubtitlesList() {
 
   if (subs.length === 0) {
     container.innerHTML = `
-      <div style="background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 3rem; text-align: center; color: var(--text-muted);">
+      <div style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); border-radius: 1rem; padding: 3rem; text-align: center; color: var(--text-muted);">
         <i class="fas fa-closed-captioning" style="font-size: 2rem; margin-bottom: 0.8rem; display: block;"></i>
-        <h3>No subtitles found for this selection</h3>
-        <p style="margin-top: 0.4rem; font-size: 0.85rem;">You can upload a custom subtitle for this title.</p>
-        <button class="btn btn-outline" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload Subtitle</button>
+        <h3>No subtitles found</h3>
+        <p style="margin-top: 0.4rem; font-size: 0.85rem;">Try another filter or upload one.</p>
+        <button class="btn btn-outline" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload</button>
       </div>
     `;
     return;
@@ -289,28 +289,38 @@ function renderSubtitlesList() {
     const downloadParam = sub.download_url ? encodeURIComponent(sub.download_url) : '';
 
     return `
-      <div class="subtitle-card">
+      <div class="subtitle-item">
         <div class="sub-info">
           <div class="sub-release">
             ${sub.release}
             <span class="format-badge">${sub.format || 'SRT'}</span>
           </div>
           <div class="sub-meta">
-            <span class="meta-badge"><i class="fas fa-flag"></i> ${sub.langFlag || ''} ${(sub.langName || sub.language || 'SUB').toUpperCase()}</span>
-            <span class="meta-badge"><i class="fas fa-user"></i> ${sub.uploader || 'SubDL Author'}</span>
-            ${sub.quality ? `<span class="meta-badge"><i class="fas fa-video"></i> ${sub.quality}</span>` : ''}
+            <span><i class="fas fa-flag"></i> ${sub.langName || sub.language || 'SUB'} (${sub.langFlag || '🌐'})</span>
+            <span><i class="fas fa-user"></i> ${sub.uploader || 'SubDL Author'}</span>
+            <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()}</span>
+            ${sub.quality ? `<span><i class="fas fa-video"></i> ${sub.quality}</span>` : ''}
           </div>
         </div>
-        <div class="actions-group">
-          <div class="download-stats">
-            <span>${(sub.downloads || 0).toLocaleString()}</span>
-            Downloads
-          </div>
-          <a href="#" class="download-btn" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}'); return false;"><i class="fas fa-download"></i></a>
-        </div>
+        <a href="#" class="download-btn" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}'); return false;"><i class="fas fa-download"></i></a>
       </div>
     `;
   }).join('');
+
+  // Re-initialize intersection observer for animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const delay = Math.random() * 300;
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, delay);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.subtitle-item').forEach(item => observer.observe(item));
 }
 
 function downloadSubtitle(subId, releaseName, format = 'SRT', encodedDownloadUrl = '') {
