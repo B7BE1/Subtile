@@ -420,18 +420,21 @@
 
           if (type === 'all' || type === 'anime') {
             promises.push(
-              fetch(`https://api.jikan.moe/v4/top/anime?limit=11`)
+              fetch(`https://kitsu.io/api/edge/anime?sort=-userCount&page[limit]=11`)
                 .then(r => r.ok ? r.json() : { data: [] })
                 .then(d => (d.data || []).map(a => {
-                  const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || '';
-                  const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
+                  const attrs = a.attributes || {};
+                  const posterUrl = (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || '';
+                  const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
                   return {
-                    id: `anime-${a.mal_id}`, title: a.title_english || a.title, type: 'anime',
-                    year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+                    id: `anime-${a.id}`, 
+                    title: attrs.titles ? (attrs.titles.en || attrs.titles.en_us || attrs.canonicalTitle) : attrs.canonicalTitle, 
+                    type: 'anime',
+                    year: attrs.startDate ? attrs.startDate.split('-')[0] : null,
                     poster: posterUrl,
                     backdrop: bgUrl,
-                    description: (a.synopsis || '').split('[')[0],
-                    genres: (a.genres || []).map(g => g.name)
+                    description: (attrs.synopsis || '').split('[')[0],
+                    genres: ['Anime']
                   };
                 }))
                 .catch(() => [])
@@ -455,10 +458,18 @@
             if (!isInitialLoad) {
               renderTrendingUI(results, grid);
             }
+          } else {
+            // Handle empty results gracefully if API fails completely
+            if (!cachedData || cachedData.length === 0) {
+              grid.innerHTML = '<div style="grid-column: 1 / -1; padding: 4rem; text-align: center; color: #ef4444;">Failed to load trending data. API rate limit exceeded. Please try again in a few seconds.</div>';
+            }
           }
 
         } catch (err) {
           console.error(err);
+          if (!cachedData || cachedData.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; padding: 4rem; text-align: center; color: #ef4444;">An error occurred while loading. Please try again.</div>';
+          }
         }
       }
 
