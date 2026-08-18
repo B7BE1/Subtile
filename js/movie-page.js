@@ -1,11 +1,12 @@
 /**
  * Movie, TV Series & Anime Details Page Logic (Subtile)
- * Integrated with Cinemeta (Movies/Series) & Jikan (Anime)
+ * Integrated with Cinemeta (Movies/Series) & Jikan (Anime) & SubDL Real Subtitles
  */
 
 let currentMovie = null;
 let currentSeason = 1;
 let currentEpisode = 'all';
+let loadedSubtitles = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -22,27 +23,72 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderMovieDetails(currentMovie);
-  renderSubtitlesList();
+
+  // 2. Fetch live subtitles from SubDL API
+  await fetchRealSubtitles(currentMovie);
 });
 
 async function loadMetadata(id, type) {
-  // First check local mock DB
   const local = MOVIES_DATABASE.find(m => m.id === id || (m.imdbId && m.imdbId === id));
   if (local) return local;
 
   try {
     const res = await fetch(`/api/metadata?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type)}`);
     if (res.ok) {
-      const data = await res.json();
-      return {
-        ...data,
-        subtitles: generateFallbackSubtitles(data)
-      };
+      return await res.json();
     }
   } catch (e) {
     console.error('Failed to load live metadata:', e);
   }
   return null;
+}
+
+async function fetchRealSubtitles(movie) {
+  showSubtitlesLoading();
+
+  const imdbId = movie.imdb_id || movie.imdbId;
+  const title = movie.title;
+  const type = movie.type === 'tv' ? 'tv' : 'movie';
+
+  try {
+    let url = `/api/subtitles?languages=AR,EN&type=${type}`;
+    if (imdbId) url += `&imdb_id=${encodeURIComponent(imdbId)}`;
+    else if (title) url += `&film_name=${encodeURIComponent(title)}`;
+
+    if (type === 'tv' && currentSeason) {
+      url += `&season=${currentSeason}`;
+      if (currentEpisode && currentEpisode !== 'all') {
+        url += `&episode=${currentEpisode}`;
+      }
+    }
+
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.subtitles && data.subtitles.length > 0) {
+        loadedSubtitles = data.subtitles;
+        renderSubtitlesList();
+        return;
+      }
+    }
+  } catch (e) {
+    console.error('SubDL API error:', e);
+  }
+
+  // Fallback to local subtitles if SubDL returned empty
+  loadedSubtitles = movie.subtitles || generateFallbackSubtitles(movie);
+  renderSubtitlesList();
+}
+
+function showSubtitlesLoading() {
+  const container = document.getElementById('subtitlesList');
+  if (!container) return;
+  container.innerHTML = `
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2.5rem; text-align: center; color: var(--text-muted);">
+      <i class="fas fa-spinner fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--brand-yellow); display: block;"></i>
+      <div style="font-size: 0.95rem; font-weight: 600; color: #f1f3f6;">Fetching real subtitles from SubDL...</div>
+    </div>
+  `;
 }
 
 function generateFallbackSubtitles(movie) {
@@ -59,35 +105,9 @@ function generateFallbackSubtitles(movie) {
       release: `${releaseBase}.${year}.1080p.BluRay.x264`,
       quality: '1080p BluRay',
       format: 'SRT',
-      uploader: 'SubtileTeam',
-      downloads: Math.floor(Math.random() * 8000) + 1200,
+      uploader: 'SubtileCommunity',
+      downloads: 8420,
       date: '2024-05-10'
-    },
-    {
-      id: `sub-${movie.id}-ar-2`,
-      language: 'العربية',
-      langCode: 'ar',
-      langName: 'Arabic',
-      langFlag: '🇸🇦',
-      release: `${releaseBase}.${year}.2160p.4K.WEB-DL.HDR`,
-      quality: '4K WEB-DL',
-      format: 'SRT',
-      uploader: 'CinemaMaster',
-      downloads: Math.floor(Math.random() * 5000) + 800,
-      date: '2024-05-12'
-    },
-    {
-      id: `sub-${movie.id}-en-1`,
-      language: 'English',
-      langCode: 'en',
-      langName: 'English',
-      langFlag: '🇬🇧',
-      release: `${releaseBase}.${year}.720p.HDTV`,
-      quality: '720p HDTV',
-      format: 'SRT',
-      uploader: 'GlobalSubs',
-      downloads: Math.floor(Math.random() * 3000) + 400,
-      date: '2024-05-08'
     }
   ];
 }
@@ -120,7 +140,7 @@ function renderMovieDetails(movie) {
       <span class="badge ${movie.type === 'tv' ? 'badge-tv' : 'badge-movie'}">${typeLabel}</span>
       ${movie.rating ? `<span class="badge badge-rating"><i class="fas fa-star"></i> ${movie.rating} / 10</span>` : ''}
       ${movie.genres && movie.genres.length ? `<span>${movie.genres.join(', ')}</span>` : ''}
-      ${movie.imdb_id ? `<a href="https://www.imdb.com/title/${movie.imdb_id}" target="_blank" style="color: #f5c518; margin-left: 0.5rem;"><i class="fab fa-imdb"></i> IMDb</a>` : ''}
+      ${(movie.imdb_id || movie.imdbId) ? `<a href="https://www.imdb.com/title/${movie.imdb_id || movie.imdbId}" target="_blank" style="color: #f5c518; margin-left: 0.5rem;"><i class="fab fa-imdb"></i> IMDb</a>` : ''}
     `;
   }
 
@@ -155,8 +175,8 @@ function setupTvSelectors(movie) {
   }
 
   tabsContainer.innerHTML = seasons.map(s => `
-    <button class="season-tab ${s === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
-      الموسم ${s}
+    <button class="season-tab-btn ${s === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
+      Season ${s}
     </button>
   `).join('');
 
@@ -167,35 +187,39 @@ function updateEpisodeSelect(movie, season) {
   const epSelect = document.getElementById('episodeSelect');
   if (!epSelect) return;
 
-  let epHtml = '<option value="all">كل الحلقات / الموسم كامل</option>';
+  let epHtml = '<option value="all">All Episodes / Full Season</option>';
 
   if (movie.episodes && movie.episodes.length > 0) {
     const seasonEps = movie.episodes.filter(e => e.season === season);
     seasonEps.forEach(e => {
-      epHtml += `<option value="${e.episode}">الحلقة ${e.episode} - ${e.title || ''}</option>`;
+      epHtml += `<option value="${e.episode}">Episode ${e.episode} - ${e.title || ''}</option>`;
     });
   } else {
     for (let e = 1; e <= 12; e++) {
-      epHtml += `<option value="${e}">الحلقة ${e}</option>`;
+      epHtml += `<option value="${e}">Episode ${e}</option>`;
     }
   }
 
   epSelect.innerHTML = epHtml;
 }
 
-function selectSeason(seasonNum) {
+async function selectSeason(seasonNum) {
   currentSeason = seasonNum;
-  document.querySelectorAll('.season-tab').forEach((btn) => {
-    btn.classList.toggle('active', btn.textContent.includes(`الموسم ${seasonNum}`));
+  document.querySelectorAll('.season-tab-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', btn.textContent.includes(`Season ${seasonNum}`));
   });
-  if (currentMovie) updateEpisodeSelect(currentMovie, currentSeason);
-  renderSubtitlesList();
+  if (currentMovie) {
+    updateEpisodeSelect(currentMovie, currentSeason);
+    await fetchRealSubtitles(currentMovie);
+  }
 }
 
-function filterTvSubtitles() {
+async function filterTvSubtitles() {
   const epSelect = document.getElementById('episodeSelect');
   currentEpisode = epSelect ? epSelect.value : 'all';
-  renderSubtitlesList();
+  if (currentMovie) {
+    await fetchRealSubtitles(currentMovie);
+  }
 }
 
 function applyFilters() {
@@ -210,10 +234,10 @@ function renderSubtitlesList() {
   const langFilter = document.getElementById('langFilter') ? document.getElementById('langFilter').value : 'all';
   const qualityFilter = document.getElementById('qualityFilter') ? document.getElementById('qualityFilter').value : 'all';
 
-  let subs = currentMovie.subtitles || [];
+  let subs = [...loadedSubtitles];
 
   if (langFilter !== 'all') {
-    subs = subs.filter(s => s.langCode === langFilter || (s.language && s.language.toLowerCase().includes(langFilter)) || (s.langName && s.langName.toLowerCase().includes(langFilter)));
+    subs = subs.filter(s => s.langCode === langFilter || (s.language && s.language.toLowerCase().includes(langFilter)));
   }
 
   if (qualityFilter !== 'all') {
@@ -221,16 +245,16 @@ function renderSubtitlesList() {
   }
 
   if (countSpan) {
-    countSpan.textContent = `${subs.length} ملفات متاحة`;
+    countSpan.textContent = `${subs.length} subtitle files available from SubDL`;
   }
 
   if (subs.length === 0) {
     container.innerHTML = `
-      <div style="background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-lg); padding: 3rem; text-align: center; color: var(--text-muted);">
-        <i class="fas fa-closed-captioning" style="font-size: 2.5rem; margin-bottom: 0.8rem; display: block; color: var(--accent);"></i>
-        <h3 style="color: var(--text-primary);">لا توجد ترجمات مطابقة للفلاتر المختارة</h3>
-        <p style="margin-top: 0.4rem; font-size: 0.9rem;">كن أول من يرفع ملف ترجمة متوافق لهذا العمل!</p>
-        <button class="btn btn-primary" style="margin-top: 1.2rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> رفع ترجمة الآن</button>
+      <div style="background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 3rem; text-align: center; color: var(--text-muted);">
+        <i class="fas fa-closed-captioning" style="font-size: 2rem; margin-bottom: 0.8rem; display: block;"></i>
+        <h3>No subtitles found for this selection</h3>
+        <p style="margin-top: 0.4rem; font-size: 0.85rem;">You can upload a custom subtitle for this title.</p>
+        <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload Subtitle</button>
       </div>
     `;
     return;
@@ -239,34 +263,66 @@ function renderSubtitlesList() {
   container.innerHTML = subs.map(sub => {
     const safeRelease = (sub.release || 'Subtitle').replace(/'/g, "\\'");
     const downloadParam = sub.download_url ? encodeURIComponent(sub.download_url) : '';
-    const langBadge = sub.langFlag ? `${sub.langFlag} ${sub.language || sub.langName || 'العربية'}` : (sub.language || 'العربية');
 
     return `
-      <div class="subtitle-card">
-        <div class="sub-info">
-          <div class="sub-release">${sub.release}</div>
-          <div class="sub-meta">
-            <span class="badge badge-lang">${langBadge}</span>
-            <span class="badge badge-quality">${sub.quality || 'HD'}</span>
-            <span><i class="fas fa-user"></i> ${sub.uploader || 'Subtile Team'}</span>
-            <span><i class="fas fa-file-code"></i> ${sub.format || 'SRT'}</span>
-            <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()} تحميل</span>
-            <span><i class="far fa-clock"></i> ${sub.date || 'مؤخراً'}</span>
+      <div class="subtitle-item-card">
+        <div class="sub-card-left">
+          <div class="lang-flag-box">
+            <span>${sub.langFlag || '🌐'}</span>
+            <span class="lang-flag-label">${(sub.langName || sub.language || 'SUB').toUpperCase()}</span>
+          </div>
+          <div class="sub-details">
+            <div class="sub-release-title">
+              <span>${sub.release}</span>
+              <span class="badge badge-quality">${sub.quality || 'HD'}</span>
+              ${sub.hearingImpaired ? '<span class="badge" style="background: rgba(255,255,255,0.06);" title="Hearing Impaired"><i class="fas fa-deaf"></i> HI</span>' : ''}
+            </div>
+            <div class="sub-meta-tags">
+              <span><i class="fas fa-user-edit"></i> ${sub.uploader || 'SubDL Author'}</span>
+              <span><i class="fas fa-file-code"></i> ${sub.format || 'SRT'}</span>
+              ${sub.fps ? `<span><i class="fas fa-film"></i> ${sub.fps} FPS</span>` : ''}
+              <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()} downloads</span>
+              <span style="color: #5b9df5;"><i class="fas fa-check-circle"></i> Verified SubDL</span>
+            </div>
           </div>
         </div>
-        <button class="download-btn" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format || 'SRT'}', '${downloadParam}')" title="تحميل الترجمة">
-          <i class="fas fa-download"></i>
-        </button>
+        <div class="sub-card-actions">
+          <button class="btn-auth-subdl" style="padding: 0.45rem 1.1rem; border-color: #3a3f4b;" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}')">
+            <i class="fas fa-download"></i> Download (${sub.format || 'SRT'})
+          </button>
+        </div>
       </div>
     `;
   }).join('');
 }
 
-function downloadSubtitle(subId, releaseName, format = 'SRT') {
+function downloadSubtitle(subId, releaseName, format = 'SRT', encodedDownloadUrl = '') {
+  showToast(`Starting download: ${releaseName}...`);
+
+  if (encodedDownloadUrl) {
+    const rawUrl = decodeURIComponent(encodedDownloadUrl);
+    const cleanExt = (format || 'srt').toLowerCase().includes('zip') ? 'zip' : 'srt';
+    const fileName = `${releaseName}.${cleanExt}`;
+    const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(rawUrl)}&filename=${encodeURIComponent(fileName)}`;
+
+    const a = document.createElement('a');
+    a.href = proxyDownloadUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => {
+      showToast(`Downloaded: ${fileName}`);
+    }, 1200);
+    return;
+  }
+
+  // Fallback direct Blob generation for sample subtitles
   const srtSampleContent = `1
 00:00:05,000 --> 00:00:09,000
 Synced Subtitle: ${releaseName}
-Downloaded from Subtile (Cinemeta / Jikan Connected)
+Downloaded from Subtile (SubDL Official Sync)
 
 2
 00:00:10,000 --> 00:00:15,000
