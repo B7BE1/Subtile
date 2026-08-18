@@ -38,7 +38,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentMovie = await loadMetadata(movieId, movieType);
 
     if (!currentMovie) {
-      currentMovie = MOVIES_DATABASE.find(m => m.id === movieId) || MOVIES_DATABASE[0];
+      currentMovie = MOVIES_DATABASE.find(m => m.id === movieId);
+      // Instead of defaulting to Oppenheimer, create a generic fallback for this ID
+      if (!currentMovie) {
+        currentMovie = {
+          id: movieId,
+          title: movieId.replace('anime-', '').replace('tt', 'Title '), // Best guess fallback title
+          type: movieType,
+          year: 'Unknown',
+          poster: `https://images.metahub.space/poster/small/${movieId}/img`,
+          backdrop: `https://images.metahub.space/background/medium/${movieId}/img`,
+          overview: "Metadata could not be loaded. Fetching subtitles regardless...",
+          genres: [movieType === 'tv' ? 'TV Series' : (movieType === 'anime' ? 'Anime' : 'Movie')],
+          rating: 'N/A',
+          episodes: []
+        };
+      }
     }
 
     renderMovieDetails(currentMovie);
@@ -167,10 +182,13 @@ async function loadMetadata(id, type) {
   const local = MOVIES_DATABASE.find(m => m.id === id || (m.imdbId && m.imdbId === id));
   if (local) return local;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+
   try {
     if (type === 'anime') {
       const kitsuId = id.replace('anime-', '');
-      const res = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`);
+      const res = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`, { signal: controller.signal });
       if (res.ok) {
         const d = await res.json();
         if (d.data) {
@@ -178,6 +196,7 @@ async function loadMetadata(id, type) {
           const attrs = a.attributes || {};
           const posterUrl = (attrs.posterImage && (attrs.posterImage.large || attrs.posterImage.original)) || '';
           const bgUrl = (attrs.coverImage && attrs.coverImage.large) || posterUrl;
+          clearTimeout(timeoutId);
           return {
             id: `anime-${a.id}`,
             slug: attrs.slug,
@@ -195,11 +214,12 @@ async function loadMetadata(id, type) {
       }
     } else {
       const cType = type === 'tv' ? 'series' : 'movie';
-      const res = await fetch(`https://v3-cinemeta.strem.io/meta/${cType}/${id}.json`);
+      const res = await fetch(`https://v3-cinemeta.strem.io/meta/${cType}/${id}.json`, { signal: controller.signal });
       if (res.ok) {
         const d = await res.json();
         if (d.meta) {
           const m = d.meta;
+          clearTimeout(timeoutId);
           return {
             id: m.imdb_id || m.id,
             imdbId: m.imdb_id || m.id,
@@ -218,6 +238,8 @@ async function loadMetadata(id, type) {
     }
   } catch (e) {
     console.error('Failed to load live metadata:', e);
+  } finally {
+    clearTimeout(timeoutId);
   }
   return null;
 }
