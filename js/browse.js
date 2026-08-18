@@ -1,13 +1,24 @@
 /**
- * Browse & Catalog Page Logic
+ * Browse & Catalog Page Logic (Connected to Cinemeta & Jikan)
  */
 
 let currentTypeFilter = 'all';
 let currentSearchQuery = '';
 let currentSort = 'downloads';
+let liveSearchResults = [];
+let browseDebounceTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderCatalog();
+  const urlParams = new URLSearchParams(window.location.search);
+  const q = urlParams.get('q');
+  if (q) {
+    currentSearchQuery = q;
+    const searchInput = document.getElementById('catalogSearchInput');
+    if (searchInput) searchInput.value = q;
+    triggerLiveCatalogSearch(q);
+  } else {
+    renderCatalog();
+  }
   setupAuthNavbar();
 });
 
@@ -16,15 +27,15 @@ function renderCatalog() {
   const countBadge = document.getElementById('itemsCountBadge');
   if (!grid) return;
 
-  let list = [...MOVIES_DATABASE];
+  let list = liveSearchResults.length > 0 ? [...liveSearchResults] : [...MOVIES_DATABASE];
 
   // Filter by Type
   if (currentTypeFilter !== 'all') {
     list = list.filter(item => item.type === currentTypeFilter);
   }
 
-  // Filter by Search Query
-  if (currentSearchQuery) {
+  // Filter by Search Query (if filtering local)
+  if (currentSearchQuery && liveSearchResults.length === 0) {
     const q = currentSearchQuery.toLowerCase();
     list = list.filter(item => 
       item.title.toLowerCase().includes(q) ||
@@ -56,30 +67,34 @@ function renderCatalog() {
     grid.innerHTML = `
       <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; color: var(--text-muted);">
         <i class="fas fa-film" style="font-size: 2rem; margin-bottom: 0.8rem; display: block;"></i>
-        <div>No movies or series found matching your criteria.</div>
+        <div>No titles found matching your criteria.</div>
       </div>
     `;
     return;
   }
 
-  grid.innerHTML = list.map((movie, index) => {
+  grid.innerHTML = list.map((movie) => {
     const mainLang = (movie.subtitles && movie.subtitles[0]) ? movie.subtitles[0].langName : 'Arabic';
     const totalDl = movie.subtitles 
       ? movie.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) 
       : 1200;
+    const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
+    const targetUrl = `movie.html?id=${encodeURIComponent(movie.id || movie.imdb_id)}&type=${movie.type || 'movie'}`;
 
     return `
-      <a href="movie.html?id=${movie.id}" class="movie-card">
+      <a href="${targetUrl}" class="movie-card">
         <div class="movie-card-poster-wrap">
-          <img src="${movie.poster}" alt="${movie.title}" class="movie-card-poster" loading="lazy">
-          <span class="rank-badge" style="background: rgba(18, 21, 27, 0.85); backdrop-filter: blur(4px); border: 1px solid #23262e; color: #f5c518;">
-            <i class="fas fa-star" style="font-size: 0.65rem;"></i> ${movie.rating}
-          </span>
+          <img src="${movie.poster || 'assets/default-poster.jpg'}" alt="${movie.title}" class="movie-card-poster" loading="lazy">
+          ${movie.rating ? `
+            <span class="rank-badge" style="background: rgba(18, 21, 27, 0.85); backdrop-filter: blur(4px); border: 1px solid #23262e; color: #f5c518;">
+              <i class="fas fa-star" style="font-size: 0.65rem;"></i> ${movie.rating}
+            </span>
+          ` : ''}
         </div>
         <div class="movie-card-info">
-          <div class="movie-card-title" title="${movie.title}">${movie.title} (${movie.year})</div>
+          <div class="movie-card-title" title="${movie.title}">${movie.title} (${movie.year || 'N/A'})</div>
           <div class="movie-card-meta-row">
-            <span class="movie-card-lang-pill">${movie.type === 'tv' ? 'TV' : 'Movie'} &bull; ${mainLang}</span>
+            <span class="movie-card-lang-pill">${typeLabel}</span>
             <span class="movie-card-downloads"><i class="fas fa-arrow-down"></i> ${totalDl.toLocaleString()}</span>
           </div>
         </div>
@@ -97,10 +112,36 @@ function filterCatalog(type, btn) {
 
 function onCatalogSearch() {
   const input = document.getElementById('catalogSearchInput');
-  if (input) {
-    currentSearchQuery = input.value.trim();
+  if (!input) return;
+
+  currentSearchQuery = input.value.trim();
+  clearTimeout(browseDebounceTimer);
+
+  if (!currentSearchQuery) {
+    liveSearchResults = [];
     renderCatalog();
+    return;
   }
+
+  browseDebounceTimer = setTimeout(() => {
+    triggerLiveCatalogSearch(currentSearchQuery);
+  }, 250);
+}
+
+async function triggerLiveCatalogSearch(q) {
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${currentTypeFilter}`);
+    if (res.ok) {
+      const data = await res.json();
+      liveSearchResults = data.results || [];
+    } else {
+      liveSearchResults = [];
+    }
+  } catch (err) {
+    console.error('Catalog live search error:', err);
+    liveSearchResults = [];
+  }
+  renderCatalog();
 }
 
 function onCatalogSort() {

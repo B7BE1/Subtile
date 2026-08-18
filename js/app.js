@@ -1,5 +1,6 @@
 /**
  * Subtile App JavaScript - Search Bar & Most Downloaded Logic
+ * Connected to Live Cinemeta (Movies/Series) & Jikan (Anime) Metadata
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +14,6 @@ function renderMostDownloaded() {
   const grid = document.getElementById('mostDownloadedGrid');
   if (!grid) return;
 
-  // Sort by downloads or predefined ranks
   const sorted = [...MOVIES_DATABASE].sort((a, b) => {
     const aDl = a.subtitles ? a.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) : 0;
     const bDl = b.subtitles ? b.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) : 0;
@@ -27,7 +27,7 @@ function renderMostDownloaded() {
       : 14250;
 
     return `
-      <a href="movie.html?id=${movie.id}" class="movie-card most-downloaded">
+      <a href="movie.html?id=${movie.id}&type=${movie.type || 'movie'}" class="movie-card most-downloaded">
         <div class="movie-card-poster-wrap">
           <img src="${movie.poster}" alt="${movie.title}" class="movie-card-poster" loading="lazy">
           <span class="rank-badge">#${index + 1}</span>
@@ -35,7 +35,7 @@ function renderMostDownloaded() {
         <div class="movie-card-info">
           <div class="movie-card-title" title="${movie.title}">${movie.title} (${movie.year})</div>
           <div class="movie-card-meta-row">
-            <span class="movie-card-lang-pill">${mainLang}</span>
+            <span class="movie-card-lang-pill">${movie.type === 'anime' ? 'Anime' : mainLang}</span>
             <span class="movie-card-downloads"><i class="fas fa-arrow-down"></i> ${totalDl.toLocaleString()}</span>
           </div>
         </div>
@@ -44,7 +44,9 @@ function renderMostDownloaded() {
   }).join('');
 }
 
-// Live Search with smooth transition matching CSS
+// Live Search with Cinemeta + Jikan Integration
+let searchDebounceTimer = null;
+
 function setupLiveSearch() {
   const searchInput = document.getElementById('heroSearchInput');
   const dropdown = document.getElementById('searchResultsDropdown');
@@ -52,41 +54,43 @@ function setupLiveSearch() {
   if (!searchInput || !dropdown) return;
 
   searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.trim().toLowerCase();
+    const query = e.target.value.trim();
     if (!query) {
       dropdown.classList.remove('active');
       return;
     }
 
-    const matches = MOVIES_DATABASE.filter(item => {
-      return item.title.toLowerCase().includes(query) ||
-             (item.arabicTitle && item.arabicTitle.includes(query)) ||
-             (item.imdbId && item.imdbId.toLowerCase().includes(query));
-    });
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(async () => {
+      // First show local instant matches
+      const localMatches = MOVIES_DATABASE.filter(item => {
+        return item.title.toLowerCase().includes(query.toLowerCase()) ||
+               (item.arabicTitle && item.arabicTitle.includes(query)) ||
+               (item.imdbId && item.imdbId.toLowerCase().includes(query.toLowerCase()));
+      });
 
-    if (matches.length === 0) {
-      dropdown.innerHTML = `
-        <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
-          No matches found for "${escapeText(query)}"
-        </div>
-      `;
-    } else {
-      dropdown.innerHTML = matches.map(movie => `
-        <div class="search-result-item" onclick="window.location.href='movie.html?id=${movie.id}'">
-          <img src="${movie.poster}" alt="${movie.title}">
-          <div style="flex: 1;">
-            <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${movie.title} <span style="color: #6b7280; font-size: 0.8rem;">(${movie.year})</span></div>
-            <div class="search-result-meta">
-              <span>${movie.type === 'tv' ? 'TV Show' : 'Movie'}</span>
-              <span class="search-result-rating"><i class="fas fa-star"></i> ${movie.rating}</span>
-              <span>${movie.subtitles ? movie.subtitles.length : 0} subtitles</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
+      renderSearchResults(localMatches, dropdown, true);
 
-    dropdown.classList.add('active');
+      // Fetch live matches from Cinemeta & Jikan API
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            // Merge and deduplicate
+            const combined = [...localMatches];
+            data.results.forEach(r => {
+              if (!combined.some(c => (c.imdbId && c.imdbId === r.id) || (c.id === r.id) || (c.title.toLowerCase() === r.title.toLowerCase()))) {
+                combined.push(r);
+              }
+            });
+            renderSearchResults(combined, dropdown, false);
+          }
+        }
+      } catch (err) {
+        console.error('Live search error:', err);
+      }
+    }, 200);
   });
 
   document.addEventListener('click', (e) => {
@@ -96,20 +100,47 @@ function setupLiveSearch() {
   });
 }
 
+function renderSearchResults(items, dropdown, isLocalOnly) {
+  if (items.length === 0) {
+    dropdown.innerHTML = `
+      <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
+        No matches found
+      </div>
+    `;
+    dropdown.classList.add('active');
+    return;
+  }
+
+  dropdown.innerHTML = items.slice(0, 10).map(movie => {
+    const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
+    const targetUrl = `movie.html?id=${encodeURIComponent(movie.id || movie.imdb_id)}&type=${movie.type || 'movie'}`;
+
+    return `
+      <div class="search-result-item" onclick="window.location.href='${targetUrl}'">
+        <img src="${movie.poster || 'assets/default-poster.jpg'}" alt="${movie.title}">
+        <div style="flex: 1;">
+          <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${movie.title} <span style="color: #6b7280; font-size: 0.8rem;">(${movie.year || 'N/A'})</span></div>
+          <div class="search-result-meta">
+            <span style="color: #5b9df5;">${typeLabel}</span>
+            ${movie.rating ? `<span class="search-result-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+            ${movie.genres && movie.genres.length ? `<span>&bull; ${movie.genres.slice(0, 2).join(', ')}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  dropdown.classList.add('active');
+}
+
 function performSearch() {
   const searchInput = document.getElementById('heroSearchInput');
   if (searchInput && searchInput.value.trim()) {
-    const query = searchInput.value.trim().toLowerCase();
-    const match = MOVIES_DATABASE.find(item => 
-      item.title.toLowerCase().includes(query) || (item.arabicTitle && item.arabicTitle.includes(query))
-    );
-    if (match) {
-      window.location.href = `movie.html?id=${match.id}`;
-    }
+    window.location.href = `browse.html?q=${encodeURIComponent(searchInput.value.trim())}`;
   }
 }
 
-// Auth UI Helper
+// User Menu & Auth
 function setupAuthNavbar() {
   const slot = document.getElementById('navAuthSlot');
   if (!slot) return;
