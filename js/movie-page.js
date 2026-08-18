@@ -82,26 +82,29 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-// ---------- Event delegation (replaces inline onclick string-building) ----------
 function wireUpEventDelegation() {
   const subtitlesList = document.getElementById('subtitlesList');
   if (subtitlesList) {
     subtitlesList.addEventListener('click', (e) => {
-      const seasonCard = e.target.closest('.season-card');
-      if (seasonCard && seasonCard.dataset.season !== undefined) {
-        loadSeasonSubtitles(Number(seasonCard.dataset.season));
-        return;
-      }
-
       const downloadBtn = e.target.closest('.download-btn');
       if (downloadBtn && downloadBtn.dataset.subId) {
         e.preventDefault();
         downloadSubtitle(
           downloadBtn.dataset.subId,
-          downloadBtn.dataset.release || 'Subtitle',
-          downloadBtn.dataset.format || 'SRT',
-          downloadBtn.dataset.downloadUrl || ''
+          downloadBtn.dataset.release,
+          downloadBtn.dataset.format,
+          downloadBtn.dataset.downloadUrl
         );
+      }
+    });
+  }
+
+  const seasonsListView = document.getElementById('seasonsListView');
+  if (seasonsListView) {
+    seasonsListView.addEventListener('click', (e) => {
+      const seasonCard = e.target.closest('.season-card');
+      if (seasonCard && seasonCard.dataset.season !== undefined) {
+        loadSeasonSubtitles(Number(seasonCard.dataset.season));
       }
     });
   }
@@ -283,10 +286,16 @@ function renderMovieDetails(movie) {
 }
 
 function renderSeasonsList(movie) {
-  const container = document.getElementById('subtitlesList');
+  const container = document.getElementById('seasonsListView');
+  const subtitlesContainer = document.getElementById('subtitlesListView');
   const filters = document.getElementById('filterPillsContainer');
   const backBtn = document.getElementById('backToSeasonsBtn');
+  const viewTitle = document.getElementById('viewTitle');
 
+  if (subtitlesContainer) subtitlesContainer.style.display = 'none';
+  if (container) container.style.display = 'flex'; // or whatever its default is
+  if (viewTitle) viewTitle.innerText = 'Seasons';
+  
   if (filters) filters.style.display = 'none';
   if (backBtn) backBtn.style.display = 'none';
   if (!container) return;
@@ -307,16 +316,22 @@ function renderSeasonsList(movie) {
     let sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
     html += `
       <div class="season-card" data-season="${s}">
-        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'">
-        <div class="season-card-content">
-          <div class="season-card-title">${escapeHtml(sTitle)}</div>
-          <div class="season-card-subtitle">${escapeHtml(sSub)}</div>
+        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb">
+        <div class="season-info">
+          <div class="season-title">${escapeHtml(sTitle)}</div>
+          <div class="season-sub">${escapeHtml(sSub)}</div>
         </div>
+        <i class="fas fa-chevron-right season-arrow"></i>
       </div>
     `;
   });
 
   container.innerHTML = html;
+  
+  // Trigger fade in if attachFadeIn exists
+  if (typeof window.attachFadeIn === 'function') {
+    window.attachFadeIn(container.querySelectorAll('.season-card'));
+  }
 }
 
 async function loadSeasonSubtitles(seasonNum) {
@@ -325,8 +340,15 @@ async function loadSeasonSubtitles(seasonNum) {
 
   const filters = document.getElementById('filterPillsContainer');
   const backBtn = document.getElementById('backToSeasonsBtn');
+  const seasonsContainer = document.getElementById('seasonsListView');
+  const subtitlesContainer = document.getElementById('subtitlesListView');
+  const viewTitle = document.getElementById('viewTitle');
 
-  if (filters) filters.style.display = ''; // revert to default grid/flex
+  if (seasonsContainer) seasonsContainer.style.display = 'none';
+  if (subtitlesContainer) subtitlesContainer.style.display = 'block';
+  if (viewTitle) viewTitle.innerText = 'Available Subtitles';
+
+  if (filters) filters.style.display = ''; // revert to default flex/grid
   if (backBtn) {
     backBtn.style.display = 'flex';
     backBtn.onclick = () => renderSeasonsList(currentMovie);
@@ -409,20 +431,9 @@ function renderSubtitlesList() {
     `;
   }).join('');
 
-  // Re-initialize intersection observer for animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const delay = Math.random() * 300;
-        setTimeout(() => {
-          entry.target.classList.add('visible');
-        }, delay);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.subtitle-item').forEach(item => observer.observe(item));
+  if (typeof window.attachFadeIn === 'function') {
+    window.attachFadeIn(container.querySelectorAll('.subtitle-item'));
+  }
 }
 
 function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '') {
