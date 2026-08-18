@@ -32,8 +32,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (container) container.classList.add('loaded');
     }, 300);
 
-    // 4. Fetch live subtitles from SubDL API in the background
-    await fetchRealSubtitles(currentMovie);
+    // 4. Fetch live subtitles or show seasons list
+    if (currentMovie.type === 'tv' || currentMovie.type === 'anime') {
+      renderSeasonsList(currentMovie);
+    } else {
+      await fetchRealSubtitles(currentMovie);
+    }
   } catch (err) {
     alert("Error loading page: " + (err.message || err));
     const loader = document.getElementById('globalLoader');
@@ -204,57 +208,58 @@ function renderMovieDetails(movie) {
   if (modalInput) {
     modalInput.value = `${movie.title} (${movie.year || ''})`;
   }
-
-  // TV / Anime Series Seasons & Episodes Switcher
-  const tvSelector = document.getElementById('tvSelectorBar');
-  if (tvSelector) {
-    if (movie.type === 'tv' || (movie.episodes && movie.episodes.length > 0)) {
-      tvSelector.style.display = 'flex';
-      setupTvSelectors(movie);
-    } else {
-      tvSelector.style.display = 'none';
-    }
-  }
 }
 
-function setupTvSelectors(movie) {
-  const tabsContainer = document.getElementById('seasonTabsContainer');
-  const epSelect = document.getElementById('episodeSelect');
+function renderSeasonsList(movie) {
+  const container = document.getElementById('subtitlesList');
+  const filters = document.getElementById('filterPillsContainer');
+  const backBtn = document.getElementById('backToSeasonsBtn');
+
+  if (filters) filters.style.display = 'none';
+  if (backBtn) backBtn.style.display = 'none';
+  if (!container) return;
 
   let seasons = [1];
   if (movie.episodes && movie.episodes.length > 0) {
-    const seasonsSet = new Set(movie.episodes.map(e => e.season).filter(Boolean));
-    if (seasonsSet.size > 0) seasons = Array.from(seasonsSet).sort((a, b) => a - b);
+    const sSet = new Set(movie.episodes.map(e => e.season));
+    seasons = Array.from(sSet).filter(s => s != null).sort((a, b) => a - b);
+  } else if (movie.seasonsCount) {
+    seasons = Array.from({length: movie.seasonsCount}, (_, i) => i + 1);
   }
 
-  tabsContainer.innerHTML = seasons.map(s => `
-    <button class="season-tab-btn ${s === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
-      Season ${s}
-    </button>
-  `).join('');
+  let html = '';
+  seasons.forEach(s => {
+    let sTitle = s === 0 ? 'Specials' : `Season ${s}`;
+    let sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
+    html += `
+      <div class="season-card" onclick="loadSeasonSubtitles(${s})">
+        <img src="${movie.poster}" alt="${sTitle}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'">
+        <div class="season-card-content">
+          <div class="season-card-title">${sTitle}</div>
+          <div class="season-card-subtitle">${sSub}</div>
+        </div>
+      </div>
+    `;
+  });
 
-  updateEpisodeSelect(movie, currentSeason);
+  container.innerHTML = html;
 }
 
-function updateEpisodeSelect(movie, season) {
-  const epSelect = document.getElementById('episodeSelect');
-  if (!epSelect) return;
+window.loadSeasonSubtitles = async function(seasonNum) {
+  currentSeason = seasonNum;
+  currentEpisode = 'all';
 
-  let epHtml = '<option value="all">All Episodes / Full Season</option>';
-
-  if (movie.episodes && movie.episodes.length > 0) {
-    const seasonEps = movie.episodes.filter(e => e.season === season);
-    seasonEps.forEach(e => {
-      epHtml += `<option value="${e.episode}">Episode ${e.episode} - ${e.title || ''}</option>`;
-    });
-  } else {
-    for (let e = 1; e <= 12; e++) {
-      epHtml += `<option value="${e}">Episode ${e}</option>`;
-    }
+  const filters = document.getElementById('filterPillsContainer');
+  const backBtn = document.getElementById('backToSeasonsBtn');
+  
+  if (filters) filters.style.display = ''; // revert to default grid/flex
+  if (backBtn) {
+    backBtn.style.display = 'flex';
+    backBtn.onclick = () => renderSeasonsList(currentMovie);
   }
 
-  epSelect.innerHTML = epHtml;
-}
+  await fetchRealSubtitles(currentMovie);
+};
 
 async function selectSeason(seasonNum) {
   currentSeason = seasonNum;
