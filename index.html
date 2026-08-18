@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --stroke: #333; }
         body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #0a0a0a; }
         [dir="ltr"] body { font-family: 'Inter', 'Tajawal', sans-serif; }
         .nav-blur { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(10, 10, 10, 0.85); }
@@ -33,23 +32,28 @@
             color: #525252; font-weight: 700; padding: 1rem; border: 1px solid #262626;
         }
 
-        /* Rank numbers clearly layered on top of covers with contrast */
+        /* Hollow Transparent Stroke Rank Numbers */
         .rank-number {
             font-family: 'Inter', sans-serif;
             font-weight: 900;
-            font-size: 5.5rem;
+            font-size: 6.5rem;
             line-height: 0.8;
-            color: #ffffff;
-            -webkit-text-stroke: 3px #0a0a0a;
-            text-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.8);
+            color: transparent;
+            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.45);
+            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9);
             position: absolute;
-            bottom: -10px;
+            bottom: -14px;
             z-index: 25;
             pointer-events: none;
             user-select: none;
+            transition: -webkit-text-stroke 0.3s ease, transform 0.3s ease;
         }
-        [dir="rtl"] .rank-number { right: -8px; }
-        [dir="ltr"] .rank-number { left: -8px; }
+        .movie-card:hover .rank-number {
+            -webkit-text-stroke: 2.5px rgba(255, 255, 255, 0.9);
+            transform: scale(1.03);
+        }
+        [dir="rtl"] .rank-number { right: -10px; }
+        [dir="ltr"] .rank-number { left: -10px; }
 
         .movie-card { position: relative; z-index: 1; transition: transform 0.3s ease; }
         .movie-card:hover { transform: translateY(-5px); }
@@ -64,17 +68,13 @@
 
         .filter-btn.active { background: #f5f5f5; color: #171717; border-color: #f5f5f5; }
 
-        .modal-backdrop { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0,0,0,.7); }
-        .toast { transform: translateY(150%); transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
-        .toast.show { transform: translateY(0); }
-
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: #262626; border-radius: 6px; }
         ::-webkit-scrollbar-thumb:hover { background: #404040; }
 
         @media (prefers-reduced-motion: reduce) {
-            .reveal, .movie-card, .overlay-content, .toast { transition: none !important; }
+            .reveal, .movie-card, .overlay-content { transition: none !important; }
         }
     </style>
 </head>
@@ -137,11 +137,12 @@
                 <div id="featuredMeta" class="flex items-center flex-wrap gap-x-4 gap-y-2 mb-6 text-neutral-400 text-sm font-medium"></div>
                 <p id="featuredDesc" class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl"></p>
 
+                <!-- Direct navigation buttons to movie.html -->
                 <div class="flex items-center gap-4 flex-wrap">
-                    <button id="featuredDownload" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                    <a id="featuredDownload" href="#" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span data-i18n="downloadSubs">تحميل الترجمة</span>
-                    </button>
+                    </a>
                     <a id="featuredInfo" href="#" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors flex items-center" data-i18n="moreInfo">
                         معلومات أكثر
                     </a>
@@ -185,44 +186,6 @@
             </div>
         </div>
     </footer>
-
-    <!-- Download Modal -->
-    <div id="modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 modal-backdrop">
-        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 shadow-2xl" role="dialog" aria-modal="true">
-            <div class="flex items-start justify-between mb-5">
-                <div>
-                    <h3 id="modalTitle" class="text-xl font-black text-neutral-50"></h3>
-                    <p id="modalSub" class="text-neutral-500 text-sm mt-1"></p>
-                </div>
-                <button id="modalClose" class="text-neutral-500 hover:text-white transition-colors p-1" aria-label="Close">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <label class="block text-xs font-bold text-neutral-400 mb-2" data-i18n="subLang">لغة الترجمة</label>
-            <div id="langOptions" class="grid grid-cols-2 gap-2 mb-5"></div>
-
-            <label class="block text-xs font-bold text-neutral-400 mb-2" data-i18n="subFormat">صيغة الملف</label>
-            <div id="formatOptions" class="grid grid-cols-3 gap-2 mb-6"></div>
-
-            <div class="flex gap-2 mb-3">
-                <button id="modalDownload" class="flex-1 bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span data-i18n="downloadNow">تحميل الآن</span>
-                </button>
-                <a id="modalMoreDetails" href="#" class="px-4 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold rounded-lg flex items-center justify-center transition-colors text-sm" title="Full Details">
-                    <span data-i18n="moreInfo">معلومات أكثر</span>
-                </a>
-            </div>
-            <p class="text-neutral-600 text-xs text-center mt-3" data-i18n="modalNote">الملفات بصيغة مضغوطة ZIP وتشمل نسخة للصم وضعاف السمع</p>
-        </div>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast" class="toast fixed bottom-6 inset-x-0 mx-auto w-fit max-w-[90vw] z-[70] bg-neutral-100 text-neutral-900 font-bold text-sm px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-        <span id="toastText"></span>
-    </div>
 
     <!-- Back to top -->
     <button id="toTop" class="hidden fixed bottom-6 end-6 z-40 w-11 h-11 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-full items-center justify-center transition-colors" aria-label="Back to top">
@@ -268,10 +231,8 @@ const I18N = {
         noResults: "لا توجد نتائج", noResultsHint: "جرّب كلمة بحث مختلفة أو غيّر التصنيف",
         footerText: "© سبتايل — أرشيف الترجمات. صُمم لعشاق السينما.",
         contact: "تواصل", privacy: "الخصوصية", DMCA: "DMCA",
-        subLang: "لغة الترجمة", subFormat: "صيغة الملف", downloadNow: "تحميل الآن",
-        modalNote: "الملفات بصيغة مضغوطة ZIP وتشمل نسخة للصم وضعاف السمع",
         downloads: "تحميل", download: "تحميل",
-        toastStart: "بدأ تحميل الترجمة", langName: { Arabic: "العربية", English: "الإنجليزية" },
+        langName: { Arabic: "العربية", English: "الإنجليزية" },
         title: "سبتايل | Subtle — الترجمات الرائجة", toggle: "EN", dir: "rtl",
     },
     en: {
@@ -285,22 +246,16 @@ const I18N = {
         noResults: "No results found", noResultsHint: "Try a different search term or category",
         footerText: "© Subtle — Subtitles Archive. Designed for cinephiles.",
         contact: "Contact", privacy: "Privacy Policy", DMCA: "DMCA",
-        subLang: "Subtitle Language", subFormat: "File Format", downloadNow: "Download Now",
-        modalNote: "Files are zipped and include an SDH version for the hearing impaired",
         downloads: "Downloads", download: "Download",
-        toastStart: "Subtitle download started", langName: { Arabic: "Arabic", English: "English" },
+        langName: { Arabic: "Arabic", English: "English" },
         title: "Subtle — Trending Subtitles", toggle: "ع", dir: "ltr",
     }
 };
-
-const SUB_LANGS = ["Arabic", "English", "French", "Spanish"];
-const FORMATS = ["SRT", "VTT", "ASS"];
 
 /* ---------------- State ---------------- */
 let lang = localStorage.getItem("subtle-lang") || "ar";
 let activeFilter = "all";
 let searchQuery = "";
-let modalItem = null, modalLang = "Arabic", modalFormat = "SRT";
 
 const t = key => I18N[lang][key];
 const $ = id => document.getElementById(id);
@@ -341,7 +296,7 @@ function updateAuthNav() {
     }
 }
 
-/* ---------------- Render: Featured ---------------- */
+/* ---------------- Render: Featured (Links to movie.html directly) ---------------- */
 function renderFeatured() {
     const f = TITLES.find(x => x.featured);
     $("bannerBg").style.backgroundImage = `url('${f.backdrop}')`;
@@ -356,13 +311,17 @@ function renderFeatured() {
     img.onerror = () => { img.style.display = "none"; fb.style.display = "flex"; fb.textContent = f.title; };
     img.src = f.poster;
     
-    $("featuredInfo").href = `movie.html?id=${f.id}&type=${f.type}`;
+    const movieUrl = `movie.html?id=${f.id}&type=${f.type}`;
+    $("featuredDownload").href = movieUrl;
+    $("featuredInfo").href = movieUrl;
 }
 
-/* ---------------- Render: Grid (Rank Number Layered on Top of Cover) ---------------- */
+/* ---------------- Render: Grid (Direct Link to movie.html with Hollow Numbers) ---------------- */
 function cardHTML(item, rank) {
+    const movieUrl = `movie.html?id=${item.id}&type=${item.type}`;
+
     return `
-    <div class="movie-card cursor-pointer group reveal" data-id="${item.id}" tabindex="0" role="button" aria-label="${item.title}">
+    <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block" data-id="${item.id}" aria-label="${item.title}">
         <div class="relative">
             <div class="poster-container">
                 <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/60"
@@ -370,10 +329,10 @@ function cardHTML(item, rank) {
                 <div class="poster-fallback"></div>
                 <span class="rank-number">${rank}</span>
                 <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
-                    <button class="dl-btn w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <div class="dl-btn w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         ${t("download")}
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,7 +344,7 @@ function cardHTML(item, rank) {
             <h3 class="text-base font-bold text-neutral-100 truncate">${item.title}</h3>
             <p class="text-neutral-500 text-sm mt-0.5">${item.dl} ${t("downloads")}</p>
         </div>
-    </div>`;
+    </a>`;
 }
 
 function renderGrid() {
@@ -397,14 +356,6 @@ function renderGrid() {
     $("grid").innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
     $("emptyState").classList.toggle("hidden", list.length > 0);
     observeReveals();
-
-    document.querySelectorAll(".movie-card").forEach(card => {
-        const item = TITLES.find(x => x.id == card.dataset.id);
-        const open = () => openModal(item);
-        card.addEventListener("click", e => { if (!e.target.closest(".dl-btn")) open(); });
-        card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
-        card.querySelector(".dl-btn").addEventListener("click", open);
-    });
 }
 
 /* ---------------- Reveal on scroll ---------------- */
@@ -413,74 +364,14 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 function observeReveals() { document.querySelectorAll(".reveal:not(.visible)").forEach(el => io.observe(el)); }
 
-/* ---------------- Modal ---------------- */
-function renderModalOptions() {
-    $("langOptions").innerHTML = SUB_LANGS.map(l => `
-        <button data-lang="${l}" class="opt-lang px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors
-            ${l === modalLang ? "bg-neutral-100 text-neutral-900 border-neutral-100" : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:border-neutral-600"}">
-            ${I18N[lang].langName[l] || l}
-        </button>`).join("");
-    $("formatOptions").innerHTML = FORMATS.map(f => `
-        <button data-fmt="${f}" class="opt-fmt px-3 py-2.5 rounded-lg border text-sm font-bold transition-colors
-            ${f === modalFormat ? "bg-neutral-100 text-neutral-900 border-neutral-100" : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:border-neutral-600"}">
-            ${f}
-        </button>`).join("");
-
-    document.querySelectorAll(".opt-lang").forEach(b => b.addEventListener("click", () => { modalLang = b.dataset.lang; renderModalOptions(); }));
-    document.querySelectorAll(".opt-fmt").forEach(b => b.addEventListener("click", () => { modalFormat = b.dataset.fmt; renderModalOptions(); }));
-}
-
-function openModal(item) {
-    modalItem = item;
-    modalLang = item.lang === "Arabic" ? "Arabic" : "Arabic"; // default: Arabic subtitles
-    modalFormat = "SRT";
-    $("modalTitle").textContent = item.title;
-    $("modalSub").textContent = `${item.year} · ${item.genre[lang]}`;
-    $("modalMoreDetails").href = `movie.html?id=${item.id}&type=${item.type}`;
-    renderModalOptions();
-    $("modal").classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-}
-function closeModal() { $("modal").classList.add("hidden"); document.body.style.overflow = ""; }
-
-$("modalClose").addEventListener("click", closeModal);
-$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
-document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeModal();
-    if (e.key === "/" && document.activeElement !== $("searchInput")) { e.preventDefault(); $("searchInput").focus(); }
-});
-
-/* ---------------- Toast & Download ---------------- */
-let toastTimer;
-function showToast(msg) {
-    $("toastText").textContent = msg;
-    $("toast").classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => $("toast").classList.remove("show"), 3000);
-}
-
-$("modalDownload").addEventListener("click", () => {
-    const name = `${modalItem.title}.${modalLang}.${modalFormat}`.replace(/\s+/g, "_");
-    const demo = modalFormat === "SRT"
-        ? `1\n00:00:01,000 --> 00:00:04,000\n${modalItem.title} — ${modalLang} subtitle\n\n2\n00:00:05,000 --> 00:00:08,000\nPowered by Subtle\n`
-        : modalFormat === "VTT"
-        ? `WEBVTT\n\n00:00:01.000 --> 00:00:04.000\n${modalItem.title} — ${modalLang} subtitle\n\n00:00:05.000 --> 00:00:08.000\nPowered by Subtle\n`
-        : `[Script Info]\nTitle: ${modalItem.title}\nScriptType: v4.00+\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize\nStyle: Default,Tajawal,20\n\n[Events]\nFormat: Layer, Start, End, Style, Text\nDialogue: 0,0:00:01.00,0:00:04.00,Default,${modalItem.title} — ${modalLang} subtitle\nDialogue: 0,0:00:05.00,0:00:08.00,Default,Powered by Subtle\n`;
-    const ext = modalFormat === "VTT" ? "vtt" : modalFormat === "ASS" ? "ass" : "srt";
-    const blob = new Blob([demo], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${name}.${ext}`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    closeModal();
-    showToast(`${t("toastStart")} — ${modalItem.title}`);
-});
-
 /* ---------------- Events ---------------- */
-$("featuredDownload").addEventListener("click", () => openModal(TITLES.find(x => x.featured)));
-
 $("searchInput").addEventListener("input", e => { searchQuery = e.target.value; renderGrid(); });
+
+$("searchInput").addEventListener("keydown", e => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+        window.location.href = `browse.html?q=${encodeURIComponent(searchQuery.trim())}`;
+    }
+});
 
 document.querySelectorAll(".filter-btn").forEach(btn => btn.addEventListener("click", () => {
     activeFilter = btn.dataset.filter;
