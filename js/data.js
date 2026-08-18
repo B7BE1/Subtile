@@ -1,9 +1,38 @@
 /**
- * قاعدة البيانات التجريبية للأفلام والمسلسلات وملفات الترجمة
- * Mock Database for Movies, TV Shows, and Subtitles (Fallback)
+ * قاعدة البيانات للأفلام والمسلسلات والأنمي وملفات الترجمة
+ * Subtile Local Data & Top Rankings
  */
 
 const MOVIES_DATABASE = [
+  {
+    id: "oppenheimer",
+    title: "Oppenheimer",
+    arabicTitle: "أوبنهايمر",
+    type: "movie",
+    year: 2023,
+    rating: 8.9,
+    genres: ["Biography", "Drama", "History"],
+    duration: "3h 00m",
+    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/rLb2cw0iwO1ekqWAlYXv2D8gPbt.jpg",
+    overview: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
+    imdbId: "tt15398776",
+    subtitles: [
+      {
+        id: "sub-opp-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "Oppenheimer.2023.1080p.BluRay.x264-SPARKS",
+        quality: "1080p BluRay",
+        format: "SRT",
+        uploader: "ArabCinemaTeam",
+        downloads: 25410,
+        date: "2023-11-20"
+      }
+    ]
+  },
   {
     id: "dune-2",
     title: "Dune: Part Two",
@@ -15,54 +44,245 @@ const MOVIES_DATABASE = [
     duration: "2h 46m",
     poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
     backdrop: "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s520b4q.jpg",
-    overview: "بول أتريدس يتحد مع تشاني والفريمن في مسار انتقامي ضد المتآمرين الذين دمروا عائلته. وفي مواجهة خيار بين حب حياته ومصير الكون بأسره، يسعى لمنع مستقبل فظيع يستطيع هو وحده توقعه.",
+    overview: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
     imdbId: "tt15239678",
     subtitles: [
       {
         id: "sub-dune-1",
-        language: "ar",
-        langName: "العربية",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
         langFlag: "🇸🇦",
-        release: "Dune.Part.Two.2024.1080p.BluRay.x264.DTS-HD.MA.7.1",
+        release: "Dune.Part.Two.2024.1080p.BluRay.x264.DTS-HD",
         quality: "1080p BluRay",
         format: "SRT",
         uploader: "SubMaster_AR",
         downloads: 14250,
-        rating: 5.0,
-        hearingImpaired: false,
-        fps: "23.976",
         date: "2024-04-12"
       }
     ]
   },
   {
-    id: "oppenheimer",
-    title: "Oppenheimer",
-    arabicTitle: "أوبنهايمر",
-    type: "movie",
-    year: 2023,
-    rating: 8.9,
-    genres: ["Biography", "Drama", "History"],
-    duration: "3h 00m",
-    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg",
-    overview: "قصة الفيزيائي الأمريكي روبرت أوبنهايمر ودوره في تطوير القنبلة الذرية خلال مشروع مانهاتن في الحرب العالمية الثانية.",
-    imdbId: "tt15398776",
+    id: "attack-on-titan",
+    title: "Attack on Titan",
+    arabicTitle: "هجوم العمالقة",
+    type: "anime",
+    year: 2013,
+    rating: 9.1,
+    genres: ["Action", "Fantasy", "Drama"],
+    poster: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/hP659v1U881g9eUjR09iF9b7cO8.jpg",
+    overview: "After his hometown is destroyed and his mother is killed, young Eren Jaeger vows to cleanse the earth of the giant humanoid Titans.",
+    imdbId: "tt2560140",
     subtitles: [
       {
-        id: "sub-opp-1",
-        language: "ar",
-        langName: "العربية",
+        id: "sub-aot-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
         langFlag: "🇸🇦",
-        release: "Oppenheimer.2023.1080p.BluRay.x264-SPARKS",
+        release: "Shingeki.no.Kyojin.The.Final.Season.Part.3.1080p.CR.WEB-DL",
+        quality: "1080p WEB-DL",
+        format: "SRT",
+        uploader: "AnimeSub_Pro",
+        downloads: 12890,
+        date: "2024-02-18"
+      }
+    ]
+  },
+  {
+    id: "breaking-bad",
+    title: "Breaking Bad",
+    arabicTitle: "اختلال ضال",
+    type: "tv",
+    year: 2008,
+    rating: 9.5,
+    genres: ["Crime", "Drama", "Thriller"],
+    poster: "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+    overview: "A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.",
+    imdbId: "tt0903747",
+    subtitles: [
+      {
+        id: "sub-bb-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "Breaking.Bad.Complete.Series.1080p.BluRay.x264",
         quality: "1080p BluRay",
         format: "SRT",
-        uploader: "ArabCinemaTeam",
-        downloads: 25410,
-        rating: 5.0,
-        hearingImpaired: false,
-        fps: "23.976",
-        date: "2023-11-20"
+        uploader: "HeisenbergSubs",
+        downloads: 11420,
+        date: "2023-09-14"
+      }
+    ]
+  },
+  {
+    id: "solo-leveling",
+    title: "Solo Leveling",
+    arabicTitle: "سولو ليفلينج",
+    type: "anime",
+    year: 2024,
+    rating: 8.5,
+    genres: ["Action", "Adventure", "Fantasy"],
+    poster: "https://image.tmdb.org/t/p/w500/geCRueV3ElhRTr0xtJuPxJ8HGQJ.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/9faGSFi5jam6pDWGNdcu8R8GvNm.jpg",
+    overview: "In a world where hunters must battle deadly monsters, weak hunter Sung Jinwoo discovers a quest only he can see.",
+    imdbId: "tt21209876",
+    subtitles: [
+      {
+        id: "sub-sl-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "Ore.dake.Level.Up.na.Ken.S01.1080p.CR.WEB-DL",
+        quality: "1080p WEB-DL",
+        format: "SRT",
+        uploader: "ShadowMonarch",
+        downloads: 9840,
+        date: "2024-03-30"
+      }
+    ]
+  },
+  {
+    id: "the-batman",
+    title: "The Batman",
+    arabicTitle: "باتمان",
+    type: "movie",
+    year: 2022,
+    rating: 7.8,
+    genres: ["Action", "Crime", "Mystery"],
+    poster: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/5P8SmMzSNYikXpxil6BYz9G660Z.jpg",
+    overview: "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate.",
+    imdbId: "tt1877830",
+    subtitles: [
+      {
+        id: "sub-bm-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "The.Batman.2022.2160p.UHD.BluRay.x265",
+        quality: "4K UHD BluRay",
+        format: "SRT",
+        uploader: "GothamKnight",
+        downloads: 9150,
+        date: "2023-01-15"
+      }
+    ]
+  },
+  {
+    id: "interstellar",
+    title: "Interstellar",
+    arabicTitle: "بين النجوم",
+    type: "movie",
+    year: 2014,
+    rating: 8.7,
+    genres: ["Adventure", "Drama", "Sci-Fi"],
+    poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
+    overview: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+    imdbId: "tt0816692",
+    subtitles: [
+      {
+        id: "sub-int-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "Interstellar.2014.1080p.BluRay.x264.DTS-WiKi",
+        quality: "1080p BluRay",
+        format: "SRT",
+        uploader: "NolanFans",
+        downloads: 8760,
+        date: "2022-08-10"
+      }
+    ]
+  },
+  {
+    id: "house-of-the-dragon",
+    title: "House of the Dragon",
+    arabicTitle: "آل التنين",
+    type: "tv",
+    year: 2022,
+    rating: 8.4,
+    genres: ["Action", "Adventure", "Drama"],
+    poster: "https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/etj5CuMuam3U9KuVdyG2KeZo1GF.jpg",
+    overview: "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke.",
+    imdbId: "tt11198330",
+    subtitles: [
+      {
+        id: "sub-hotd-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "House.of.the.Dragon.S02.1080p.MAX.WEB-DL.DDP5.1.Atmos",
+        quality: "1080p MAX WEB-DL",
+        format: "SRT",
+        uploader: "WesterosSubs",
+        downloads: 8430,
+        date: "2024-06-20"
+      }
+    ]
+  },
+  {
+    id: "jujutsu-kaisen",
+    title: "Jujutsu Kaisen",
+    arabicTitle: "جوجوتسو كايسن",
+    type: "anime",
+    year: 2020,
+    rating: 8.6,
+    genres: ["Animation", "Action", "Fantasy"],
+    poster: "https://image.tmdb.org/t/p/w500/hFWP5HkbVEe40hrXgtCeQxoccHE.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/9r8b3fD3NfO2Z0yL6W3T8QjG9F8.jpg",
+    overview: "A boy swallows a cursed talisman and becomes cursed himself. He enters a shaman's school to find the demon's other body parts.",
+    imdbId: "tt12343534",
+    subtitles: [
+      {
+        id: "sub-jjk-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "Jujutsu.Kaisen.S02.Shibuya.Incident.1080p.CR.WEB-DL",
+        quality: "1080p WEB-DL",
+        format: "SRT",
+        uploader: "GojoSubs",
+        downloads: 7920,
+        date: "2023-12-15"
+      }
+    ]
+  },
+  {
+    id: "silo",
+    title: "Silo",
+    arabicTitle: "سايلو",
+    type: "tv",
+    year: 2023,
+    rating: 8.1,
+    genres: ["Drama", "Sci-Fi"],
+    poster: "https://image.tmdb.org/t/p/w500/1NsqDfqjWzT3l7R1h6C0f0f3t9o.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/9w90w1E5h04tH7kK5C0b9K4x7q2.jpg",
+    overview: "Men and women live in a giant subterranean silo with strict regulations which they believe protect them.",
+    imdbId: "tt14688458",
+    subtitles: [
+      {
+        id: "sub-silo-1",
+        language: "العربية",
+        langCode: "ar",
+        langName: "Arabic",
+        langFlag: "🇸🇦",
+        release: "Silo.S01.1080p.ATVP.WEB-DL.DDP5.1.Atmos",
+        quality: "1080p WEB-DL",
+        format: "SRT",
+        uploader: "AppleTVFans",
+        downloads: 6540,
+        date: "2023-07-02"
       }
     ]
   }
@@ -84,136 +304,4 @@ function getRecentSubtitles() {
     });
   });
   return allSubs.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
-
-/**
- * محول مصادر الترجمة (Adapter Pattern)
- * يوحد شكل البيانات القادمة من مختلف الـ APIs لتتوافق مع الواجهة
- */
-class SubtitleAdapter {
-  static adapt(apiData) {
-    if (!apiData || !apiData.subtitles) return [];
-    
-    return apiData.subtitles.map((sub, index) => {
-      const langLower = (sub.language || 'ar').toLowerCase();
-      const isArabic = langLower.includes('ar') || langLower.includes('arabic');
-      const isEnglish = langLower.includes('en') || langLower.includes('english');
-      
-      const releaseName = sub.release_name || sub.name || `Release ${index + 1}`;
-      
-      // Determine file format
-      let format = 'SRT';
-      if ((sub.download_url && sub.download_url.endsWith('.zip')) || (sub.name && sub.name.endsWith('.zip')) || sub.episode === 'All') {
-        format = 'ZIP';
-      } else if ((sub.name && sub.name.endsWith('.ass')) || (sub.release_name && sub.release_name.endsWith('.ass'))) {
-        format = 'ASS';
-      }
-
-      return {
-        id: sub.id || `sub-${index}`,
-        language: isArabic ? 'ar' : isEnglish ? 'en' : langLower,
-        langName: isArabic ? 'العربية' : isEnglish ? 'English' : sub.language,
-        langFlag: isArabic ? '🇸🇦' : isEnglish ? '🇬🇧' : '🌐',
-        release: releaseName,
-        quality: sub.quality || 'BluRay / WEB',
-        season: sub.season || null,
-        episode: sub.episode || null,
-        format: format,
-        uploader: sub.author || sub.source_api || 'SubHub Community',
-        downloads: sub.downloads || Math.floor(Math.random() * 3000) + 500,
-        rating: 5.0,
-        hearingImpaired: Boolean(sub.hearing_impaired || sub.hi),
-        fps: sub.fps ? String(sub.fps) : '23.976',
-        date: sub.date || new Date().toISOString().split('T')[0],
-        download_url: sub.download_url || null,
-        source_api: sub.source_api || 'Provider'
-      };
-    });
-  }
-}
-
-/**
- * State Manager لترجمات صفحة الفيلم/المسلسل
- */
-class SubtitleStateManager {
-  constructor() {
-    this.rawSubtitles = [];
-    this.filteredSubtitles = [];
-    this.filters = {
-      lang: 'all',
-      quality: 'all',
-      season: 'all',
-      episode: 'all'
-    };
-    this.currentTmdbId = null;
-    this.currentType = 'movie';
-  }
-
-  async fetchSubtitles(tmdb_id, type = 'movie', season = 'all', episode = 'all') {
-    this.currentTmdbId = tmdb_id;
-    this.currentType = type;
-
-    try {
-      const params = new URLSearchParams({
-        tmdb_id: tmdb_id,
-        type: type
-      });
-      if (season && season !== 'all') params.append('season', season);
-      if (episode && episode !== 'all') params.append('episode', episode);
-
-      const response = await fetch(`/api/subtitles?${params.toString()}`);
-      if (!response.ok) throw new Error('API Error');
-      const data = await response.json();
-      
-      this.rawSubtitles = SubtitleAdapter.adapt(data);
-      this.applyFilters();
-      return this.filteredSubtitles;
-    } catch (e) {
-      console.error('Failed to fetch subtitles from API:', e);
-      // Fallback to local db if ID exists
-      const localMovie = MOVIES_DATABASE.find(m => m.id === tmdb_id || m.imdbId === tmdb_id);
-      if (localMovie && localMovie.subtitles) {
-        this.rawSubtitles = SubtitleAdapter.adapt({ subtitles: localMovie.subtitles });
-      } else {
-        this.rawSubtitles = [];
-      }
-      this.applyFilters();
-      return this.filteredSubtitles;
-    }
-  }
-
-  setFilter(key, value) {
-    this.filters[key] = value;
-    this.applyFilters();
-  }
-
-  applyFilters() {
-    this.filteredSubtitles = this.rawSubtitles.filter(sub => {
-      let match = true;
-      if (this.filters.lang !== 'all' && sub.language !== this.filters.lang) {
-        match = false;
-      }
-      if (this.filters.quality !== 'all') {
-        const q = this.filters.quality.toLowerCase();
-        const sq = (sub.quality || sub.release).toLowerCase();
-        if (q === 'web' && !sq.includes('web')) match = false;
-        else if (q === 'bluray' && !sq.includes('bluray') && !sq.includes('bdrip')) match = false;
-        else if (q === '4k' && !sq.includes('2160p') && !sq.includes('4k')) match = false;
-        else if (q === '1080p' && !sq.includes('1080p')) match = false;
-      }
-      if (this.filters.season !== 'all' && sub.season && sub.season.toString() !== this.filters.season.toString()) {
-        match = false;
-      }
-      if (this.filters.episode !== 'all' && sub.episode && sub.episode.toString() !== this.filters.episode.toString()) {
-        if (sub.episode !== 'All') { // Accept full season packs
-          match = false;
-        }
-      }
-      return match;
-    });
-  }
-
-  getFiltered() {
-    return this.filteredSubtitles;
-  }
 }
