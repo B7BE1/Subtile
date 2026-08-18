@@ -1,12 +1,37 @@
 /**
  * Movie, TV Series & Anime Details Page Logic (Subtile)
  * Integrated with Cinemeta (Movies/Series) & Jikan (Anime) & SubDL Real Subtitles
+ *
+ * Upgrade notes (vs. previous version):
+ *  - All API-sourced strings (titles, genres, subtitle release/uploader/lang names)
+ *    are now HTML-escaped before being inserted via innerHTML. Previously these were
+ *    interpolated raw, so a malicious SubDL release name or genre string could inject
+ *    markup/script into the page (stored/reflected XSS via a third-party API response).
+ *  - Subtitle download and season-select handlers moved from inline onclick="" string
+ *    concatenation to event delegation with data-* attributes. The old approach only
+ *    escaped single quotes, so release names containing " or < could break out of the
+ *    attribute or inject a new handler.
+ *  - fetchRealSubtitles now uses an AbortController with a timeout (metadata fetch had
+ *    one, subtitles fetch didn't) and cancels any in-flight subtitles request when the
+ *    user switches season/episode quickly, preventing a slow older response from
+ *    overwriting a newer selection (race condition).
+ *  - Added a small in-memory cache keyed by type/season/episode so re-opening a season
+ *    you've already viewed doesn't re-hit the network.
+ *  - Removed dead/broken code paths: `selectSeason` and `filterTvSubtitles` referenced
+ *    `updateEpisodeSelect`, a function that was never defined, and neither was wired to
+ *    any element in the current markup. `loadSeasonSubtitles` is the actual live path.
+ *  - Defensive guards for missing movie.title / empty genres / empty subtitles arrays.
+ *
+ * No HTML/CSS changes required — same element IDs and classes as before.
  */
 
 let currentMovie = null;
 let currentSeason = 1;
 let currentEpisode = 'all';
 let loadedSubtitles = [];
+
+const subtitlesCache = new Map(); // key: `${type}:${season}:${episode}` -> subtitles[]
+let subtitlesAbortController = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -22,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderMovieDetails(currentMovie);
+    wireUpEventDelegation();
 
     // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
     const loader = document.getElementById('globalLoader');
@@ -45,6 +71,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// ---------- Security helper ----------
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ---------- Event delegation (replaces inline onclick string-building) ----------
+function wireUpEventDelegation() {
+  const subtitlesList = document.getElementById('subtitlesList');
+  if (subtitlesList) {
+    subtitlesList.addEventListener('click', (e) => {
+      const seasonCard = e.target.closest('.season-card');
+      if (seasonCard && seasonCard.dataset.season !== undefined) {
+        loadSeasonSubtitles(Number(seasonCard.dataset.season));
+        return;
+      }
+
+      const downloadBtn = e.target.closest('.download-btn');
+      if (downloadBtn && downloadBtn.dataset.subId) {
+        e.preventDefault();
+        downloadSubtitle(
+          downloadBtn.dataset.subId,
+          downloadBtn.dataset.release || 'Subtitle',
+          downloadBtn.dataset.format || 'SRT',
+          downloadBtn.dataset.downloadUrl || ''
+        );
+      }
+    });
+  }
+}
+
 async function loadMetadata(id, type) {
   const local = MOVIES_DATABASE.find(m => m.id === id || (m.imdbId && m.imdbId === id));
   if (local) return local;
@@ -67,11 +129,27 @@ async function loadMetadata(id, type) {
 }
 
 async function fetchRealSubtitles(movie) {
+  const type = movie.type === 'tv' ? 'tv' : 'movie';
+  const cacheKey = `${type}:${currentSeason}:${currentEpisode}`;
+
+  if (subtitlesCache.has(cacheKey)) {
+    loadedSubtitles = subtitlesCache.get(cacheKey);
+    renderSubtitlesList();
+    return;
+  }
+
   showSubtitlesLoading();
+
+  // Cancel any in-flight request so a slow older response can't clobber a newer selection
+  if (subtitlesAbortController) {
+    subtitlesAbortController.abort();
+  }
+  subtitlesAbortController = new AbortController();
+  const { signal } = subtitlesAbortController;
+  const timeoutId = setTimeout(() => subtitlesAbortController.abort(), 8000);
 
   const imdbId = movie.imdb_id || movie.imdbId;
   const title = movie.title;
-  const type = movie.type === 'tv' ? 'tv' : 'movie';
 
   try {
     let url = `/api/subtitles?languages=AR,EN&type=${type}`;
@@ -85,24 +163,33 @@ async function fetchRealSubtitles(movie) {
       }
     }
 
-    const res = await fetch(url);
+    const res = await fetch(url, { signal });
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       const data = await res.json();
       if (data.subtitles && data.subtitles.length > 0) {
         loadedSubtitles = data.subtitles;
+        subtitlesCache.set(cacheKey, loadedSubtitles);
         renderSubtitlesList();
         return;
       }
     }
   } catch (e) {
+    if (e.name === 'AbortError') {
+      // Superseded by a newer request or timed out — a newer call already owns rendering.
+      return;
+    }
     console.error('SubDL API error:', e);
   }
 
   // Fallback to local subtitles if SubDL returned empty
-  loadedSubtitles = movie.subtitles || generateFallbackSubtitles(movie);
+  loadedSubtitles = (movie.subtitles && movie.subtitles.length > 0)
+    ? movie.subtitles
+    : generateFallbackSubtitles(movie);
+  subtitlesCache.set(cacheKey, loadedSubtitles);
   renderSubtitlesList();
 }
-
 
 function showSubtitlesLoading() {
   const container = document.getElementById('subtitlesList');
@@ -136,24 +223,8 @@ function generateFallbackSubtitles(movie) {
   ];
 }
 
-function showPageLoading() {
-  const title = document.getElementById('movieTitle');
-  const overview = document.getElementById('movieOverview');
-  const poster = document.getElementById('moviePoster');
-  const tags = document.getElementById('movieTags');
-  const meta = document.getElementById('movieMeta');
-  const backdrop = document.getElementById('movieBackdropSection');
-
-  if (title) title.textContent = '';
-  if (overview) overview.textContent = '';
-  if (tags) tags.innerHTML = '';
-  if (meta) meta.innerHTML = '';
-  if (poster) poster.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-  if (backdrop) backdrop.style.backgroundImage = 'none';
-}
-
 function renderMovieDetails(movie) {
-  document.title = `${movie.title} (${movie.year || ''}) - Subtile`;
+  document.title = `${movie.title || 'Movie Details'} (${movie.year || ''}) - Subtile`;
 
   const backdropSec = document.getElementById('movieBackdropSection');
   if (backdropSec) {
@@ -181,21 +252,22 @@ function renderMovieDetails(movie) {
 
   const tags = document.getElementById('movieTags');
   if (tags) {
-    let tagsHtml = `<span class="tag">${movie.year || ''}</span>`;
+    let tagsHtml = `<span class="tag">${escapeHtml(movie.year || '')}</span>`;
     if (movie.genres && movie.genres.length > 0) {
-      tagsHtml += movie.genres.map(g => `<span class="tag">${g}</span>`).join('');
+      tagsHtml += movie.genres.map(g => `<span class="tag">${escapeHtml(g)}</span>`).join('');
     }
     tags.innerHTML = tagsHtml;
   }
 
   const meta = document.getElementById('movieMeta');
   if (meta) {
+    const imdbId = movie.imdb_id || movie.imdbId;
     meta.innerHTML = `
       <div class="rating-circle">
-        <span>${movie.rating || 'N/A'}</span>
+        <span>${escapeHtml(movie.rating || 'N/A')}</span>
       </div>
       <div class="meta-item"><i class="fas fa-clock"></i> ${movie.type === 'tv' ? 'TV Series' : 'Movie'}</div>
-      ${(movie.imdb_id || movie.imdbId) ? `<div class="meta-item"><a href="https://www.imdb.com/title/${movie.imdb_id || movie.imdbId}" target="_blank" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
+      ${imdbId ? `<div class="meta-item"><a href="https://www.imdb.com/title/${encodeURIComponent(imdbId)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
     `;
   }
 
@@ -206,7 +278,7 @@ function renderMovieDetails(movie) {
 
   const modalInput = document.getElementById('modalMovieNameInput');
   if (modalInput) {
-    modalInput.value = `${movie.title} (${movie.year || ''})`;
+    modalInput.value = `${movie.title || ''} (${movie.year || ''})`;
   }
 }
 
@@ -227,16 +299,18 @@ function renderSeasonsList(movie) {
     seasons = Array.from({length: movie.seasonsCount}, (_, i) => i + 1);
   }
 
+  const posterUrl = escapeHtml(movie.poster || '');
+
   let html = '';
   seasons.forEach(s => {
     let sTitle = s === 0 ? 'Specials' : `Season ${s}`;
     let sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
     html += `
-      <div class="season-card" onclick="loadSeasonSubtitles(${s})">
-        <img src="${movie.poster}" alt="${sTitle}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'">
+      <div class="season-card" data-season="${s}">
+        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'">
         <div class="season-card-content">
-          <div class="season-card-title">${sTitle}</div>
-          <div class="season-card-subtitle">${sSub}</div>
+          <div class="season-card-title">${escapeHtml(sTitle)}</div>
+          <div class="season-card-subtitle">${escapeHtml(sSub)}</div>
         </div>
       </div>
     `;
@@ -245,13 +319,13 @@ function renderSeasonsList(movie) {
   container.innerHTML = html;
 }
 
-window.loadSeasonSubtitles = async function(seasonNum) {
+async function loadSeasonSubtitles(seasonNum) {
   currentSeason = seasonNum;
   currentEpisode = 'all';
 
   const filters = document.getElementById('filterPillsContainer');
   const backBtn = document.getElementById('backToSeasonsBtn');
-  
+
   if (filters) filters.style.display = ''; // revert to default grid/flex
   if (backBtn) {
     backBtn.style.display = 'flex';
@@ -259,26 +333,9 @@ window.loadSeasonSubtitles = async function(seasonNum) {
   }
 
   await fetchRealSubtitles(currentMovie);
-};
-
-async function selectSeason(seasonNum) {
-  currentSeason = seasonNum;
-  document.querySelectorAll('.season-tab-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', btn.textContent.includes(`Season ${seasonNum}`));
-  });
-  if (currentMovie) {
-    updateEpisodeSelect(currentMovie, currentSeason);
-    await fetchRealSubtitles(currentMovie);
-  }
 }
-
-async function filterTvSubtitles() {
-  const epSelect = document.getElementById('episodeSelect');
-  currentEpisode = epSelect ? epSelect.value : 'all';
-  if (currentMovie) {
-    await fetchRealSubtitles(currentMovie);
-  }
-}
+// Exposed for the "back to seasons" button and any inline markup that still references it
+window.loadSeasonSubtitles = loadSeasonSubtitles;
 
 window.currentFilters = { lang: 'all', quality: 'all' };
 
@@ -323,24 +380,31 @@ function renderSubtitlesList() {
   }
 
   container.innerHTML = subs.map(sub => {
-    const safeRelease = (sub.release || 'Subtitle').replace(/'/g, "\\'");
-    const downloadParam = sub.download_url ? encodeURIComponent(sub.download_url) : '';
+    const release = escapeHtml(sub.release || 'Subtitle');
+    const format = escapeHtml(sub.format || 'SRT');
+    const langLabel = escapeHtml(sub.langName || sub.language || 'SUB');
+    const langFlag = escapeHtml(sub.langFlag || '🌐');
+    const uploader = escapeHtml(sub.uploader || 'SubDL Author');
+    const downloadsCount = (sub.downloads || 0).toLocaleString();
+    const quality = sub.quality ? escapeHtml(sub.quality) : '';
+    const subId = escapeHtml(sub.id || '');
+    const downloadUrl = escapeHtml(sub.download_url || '');
 
     return `
       <div class="subtitle-item">
         <div class="sub-info">
           <div class="sub-release">
-            ${sub.release}
-            <span class="format-badge">${sub.format || 'SRT'}</span>
+            ${release}
+            <span class="format-badge">${format}</span>
           </div>
           <div class="sub-meta">
-            <span><i class="fas fa-flag"></i> ${sub.langName || sub.language || 'SUB'} (${sub.langFlag || '🌐'})</span>
-            <span><i class="fas fa-user"></i> ${sub.uploader || 'SubDL Author'}</span>
-            <span><i class="fas fa-download"></i> ${(sub.downloads || 0).toLocaleString()}</span>
-            ${sub.quality ? `<span><i class="fas fa-video"></i> ${sub.quality}</span>` : ''}
+            <span><i class="fas fa-flag"></i> ${langLabel} (${langFlag})</span>
+            <span><i class="fas fa-user"></i> ${uploader}</span>
+            <span><i class="fas fa-download"></i> ${downloadsCount}</span>
+            ${quality ? `<span><i class="fas fa-video"></i> ${quality}</span>` : ''}
           </div>
         </div>
-        <a href="#" class="download-btn" onclick="downloadSubtitle('${sub.id}', '${safeRelease}', '${sub.format}', '${downloadParam}'); return false;"><i class="fas fa-download"></i></a>
+        <a href="#" class="download-btn" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
       </div>
     `;
   }).join('');
@@ -361,14 +425,13 @@ function renderSubtitlesList() {
   document.querySelectorAll('.subtitle-item').forEach(item => observer.observe(item));
 }
 
-function downloadSubtitle(subId, releaseName, format = 'SRT', encodedDownloadUrl = '') {
+function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '') {
   showToast(`Starting download: ${releaseName}...`);
 
-  if (encodedDownloadUrl) {
-    const rawUrl = decodeURIComponent(encodedDownloadUrl);
+  if (rawDownloadUrl) {
     const cleanExt = (format || 'srt').toLowerCase().includes('zip') ? 'zip' : 'srt';
     const fileName = `${releaseName}.${cleanExt}`;
-    const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(rawUrl)}&filename=${encodeURIComponent(fileName)}`;
+    const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(rawDownloadUrl)}&filename=${encodeURIComponent(fileName)}`;
 
     const a = document.createElement('a');
     a.href = proxyDownloadUrl;
@@ -429,7 +492,7 @@ function showToast(message) {
 
   const toast = document.createElement('div');
   toast.className = 'toast';
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--brand-yellow);"></i> <span>${message}</span>`;
+  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--brand-yellow);"></i> <span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -437,3 +500,8 @@ function showToast(message) {
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
+
+// Exposed for inline onclick="" still present in the (unmodified) HTML markup
+window.openUploadModal = openUploadModal;
+window.closeUploadModal = closeUploadModal;
+window.handleUploadSubtitle = handleUploadSubtitle;
