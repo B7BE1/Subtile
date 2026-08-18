@@ -120,48 +120,19 @@
         </div>
     </header>
 
-    <!-- Featured Banner (Number 1: Dune Part Two) -->
-    <section class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
+    <!-- Featured Banner -->
+    <section id="homeHeroBanner" class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
         <div class="banner-bg" style="background-image: url('https://images.metahub.space/background/medium/tt15239678/img');"></div>
         
         <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
             <div class="hidden md:block w-64 flex-shrink-0">
-                <div class="poster-container">
-                    <img src="https://images.metahub.space/poster/small/tt15239678/img" alt="Dune: Part Two" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800">
-                </div>
+                <div class="poster-container animate-pulse bg-neutral-900 rounded-xl" style="height: 384px;"></div>
             </div>
 
-            <div class="max-w-2xl mt-8 md:mt-0">
-                <div class="flex items-center gap-4 mb-4">
-                    <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
-                    <div class="border-l border-neutral-700 pl-4">
-                        <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
-                        <p class="text-neutral-500 text-sm">Trending Worldwide</p>
-                    </div>
-                </div>
-                
-                <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none">Dune: Part Two</h1>
-                <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
-                    <span>2024</span>
-                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span>Sci-Fi / Adventure</span>
-                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
-                    <span>5.4M Downloads</span>
-                </div>
-                
-                <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl">
-                    Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Experience the epic in verified subtitles.
-                </p>
-
-                <div class="flex items-center gap-4">
-                    <a href="movie.html?id=dune-2&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download Subtitles
-                    </a>
-                    <a href="movie.html?id=dune-2&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
-                        More Info
-                    </a>
-                </div>
+            <div class="max-w-2xl mt-8 md:mt-0 w-full animate-pulse">
+                <div class="h-16 bg-neutral-900 rounded-lg w-32 mb-4"></div>
+                <div class="h-24 bg-neutral-900 rounded-lg w-full mb-6"></div>
+                <div class="h-4 bg-neutral-900 rounded-lg w-1/2 mb-8"></div>
             </div>
         </div>
     </section>
@@ -300,10 +271,13 @@
             promises.push(
               fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`)
                 .then(r => r.ok ? r.json() : { metas: [] })
-                .then(d => (d.metas || []).slice(0, 10).map(m => ({
+                .then(d => (d.metas || []).slice(0, 11).map(m => ({
                   id: m.imdb_id || m.id, title: m.name, type: 'tv', 
                   year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
-                  poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
+                  poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`,
+                  backdrop: m.background || `https://images.metahub.space/background/medium/${m.id}/img`,
+                  description: m.description || '',
+                  genres: m.genres || ['TV Series']
                 })))
                 .catch(() => [])
             );
@@ -313,10 +287,13 @@
             promises.push(
               fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`)
                 .then(r => r.ok ? r.json() : { metas: [] })
-                .then(d => (d.metas || []).slice(0, 10).map(m => ({
+                .then(d => (d.metas || []).slice(0, 11).map(m => ({
                   id: m.imdb_id || m.id, title: m.name, type: 'movie',
                   year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
-                  poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
+                  poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`,
+                  backdrop: m.background || `https://images.metahub.space/background/medium/${m.id}/img`,
+                  description: m.description || '',
+                  genres: m.genres || ['Movie']
                 })))
                 .catch(() => [])
             );
@@ -324,13 +301,20 @@
 
           if (type === 'all' || type === 'anime') {
             promises.push(
-              fetch(`https://api.jikan.moe/v4/top/anime?limit=10`)
+              fetch(`https://api.jikan.moe/v4/top/anime?limit=11`)
                 .then(r => r.ok ? r.json() : { data: [] })
-                .then(d => (d.data || []).map(a => ({
-                  id: `anime-${a.mal_id}`, title: a.title_english || a.title, type: 'anime',
-                  year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
-                  poster: (a.images && a.images.webp && a.images.webp.large_image_url) || ''
-                })))
+                .then(d => (d.data || []).map(a => {
+                  const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || '';
+                  const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
+                  return {
+                    id: `anime-${a.mal_id}`, title: a.title_english || a.title, type: 'anime',
+                    year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
+                    poster: posterUrl,
+                    backdrop: bgUrl,
+                    description: (a.synopsis || '').split('[')[0],
+                    genres: (a.genres || []).map(g => g.name)
+                  };
+                }))
                 .catch(() => [])
             );
           }
@@ -338,19 +322,69 @@
           const settled = await Promise.all(promises);
           let results = settled.flat();
           
-          // Randomize / shuffle for 'all' to look interesting, or just sort by a proxy for popularity
           results.sort(() => Math.random() - 0.5);
-          results = results.slice(0, 10); // keep top 10 for home page
+          results = results.slice(0, 11); // need 1 for hero + 10 for grid
 
           if (results.length === 0) {
             grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;">No trending data available.</div>';
             return;
           }
 
-          grid.innerHTML = results.map((m, index) => {
+          // 1. Render Hero Banner (index 0)
+          const hero = results[0];
+          const heroSection = document.getElementById('homeHeroBanner');
+          const heroUrl = `movie.html?id=${encodeURIComponent(hero.id)}&type=${hero.type}`;
+          const heroTypeLabel = hero.type === 'anime' ? 'Anime' : (hero.type === 'tv' ? 'TV Series' : 'Movie');
+          
+          heroSection.innerHTML = `
+            <div class="banner-bg" style="background-image: url('${hero.backdrop || hero.poster}'); filter: brightness(0.4);"></div>
+            <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
+                <div class="hidden md:block w-64 flex-shrink-0">
+                    <div class="poster-container">
+                        <img src="${hero.poster}" alt="${hero.title}" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mt-8 md:mt-0">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
+                        <div class="border-l border-neutral-700 pl-4">
+                            <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
+                            <p class="text-neutral-500 text-sm">Trending Worldwide</p>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${hero.title}</h1>
+                    <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
+                        <span>${hero.year || ''}</span>
+                        <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                        <span>${hero.genres && hero.genres.length > 0 ? hero.genres[0] : heroTypeLabel}</span>
+                        <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                        <span>${(Math.random() * 5 + 1).toFixed(1)}M Downloads</span>
+                    </div>
+                    
+                    <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                        ${hero.description || 'Experience the epic trending title with perfectly synced and verified Arabic subtitles. Download directly below.'}
+                    </p>
+
+                    <div class="flex items-center gap-4">
+                        <a href="${heroUrl}" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download Subtitles
+                        </a>
+                        <a href="${heroUrl}" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
+                            More Info
+                        </a>
+                    </div>
+                </div>
+            </div>
+          `;
+
+          // 2. Render Grid (index 1 to 10)
+          const gridItems = results.slice(1, 11);
+          grid.innerHTML = gridItems.map((m, index) => {
             const typeLabel = m.type === 'anime' ? 'Anime' : (m.type === 'tv' ? 'TV Series' : 'Movie');
             const targetUrl = `movie.html?id=${encodeURIComponent(m.id)}&type=${m.type}`;
-            // Fake downloads just for the UI
             const fakeDl = (Math.random() * 5 + 1).toFixed(1) + 'M Downloads';
             
             return `
