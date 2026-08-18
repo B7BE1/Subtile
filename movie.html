@@ -49,11 +49,18 @@
       padding: 8rem 4rem 4rem;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start; /* Align content to the top */
       align-items: center;
-      position: relative;
+      position: sticky; /* Keep it fixed on screen */
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
       z-index: 2;
       border-left: 1px solid var(--divider-color); /* The Vertical Divider Line */
+    }
+    
+    .left-panel::-webkit-scrollbar {
+      display: none;
     }
 
     .left-content {
@@ -271,7 +278,8 @@
     /* Responsive */
     @media (max-width: 1024px) {
       .split-container { flex-direction: column; }
-      .left-panel, .right-panel { width: 100%; padding: 8rem 1.5rem 4rem; border-left: none; border-top: 1px solid var(--divider-color); }
+      .left-panel { position: relative; height: auto; overflow-y: visible; border-left: none; }
+      .left-panel, .right-panel { width: 100%; padding: 8rem 1.5rem 4rem; border-top: 1px solid var(--divider-color); }
       .left-content { max-width: 100%; }
       .movie-title { font-size: 2.5rem; }
       .filter-pills { grid-template-columns: repeat(3, 1fr); }
