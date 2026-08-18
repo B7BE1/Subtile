@@ -155,28 +155,23 @@
     /* Movie Backdrop */
     .movie-header-backdrop {
       position: relative;
-      min-height: 60vh;
+      min-height: 55vh;
       display: flex;
       align-items: flex-end;
       padding: 4rem 4% 3rem;
       overflow: hidden;
+      background-size: cover !important;
+      background-position: center top !important;
+      background-repeat: no-repeat !important;
+      background-color: #0d1017;
     }
 
     .backdrop-gradient {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, var(--bg-primary) 10%, rgba(11, 15, 23, 0.6) 50%, rgba(11, 15, 23, 0.3) 100%);
+      background: linear-gradient(to top, #0d1017 15%, rgba(13, 16, 23, 0.7) 60%, rgba(13, 16, 23, 0.4) 100%);
       z-index: 1;
-    }
-    
-    #movieBackdropSection::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center top;
-      filter: blur(2px) brightness(0.4);
-      z-index: 0;
+      pointer-events: none;
     }
 
     .movie-hero-content {

@@ -29,7 +29,7 @@ function renderMostDownloaded() {
     return `
       <a href="movie.html?id=${movie.id}&type=${movie.type || 'movie'}" class="movie-card most-downloaded">
         <div class="movie-card-poster-wrap">
-          <img src="${movie.poster}" alt="${movie.title}" class="movie-card-poster" loading="lazy">
+          <img src="${movie.poster}" alt="${movie.title}" class="movie-card-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
           <span class="rank-badge">#${index + 1}</span>
         </div>
         <div class="movie-card-info">
@@ -117,9 +117,9 @@ function renderSearchResults(items, dropdown, isLocalOnly) {
 
     return `
       <div class="search-result-item" onclick="window.location.href='${targetUrl}'">
-        <img src="${movie.poster || 'assets/default-poster.jpg'}" alt="${movie.title}">
+        <img src="${movie.poster || 'https://images.metahub.space/poster/small/tt15239678/img'}" alt="${movie.title}" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
         <div style="flex: 1;">
-          <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${movie.title} <span style="color: #6b7280; font-size: 0.8rem;">(${movie.year || 'N/A'})</span></div>
+          <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${movie.title} <span style="color: #6b7280; font-size: 0.8rem;">(${movie.year || movie.releaseInfo || 'N/A'})</span></div>
           <div class="search-result-meta">
             <span style="color: #5b9df5;">${typeLabel}</span>
             ${movie.rating ? `<span class="search-result-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}

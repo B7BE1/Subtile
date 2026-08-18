@@ -1,84 +1,126 @@
 /**
- * Serverless Metadata API (Cinemeta for Movies/Series + Jikan v4 for Anime)
+ * Metadata API - Resolves metadata from Cinemeta (Movies/Series) and Jikan (Anime)
  */
 
 export default async function handler(req, res) {
-  const { id, type = 'movie', provider } = req.query;
+  const { id, type = 'movie' } = req.query;
 
-  if (!id) return res.status(400).json({ error: 'ID (IMDb ID for Movies/TV or MAL ID for Anime) is required' });
+  if (!id) {
+    return res.status(400).json({ error: 'ID parameter is required' });
+  }
 
   const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
 
   try {
-    // 1. Anime via Jikan API v4
-    if (type === 'anime' || provider === 'jikan' || id.startsWith('anime-') || !isNaN(id)) {
+    // 1. Anime from Jikan API
+    if (type === 'anime' || id.startsWith('anime-') || (!id.startsWith('tt') && !isNaN(id))) {
       const malId = id.replace('anime-', '');
-      const jikanUrl = `https://api.jikan.moe/v4/anime/${malId}/full`;
-      
-      const response = await fetch(jikanUrl, {
+      const jikanRes = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, {
         headers: { 'User-Agent': USER_AGENT }
       });
-      
-      if (!response.ok) throw new Error(`Jikan API Error: ${response.statusText}`);
-      const json = await response.json();
-      const a = json.data;
 
-      const metadata = {
+      if (!jikanRes.ok) {
+        throw new Error(`Jikan API responded with status ${jikanRes.status}`);
+      }
+
+      const jikanData = await jikanRes.json();
+      const a = jikanData.data;
+
+      const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '';
+      const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
+
+      // Generate episodes array
+      const episodesCount = a.episodes || 12;
+      const episodes = [];
+      for (let i = 1; i <= episodesCount; i++) {
+        episodes.push({
+          season: 1,
+          episode: i,
+          title: `Episode ${i}`
+        });
+      }
+
+      const result = {
         id: `anime-${a.mal_id}`,
         mal_id: a.mal_id,
         title: a.title_english || a.title,
-        japanese_title: a.title_japanese,
+        original_title: a.title_japanese,
         year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
         type: 'anime',
-        rating: parseFloat(a.score) || 0,
-        episodes_count: a.episodes || 0,
-        status: a.status,
-        poster: (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '',
-        backdrop: (a.trailer && a.trailer.images && a.trailer.images.maximum_image_url) || '',
+        rating: parseFloat(a.score) || 8.5,
+        poster: posterUrl,
+        backdrop: bgUrl,
         overview: a.synopsis || '',
-        genres: (a.genres || []).map(g => g.name)
+        genres: (a.genres || []).map(g => g.name),
+        status: a.status,
+        episodes: episodes,
+        seasonsCount: 1
       };
 
       res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate');
-      return res.status(200).json(metadata);
+      return res.status(200).json(result);
     }
 
-    // 2. Movies & TV Shows via Cinemeta API (Stremio / IMDb)
-    const cinemetaType = (type === 'tv' || type === 'series') ? 'series' : 'movie';
-    const cinemetaUrl = `https://v3-cinemeta.strem.io/meta/${cinemetaType}/${id}.json`;
+    // 2. Movies & Series from Cinemeta API
+    const imdbId = id.startsWith('tt') ? id : `tt${id}`;
+    const mediaType = (type === 'tv' || type === 'series') ? 'series' : 'movie';
 
-    const response = await fetch(cinemetaUrl, {
+    // Fetch from Cinemeta
+    let cinemetaRes = await fetch(`https://v3-cinemeta.strem.io/meta/${mediaType}/${imdbId}.json`, {
       headers: { 'User-Agent': USER_AGENT }
     });
 
-    if (!response.ok) throw new Error(`Cinemeta API Error: ${response.statusText}`);
-    const data = await response.json();
-    const meta = data.meta;
+    // If not found in primary type, try alternative (e.g. series instead of movie)
+    let cinemetaData;
+    if (cinemetaRes.ok) {
+      cinemetaData = await cinemetaRes.json();
+    }
+    
+    if (!cinemetaData || !cinemetaData.meta) {
+      const altType = mediaType === 'movie' ? 'series' : 'movie';
+      const altRes = await fetch(`https://v3-cinemeta.strem.io/meta/${altType}/${imdbId}.json`, {
+        headers: { 'User-Agent': USER_AGENT }
+      });
+      if (altRes.ok) {
+        cinemetaData = await altRes.json();
+      }
+    }
 
-    if (!meta) throw new Error('Title not found on Cinemeta');
+    if (!cinemetaData || !cinemetaData.meta) {
+      return res.status(404).json({ error: 'Metadata not found on Cinemeta' });
+    }
 
-    const metadata = {
-      id: meta.imdb_id || id,
-      title: meta.name || meta.title,
-      year: parseInt(meta.year) || parseInt((meta.releaseInfo || '').substring(0, 4)) || null,
-      type: cinemetaType === 'series' ? 'tv' : 'movie',
-      rating: parseFloat(meta.imdbRating) || 0,
-      poster: meta.poster || '',
-      backdrop: meta.background || '',
-      imdb_id: meta.imdb_id || id,
-      overview: meta.description || '',
-      genres: meta.genres || [],
-      episodes: (meta.videos || []).map(v => ({
-        id: v.id,
-        season: v.season,
-        episode: v.episode || v.number,
-        title: v.title || `Episode ${v.episode || v.number}`,
-        released: v.released || ''
-      }))
+    const m = cinemetaData.meta;
+    const episodes = (m.videos || []).map(v => ({
+      season: v.season,
+      episode: v.episode || v.number,
+      title: v.name || v.title || `Episode ${v.episode || v.number}`,
+      released: v.released
+    }));
+
+    const rawYear = m.releaseInfo || m.year || '';
+    const year = rawYear.toString().split(/[-–]/)[0].trim() || null;
+    const posterUrl = m.poster || `https://images.metahub.space/poster/small/${m.id}/img`;
+    const bgUrl = m.background || `https://images.metahub.space/background/medium/${m.id}/img`;
+
+    const result = {
+      id: m.id || imdbId,
+      imdb_id: m.imdb_id || m.id || imdbId,
+      title: m.name,
+      year: year,
+      releaseInfo: rawYear,
+      type: m.type === 'series' ? 'tv' : 'movie',
+      rating: parseFloat(m.imdbRating) || 8.0,
+      poster: posterUrl,
+      backdrop: bgUrl,
+      overview: m.description || m.overview || '',
+      genres: m.genres || [],
+      episodes: episodes,
+      seasonsCount: episodes.length > 0 ? Math.max(...episodes.map(e => e.season || 1)) : 1
     };
 
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate');
-    return res.status(200).json(metadata);
+    return res.status(200).json(result);
 
   } catch (error) {
     console.error('Metadata API Error:', error);

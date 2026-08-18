@@ -121,12 +121,23 @@ function renderMovieDetails(movie) {
   document.title = `${movie.title} (${movie.year || ''}) - Subtile`;
 
   const backdropSec = document.getElementById('movieBackdropSection');
-  if (backdropSec && movie.backdrop) {
-    backdropSec.style.backgroundImage = `url('${movie.backdrop}')`;
+  if (backdropSec) {
+    const bg = movie.backdrop || (movie.imdb_id ? `https://images.metahub.space/background/medium/${movie.imdb_id}/img` : (movie.imdbId ? `https://images.metahub.space/background/medium/${movie.imdbId}/img` : movie.poster));
+    if (bg) {
+      backdropSec.style.backgroundImage = `url('${bg}')`;
+    }
   }
 
   const poster = document.getElementById('moviePoster');
-  if (poster) poster.src = movie.poster || 'assets/default-poster.jpg';
+  if (poster) {
+    poster.src = movie.poster || 'https://images.metahub.space/poster/small/tt15239678/img';
+    poster.onerror = function() {
+      const fallbackId = movie.imdb_id || movie.imdbId;
+      if (fallbackId) {
+        this.src = `https://images.metahub.space/poster/small/${fallbackId}/img`;
+      }
+    };
+  }
 
   const title = document.getElementById('movieTitle');
   if (title) {

@@ -84,7 +84,7 @@ function renderCatalog() {
     return `
       <a href="${targetUrl}" class="movie-card">
         <div class="movie-card-poster-wrap">
-          <img src="${movie.poster || 'assets/default-poster.jpg'}" alt="${movie.title}" class="movie-card-poster" loading="lazy">
+          <img src="${movie.poster || 'https://images.metahub.space/poster/small/tt15239678/img'}" alt="${movie.title}" class="movie-card-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
           ${movie.rating ? `
             <span class="rank-badge" style="background: rgba(18, 21, 27, 0.85); backdrop-filter: blur(4px); border: 1px solid #23262e; color: #f5c518;">
               <i class="fas fa-star" style="font-size: 0.65rem;"></i> ${movie.rating}
