@@ -1,33 +1,42 @@
 /**
- * Subtile JavaScript logic (Matching SubDL exact behavior)
+ * Subtile App JavaScript - Search Bar & Most Downloaded Logic
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderPopularSubtitles();
-  renderRecentSubtitlesFeed();
+  renderMostDownloaded();
   setupLiveSearch();
   setupAuthNavbar();
 });
 
-// عرض الأعمال الشائعة بنمط بطاقات SubDL
-function renderPopularSubtitles() {
-  const grid = document.getElementById('moviesGrid');
+// Render Most Downloaded Grid
+function renderMostDownloaded() {
+  const grid = document.getElementById('mostDownloadedGrid');
   if (!grid) return;
 
-  grid.innerHTML = MOVIES_DATABASE.map(movie => {
+  // Sort by downloads or predefined ranks
+  const sorted = [...MOVIES_DATABASE].sort((a, b) => {
+    const aDl = a.subtitles ? a.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) : 0;
+    const bDl = b.subtitles ? b.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) : 0;
+    return bDl - aDl;
+  });
+
+  grid.innerHTML = sorted.map((movie, index) => {
     const mainLang = (movie.subtitles && movie.subtitles[0]) ? movie.subtitles[0].langName : 'Arabic';
-    const subCount = movie.subtitles ? movie.subtitles.length * 42 + 5 : 12;
+    const totalDl = movie.subtitles 
+      ? movie.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) 
+      : 14250;
 
     return `
-      <a href="movie.html?id=${movie.id}" class="subdl-card">
-        <div class="subdl-poster-wrapper">
-          <img src="${movie.poster}" alt="${movie.title}" class="subdl-poster-img" loading="lazy">
+      <a href="movie.html?id=${movie.id}" class="movie-card most-downloaded">
+        <div class="movie-card-poster-wrap">
+          <img src="${movie.poster}" alt="${movie.title}" class="movie-card-poster" loading="lazy">
+          <span class="rank-badge">#${index + 1}</span>
         </div>
-        <div class="subdl-card-body">
-          <div class="subdl-card-title" title="${movie.title}">${movie.title} (${movie.year})</div>
-          <div class="subdl-card-pills">
-            <span class="subdl-pill subdl-pill-lang">${mainLang}</span>
-            <span class="subdl-pill">${subCount} &darr;</span>
+        <div class="movie-card-info">
+          <div class="movie-card-title" title="${movie.title}">${movie.title} (${movie.year})</div>
+          <div class="movie-card-meta-row">
+            <span class="movie-card-lang-pill">${mainLang}</span>
+            <span class="movie-card-downloads"><i class="fas fa-arrow-down"></i> ${totalDl.toLocaleString()}</span>
           </div>
         </div>
       </a>
@@ -35,34 +44,7 @@ function renderPopularSubtitles() {
   }).join('');
 }
 
-// عرض أحدث ملفات الترجمة
-function renderRecentSubtitlesFeed() {
-  const feed = document.getElementById('recentSubtitlesFeed');
-  if (!feed) return;
-
-  const recent = getRecentSubtitles();
-
-  feed.innerHTML = recent.map(sub => `
-    <div class="subdl-card" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 0.75rem 1.2rem; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <span class="subdl-pill subdl-pill-lang" style="font-size: 0.8rem; padding: 0.25rem 0.6rem;">${sub.langFlag} ${sub.langName}</span>
-        <div>
-          <a href="movie.html?id=${sub.movieId}" style="font-weight: 700; color: #fff; font-size: 0.92rem;">${sub.release}</a>
-          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.15rem;">
-            ${sub.movieTitle} (${sub.movieYear}) &bull; By <span style="color: var(--brand-yellow);">${sub.uploader}</span> &bull; ${sub.downloads.toLocaleString()} downloads
-          </div>
-        </div>
-      </div>
-      <div>
-        <button class="btn-auth-subdl" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;" onclick="downloadSubtitle('${sub.id}', '${sub.release}', '${sub.format}')">
-          <i class="fas fa-download"></i> Download (${sub.format})
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-// إعداد البحث الفوري
+// Live Search with smooth transition matching CSS
 function setupLiveSearch() {
   const searchInput = document.getElementById('heroSearchInput');
   const dropdown = document.getElementById('searchResultsDropdown');
@@ -72,7 +54,7 @@ function setupLiveSearch() {
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim().toLowerCase();
     if (!query) {
-      dropdown.classList.remove('show');
+      dropdown.classList.remove('active');
       return;
     }
 
@@ -84,19 +66,19 @@ function setupLiveSearch() {
 
     if (matches.length === 0) {
       dropdown.innerHTML = `
-        <div style="padding: 1.2rem; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
-          No results found for "${escapeText(query)}"
+        <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
+          No matches found for "${escapeText(query)}"
         </div>
       `;
     } else {
       dropdown.innerHTML = matches.map(movie => `
-        <div class="subdl-dropdown-item" onclick="window.location.href='movie.html?id=${movie.id}'">
-          <img src="${movie.poster}" class="subdl-dropdown-poster" alt="${movie.title}">
-          <div class="subdl-dropdown-info">
-            <div class="subdl-dropdown-title">${movie.title} <span style="color: var(--text-muted); font-weight: 400;">(${movie.year})</span></div>
-            <div class="subdl-dropdown-meta">
-              <span>${movie.type === 'tv' ? 'TV Series' : 'Movie'}</span>
-              <span><i class="fas fa-star" style="color: var(--brand-yellow);"></i> ${movie.rating}</span>
+        <div class="search-result-item" onclick="window.location.href='movie.html?id=${movie.id}'">
+          <img src="${movie.poster}" alt="${movie.title}">
+          <div style="flex: 1;">
+            <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${movie.title} <span style="color: #6b7280; font-size: 0.8rem;">(${movie.year})</span></div>
+            <div class="search-result-meta">
+              <span>${movie.type === 'tv' ? 'TV Show' : 'Movie'}</span>
+              <span class="search-result-rating"><i class="fas fa-star"></i> ${movie.rating}</span>
               <span>${movie.subtitles ? movie.subtitles.length : 0} subtitles</span>
             </div>
           </div>
@@ -104,22 +86,14 @@ function setupLiveSearch() {
       `).join('');
     }
 
-    dropdown.classList.add('show');
+    dropdown.classList.add('active');
   });
 
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.subdl-search-container')) {
-      dropdown.classList.remove('show');
+    if (!e.target.closest('.search-wrapper')) {
+      dropdown.classList.remove('active');
     }
   });
-}
-
-function quickSearch(title) {
-  const input = document.getElementById('heroSearchInput');
-  if (input) {
-    input.value = title;
-    input.dispatchEvent(new Event('input'));
-  }
 }
 
 function performSearch() {
@@ -131,36 +105,11 @@ function performSearch() {
     );
     if (match) {
       window.location.href = `movie.html?id=${match.id}`;
-    } else {
-      showToast(`Searching for: ${query}`);
     }
   }
 }
 
-function downloadSubtitle(subId, releaseName, format = 'SRT') {
-  const srtSampleContent = `1
-00:00:05,000 --> 00:00:09,000
-Synced Subtitle: ${releaseName}
-Downloaded from Subtile
-
-2
-00:00:10,000 --> 00:00:15,000
-Enjoy your movie!
-`;
-
-  const blob = new Blob([srtSampleContent], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${releaseName}.${format.toLowerCase()}`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  showToast(`Downloaded subtitle: ${releaseName}`);
-}
-
+// Auth UI Helper
 function setupAuthNavbar() {
   const slot = document.getElementById('navAuthSlot');
   if (!slot) return;
