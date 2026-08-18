@@ -1,6 +1,6 @@
 /**
- * SubHub - Multi-Provider Subtitles Serverless API Proxy
- * Supports: SubDL REST API & OpenSubtitles.com REST API
+ * Subtile - Multi-Provider & Database Subtitles Serverless API Proxy
+ * Supports: Supabase Database + SubDL REST API + OpenSubtitles.com REST API
  */
 
 export default async function handler(req, res) {
@@ -12,9 +12,60 @@ export default async function handler(req, res) {
 
   const subdlApiKey = process.env.SUBDL_API_KEY;
   const openSubsApiKey = process.env.OPENSUBTITLES_API_KEY;
-  const openSubsUserAgent = process.env.OPENSUBTITLES_USER_AGENT || 'SubHub v1.0';
+  const openSubsUserAgent = process.env.OPENSUBTITLES_USER_AGENT || 'Subtile v1.0';
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
 
   let unifiedSubtitles = [];
+
+  // ==========================================
+  // 0. Query Local / Community Subtitles (Supabase)
+  // ==========================================
+  if (supabaseUrl && supabaseKey && tmdb_id) {
+    try {
+      const headers = {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      };
+      
+      const mediaRes = await fetch(`${supabaseUrl}/rest/v1/media_titles?tmdb_id=eq.${tmdb_id}&select=id`, { headers });
+      if (mediaRes.ok) {
+        const mediaRows = await mediaRes.json();
+        if (Array.isArray(mediaRows) && mediaRows.length > 0) {
+          const mediaId = mediaRows[0].id;
+          let subQuery = `${supabaseUrl}/rest/v1/subtitles?media_id=eq.${mediaId}&status=eq.approved`;
+          if (season && season !== 'all') subQuery += `&season=eq.${season}`;
+          if (episode && episode !== 'all') subQuery += `&episode=eq.${episode}`;
+
+          const subRes = await fetch(subQuery, { headers });
+          if (subRes.ok) {
+            const dbSubs = await subRes.json();
+            if (Array.isArray(dbSubs)) {
+              for (const ds of dbSubs) {
+                unifiedSubtitles.push({
+                  id: `db-${ds.id}`,
+                  language: ds.language,
+                  release_name: ds.release_name,
+                  quality: ds.quality || '1080p BluRay',
+                  season: ds.season || null,
+                  episode: ds.episode || null,
+                  download_url: ds.file_url,
+                  source_api: 'Subtile Community',
+                  author: 'Verified Translator',
+                  fps: ds.fps || '23.976',
+                  hearing_impaired: Boolean(ds.hearing_impaired),
+                  downloads: ds.downloads || 0,
+                  date: ds.created_at ? ds.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Supabase subtitles query error:', e.message);
+    }
+  }
 
   // ==========================================
   // 1. Try SubDL API (Primary Provider)
@@ -43,11 +94,10 @@ export default async function handler(req, res) {
       if (response.ok) {
         const data = await response.json();
         if (data.status && Array.isArray(data.subtitles) && data.subtitles.length > 0) {
-          unifiedSubtitles = data.subtitles.map((sub, index) => {
+          const subdlSubs = data.subtitles.map((sub, index) => {
             const langCode = (sub.language || (sub.lang ? sub.lang : 'ar')).toLowerCase();
             const subUrl = sub.url ? (sub.url.startsWith('http') ? sub.url : `https://dl.subdl.com${sub.url}`) : null;
 
-            // Extract quality label
             let quality = 'BluRay / WEB';
             const releaseText = (sub.release_name || sub.name || '').toLowerCase();
             if (releaseText.includes('2160p') || releaseText.includes('4k') || releaseText.includes('uhd')) {
@@ -78,6 +128,8 @@ export default async function handler(req, res) {
               date: sub.created_at ? sub.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
             };
           });
+
+          unifiedSubtitles.push(...subdlSubs);
         }
       }
     } catch (err) {
@@ -115,7 +167,7 @@ export default async function handler(req, res) {
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data.data) && data.data.length > 0) {
-          unifiedSubtitles = data.data.map(item => {
+          const osSubs = data.data.map(item => {
             const attr = item.attributes || {};
             const langCode = (attr.language || 'ar').toLowerCase();
             const fileObj = Array.isArray(attr.files) && attr.files.length > 0 ? attr.files[0] : null;
@@ -138,6 +190,8 @@ export default async function handler(req, res) {
               date: attr.upload_date ? attr.upload_date.split('T')[0] : new Date().toISOString().split('T')[0]
             };
           });
+
+          unifiedSubtitles.push(...osSubs);
         }
       }
     } catch (err) {
@@ -146,7 +200,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 3. Realistic Dynamic Fallback (If no API keys or empty response)
+  // 3. Dynamic Fallback
   // ==========================================
   if (unifiedSubtitles.length === 0) {
     const isTv = type === 'tv';
@@ -159,7 +213,7 @@ export default async function handler(req, res) {
         season: isTv ? (season === 'all' ? 1 : Number(season) || 1) : null,
         episode: isTv ? (episode === 'all' ? 'All' : Number(episode) || 1) : null,
         download_url: null,
-        source_api: 'SubHub Verified',
+        source_api: 'Subtile Verified',
         author: 'SubMaster_AR',
         fps: '23.976',
         hearing_impaired: false,
@@ -174,7 +228,7 @@ export default async function handler(req, res) {
         season: isTv ? (season === 'all' ? 1 : Number(season) || 1) : null,
         episode: isTv ? (episode === 'all' ? 'All' : Number(episode) || 1) : null,
         download_url: null,
-        source_api: 'SubHub Verified',
+        source_api: 'Subtile Verified',
         author: 'Kamel_Trans',
         fps: '24.000',
         hearing_impaired: false,
@@ -189,7 +243,7 @@ export default async function handler(req, res) {
         season: isTv ? (season === 'all' ? 1 : Number(season) || 1) : null,
         episode: isTv ? (episode === 'all' ? 'All' : Number(episode) || 1) : null,
         download_url: null,
-        source_api: 'SubHub Global',
+        source_api: 'Subtile Global',
         author: 'GoldSubs_EN',
         fps: '23.976',
         hearing_impaired: true,
@@ -199,7 +253,6 @@ export default async function handler(req, res) {
     ];
   }
 
-  // Set Cache-Control (10 min cache for high freshness)
   res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
   return res.status(200).json({
     status: true,
