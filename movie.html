@@ -1,236 +1,234 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تحميل ملفات الترجمة | SubHub</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/movie.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تحميل ملفات الترجمة | SubHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/movie.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <a href="index.html" class="logo-container">
-      <span class="logo-badge">SUB</span>
-      <div class="logo-text">Hub<span>.DL</span></div>
-    </a>
+<!-- Navigation Bar -->
+<header class="navbar">
+  <a href="index.html" class="logo-container">
+    <span class="logo-badge">SUB</span>
+    <div class="logo-text">Hub<span>.DL</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a></li>
+    <li><a href="index.html#trending" class="nav-link"><i class="fas fa-fire"></i> الشائع</a></li>
+    <li><a href="index.html#recent" class="nav-link"><i class="fas fa-clock"></i> أحدث الترجمات</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn btn-secondary" onclick="openUploadModal()"><i class="fas fa-cloud-upload-alt"></i> رفع ترجمة</button>
+    <div id="navAuthSlot"></div>
+  </div>
+</header>
 
-    <ul class="nav-links">
-      <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a></li>
-      <li><a href="index.html#trending" class="nav-link"><i class="fas fa-fire"></i> الشائع</a></li>
-      <li><a href="index.html#recent" class="nav-link"><i class="fas fa-clock"></i> أحدث الترجمات</a></li>
-    </ul>
-
-    <div class="nav-actions">
-      <button class="btn btn-secondary" onclick="openUploadModal()"><i class="fas fa-cloud-upload-alt"></i> رفع ترجمة</button>
-      <div id="navAuthSlot"></div>
+<!-- Movie Backdrop & Hero Info -->
+<section id="movieBackdropSection" class="movie-header-backdrop">
+  <div class="backdrop-gradient"></div>
+  <div class="movie-hero-content">
+    <img id="moviePoster" src="" alt="Poster" class="movie-hero-poster">
+    <div class="movie-hero-details">
+      <h1 id="movieTitle" class="movie-hero-title">--</h1>
+      <div id="movieMeta" class="movie-hero-meta"></div>
+      <p id="movieOverview" class="movie-hero-overview">--</p>
     </div>
-  </header>
+  </div>
+</section>
 
-  <!-- Movie Backdrop & Hero Info -->
-  <section id="movieBackdropSection" class="movie-header-backdrop">
-    <div class="backdrop-gradient"></div>
-    <div class="movie-hero-content">
-      <img id="moviePoster" src="" alt="Poster" class="movie-hero-poster">
-      <div class="movie-hero-details">
-        <h1 id="movieTitle" class="movie-hero-title">--</h1>
-        <div id="movieMeta" class="movie-hero-meta"></div>
-        <p id="movieOverview" class="movie-hero-overview">--</p>
-      </div>
+<!-- Main Content & Subtitles List -->
+<main class="container">
+
+  <!-- TV Show Season / Episode Bar -->
+  <div id="tvSelectorBar" class="tv-selector-bar" style="display: none;">
+    <div class="tv-selector-group">
+      <span style="font-weight: 700; color: var(--text-secondary);"><i class="fas fa-layer-group"></i> الموسم:</span>
+      <div id="seasonTabsContainer" class="season-tabs"></div>
     </div>
-  </section>
-
-  <!-- Main Content & Subtitles List -->
-  <main class="container">
-    
-    <!-- TV Show Season / Episode Bar -->
-    <div id="tvSelectorBar" class="tv-selector-bar" style="display: none;">
-      <div class="tv-selector-group">
-        <span style="font-weight: 700; color: var(--text-secondary);"><i class="fas fa-layer-group"></i> الموسم:</span>
-        <div id="seasonTabsContainer" class="season-tabs"></div>
-      </div>
-      <div class="tv-selector-group">
-        <span style="font-weight: 700; color: var(--text-secondary);"><i class="fas fa-tv"></i> الحلقة:</span>
-        <select id="episodeSelect" class="episode-select" onchange="filterTvSubtitles()">
-          <option value="all">كل الحلقات / الموسم كامل</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Filters Toolbar -->
-    <div class="subtitles-filter-toolbar">
-      <div class="filter-group">
-        <label style="font-weight: 600; font-size: 0.9rem;"><i class="fas fa-filter"></i> تصفية الترجمات:</label>
-        
-        <select id="langFilter" class="filter-select" onchange="applyFilters()">
-          <option value="all">كل اللغات (All Languages)</option>
-          <option value="ar">العربية (Arabic 🇸🇦)</option>
-          <option value="en">الإنجليزية (English 🇬🇧)</option>
-        </select>
-
-        <select id="qualityFilter" class="filter-select" onchange="applyFilters()">
-          <option value="all">كل النسخ والجودات</option>
-          <option value="BluRay">BluRay</option>
-          <option value="WEB">WEB-DL / WEBRip</option>
-          <option value="4K">4K / UHD</option>
-          <option value="1080p">1080p</option>
-        </select>
-      </div>
-
-      <div>
-        <span id="subtitlesCount" style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;">0 ملف ترجمة متوفر</span>
-      </div>
-    </div>
-
-    <!-- Subtitles List -->
-    <div id="subtitlesList" class="subtitles-list"></div>
-
-  </main>
-
-  <!-- Auth Modal: Login / Register / Forgot Password -->
-  <div id="authModal" class="modal-backdrop">
-    <div class="modal-content" style="max-width: 420px;">
-      <div class="modal-header">
-        <h3 class="modal-title"><i class="fas fa-clapperboard"></i> مرحبًا بك في SubHub</h3>
-        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
-      </div>
-
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab active" data-tab="login">تسجيل الدخول</button>
-        <button type="button" class="auth-tab" data-tab="register">إنشاء حساب</button>
-        <div class="auth-tab-indicator"></div>
-      </div>
-
-      <!-- Login Panel -->
-      <div class="auth-panel active" data-panel="login">
-        <form id="loginForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="loginIdentifier">اسم المستخدم أو البريد الإلكتروني</label>
-            <input type="text" id="loginIdentifier" class="form-control" autocomplete="username" required>
-            <div class="form-error" id="loginIdentifierError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="loginPassword">كلمة المرور</label>
-            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
-            <div class="form-error" id="loginPasswordError"></div>
-          </div>
-          <button type="submit" id="loginSubmitBtn" class="btn btn-primary auth-submit-btn">تسجيل الدخول</button>
-        </form>
-        <p class="auth-switch-link">نسيت كلمة المرور؟ <a href="#" data-auth-tab-trigger="forgot">إعادة تعيينها</a></p>
-      </div>
-
-      <!-- Register Panel -->
-      <div class="auth-panel" data-panel="register">
-        <form id="registerForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="regUsername">اسم المستخدم</label>
-            <input type="text" id="regUsername" class="form-control" autocomplete="username" required>
-            <div class="form-error" id="regUsernameError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="regEmail">البريد الإلكتروني</label>
-            <input type="email" id="regEmail" class="form-control" autocomplete="email" required>
-            <div class="form-error" id="regEmailError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="regPassword">كلمة المرور</label>
-            <input type="password" id="regPassword" class="form-control" autocomplete="new-password" required>
-            <div class="password-strength">
-              <div class="password-strength-bar"></div>
-              <div class="password-strength-bar"></div>
-              <div class="password-strength-bar"></div>
-              <div class="password-strength-bar"></div>
-            </div>
-            <div class="form-error" id="regPasswordError"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="regPasswordConfirm">تأكيد كلمة المرور</label>
-            <input type="password" id="regPasswordConfirm" class="form-control" autocomplete="new-password" required>
-            <div class="form-error" id="regPasswordConfirmError"></div>
-          </div>
-          <button type="submit" id="registerSubmitBtn" class="btn btn-primary auth-submit-btn">إنشاء حساب</button>
-        </form>
-      </div>
-
-      <!-- Forgot Password Panel -->
-      <div class="auth-panel" data-panel="forgot">
-        <p class="form-hint" style="margin-bottom: 1rem;">أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.</p>
-        <form id="forgotForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="forgotEmail">البريد الإلكتروني</label>
-            <input type="email" id="forgotEmail" class="form-control" autocomplete="email" required>
-            <div class="form-error" id="forgotEmailError"></div>
-          </div>
-          <button type="submit" id="forgotSubmitBtn" class="btn btn-primary auth-submit-btn">إرسال رابط إعادة التعيين</button>
-        </form>
-        <p class="auth-switch-link">تذكرت كلمة المرور؟ <a href="#" data-auth-tab-trigger="login">تسجيل الدخول</a></p>
-      </div>
+    <div class="tv-selector-group">
+      <span style="font-weight: 700; color: var(--text-secondary);"><i class="fas fa-tv"></i> الحلقة:</span>
+      <select id="episodeSelect" class="episode-select" onchange="filterTvSubtitles()">
+        <option value="all">كل الحلقات / الموسم كامل</option>
+      </select>
     </div>
   </div>
 
-  <!-- Upload Subtitle Modal -->
-  <div id="uploadModal" class="modal-backdrop">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title"><i class="fas fa-file-upload"></i> رفع ملف ترجمة للعمل</h3>
-        <button class="modal-close" onclick="closeUploadModal()">&times;</button>
-      </div>
-      <form id="uploadForm" onsubmit="handleUploadSubtitle(event)">
+  <!-- Filters Toolbar -->
+  <div class="subtitles-filter-toolbar">
+    <div class="filter-group">
+      <label style="font-weight: 600; font-size: 0.9rem;"><i class="fas fa-filter"></i> تصفية الترجمات:</label>
+      <select id="langFilter" class="filter-select" onchange="applyFilters()">
+        <option value="all">كل اللغات (All Languages)</option>
+        <option value="ar">العربية (Arabic 🇸🇦)</option>
+        <option value="en">الإنجليزية (English 🇬🇧)</option>
+      </select>
+      <select id="qualityFilter" class="filter-select" onchange="applyFilters()">
+        <option value="all">كل النسخ والجودات</option>
+        <option value="BluRay">BluRay</option>
+        <option value="WEB">WEB-DL / WEBRip</option>
+        <option value="4K">4K / UHD</option>
+        <option value="1080p">1080p</option>
+      </select>
+    </div>
+    <div>
+      <span id="subtitlesCount" style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;">0 ملف ترجمة متوفر</span>
+    </div>
+  </div>
+
+  <!-- Subtitles List -->
+  <div id="subtitlesList" class="subtitles-list"></div>
+
+</main>
+
+<!-- Auth Modal: Login / Register / Forgot Password -->
+<div id="authModal" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 420px;">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fas fa-clapperboard"></i> مرحبًا بك في SubHub</h3>
+      <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+    </div>
+
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" data-tab="login">تسجيل الدخول</button>
+      <button type="button" class="auth-tab" data-tab="register">إنشاء حساب</button>
+      <div class="auth-tab-indicator"></div>
+    </div>
+
+    <!-- Login Panel -->
+    <div class="auth-panel active" data-panel="login">
+      <form id="loginForm" novalidate>
         <div class="form-group">
-          <label class="form-label">العمل</label>
-          <input type="text" id="modalMovieNameInput" class="form-control" readonly>
+          <label class="form-label" for="loginIdentifier">اسم المستخدم أو البريد الإلكتروني</label>
+          <input type="text" id="loginIdentifier" class="form-control" autocomplete="username" required>
+          <div class="form-error" id="loginIdentifierError"></div>
         </div>
-        <div class="form-group" style="display: flex; gap: 1rem;">
-          <div style="flex: 1;">
-            <label class="form-label">اللغة</label>
-            <select class="form-control">
-              <option value="ar">العربية (Arabic 🇸🇦)</option>
-              <option value="en">الإنجليزية (English 🇬🇧)</option>
-              <option value="fr">الفرنسية (French 🇫🇷)</option>
-              <option value="es">الإسبانية (Spanish 🇪🇸)</option>
-            </select>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">كلمة المرور</label>
+          <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
+          <div class="form-error" id="loginPasswordError"></div>
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary auth-submit-btn">تسجيل الدخول</button>
+      </form>
+      <p class="auth-switch-link">نسيت كلمة المرور؟ <a href="#" data-auth-tab-trigger="forgot">إعادة تعيينها</a></p>
+    </div>
+
+    <!-- Register Panel -->
+    <div class="auth-panel" data-panel="register">
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="regUsername">اسم المستخدم</label>
+          <input type="text" id="regUsername" class="form-control" autocomplete="username" required>
+          <div class="form-error" id="regUsernameError"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regEmail">البريد الإلكتروني</label>
+          <input type="email" id="regEmail" class="form-control" autocomplete="email" required>
+          <div class="form-error" id="regEmailError"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regPassword">كلمة المرور</label>
+          <input type="password" id="regPassword" class="form-control" autocomplete="new-password" required>
+          <div class="password-strength">
+            <div class="password-strength-bar"></div>
+            <div class="password-strength-bar"></div>
+            <div class="password-strength-bar"></div>
+            <div class="password-strength-bar"></div>
           </div>
-          <div style="flex: 1;">
-            <label class="form-label">النسخة / Release</label>
-            <input type="text" class="form-control" placeholder="مثال: 1080p.BluRay.x264" required>
-          </div>
+          <div class="form-error" id="regPasswordError"></div>
         </div>
         <div class="form-group">
-          <label class="form-label">ملف الترجمة (.srt أو .zip)</label>
-          <input type="file" accept=".srt,.zip,.vtt" class="form-control" required>
+          <label class="form-label" for="regPasswordConfirm">تأكيد كلمة المرور</label>
+          <input type="password" id="regPasswordConfirm" class="form-control" autocomplete="new-password" required>
+          <div class="form-error" id="regPasswordConfirmError"></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">اسم المترجم / رافع الترجمة</label>
-          <input type="text" class="form-control" placeholder="اسمك أو الفريق" required>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem;">
-          <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">إلغاء</button>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> رفع الترجمة</button>
-        </div>
+        <button type="submit" id="registerSubmitBtn" class="btn btn-primary auth-submit-btn">إنشاء حساب</button>
       </form>
     </div>
-  </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="toast-container"></div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-links">
-      <a href="index.html">الرئيسية</a>
-      <a href="index.html#trending">الأعمال الشائعة</a>
-      <a href="index.html#recent">أحدث الترجمات</a>
+    <!-- Forgot Password Panel -->
+    <div class="auth-panel" data-panel="forgot">
+      <p class="form-hint" style="margin-bottom: 1rem;">أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.</p>
+      <form id="forgotForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="forgotEmail">البريد الإلكتروني</label>
+          <input type="email" id="forgotEmail" class="form-control" autocomplete="email" required>
+          <div class="form-error" id="forgotEmailError"></div>
+        </div>
+        <button type="submit" id="forgotSubmitBtn" class="btn btn-primary auth-submit-btn">إرسال رابط إعادة التعيين</button>
+      </form>
+      <p class="auth-switch-link">تذكرت كلمة المرور؟ <a href="#" data-auth-tab-trigger="login">تسجيل الدخول</a></p>
     </div>
-    <p>© 2026 SubHub - منصة ترجمات الأفلام والمسلسلات مفتوحة المصدر</p>
-  </footer>
+  </div>
+</div>
 
-  <!-- Scripts -->
-  <script src="js/security.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/auth-ui.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/movie-page.js"></script>
+<!-- Upload Subtitle Modal -->
+<div id="uploadModal" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fas fa-file-upload"></i> رفع ملف ترجمة للعمل</h3>
+      <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+    </div>
+    <form id="uploadForm" onsubmit="handleUploadSubtitle(event)">
+      <div class="form-group">
+        <label class="form-label">العمل</label>
+        <input type="text" id="modalMovieNameInput" class="form-control" readonly>
+      </div>
+      <div class="form-group" style="display: flex; gap: 1rem;">
+        <div style="flex: 1;">
+          <label class="form-label">اللغة</label>
+          <select class="form-control">
+            <option value="ar">العربية (Arabic 🇸🇦)</option>
+            <option value="en">الإنجليزية (English 🇬🇧)</option>
+            <option value="fr">الفرنسية (French 🇫🇷)</option>
+            <option value="es">الإسبانية (Spanish 🇪🇸)</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label class="form-label">النسخة / Release</label>
+          <input type="text" class="form-control" placeholder="مثال: 1080p.BluRay.x264" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ملف الترجمة (.srt أو .zip)</label>
+        <input type="file" accept=".srt,.zip,.vtt" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">اسم المترجم / رافع الترجمة</label>
+        <input type="text" class="form-control" placeholder="اسمك أو الفريق" required>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">إلغاء</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> رفع الترجمة</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="index.html">الرئيسية</a>
+    <a href="index.html#trending">الأعمال الشائعة</a>
+    <a href="index.html#recent">أحدث الترجمات</a>
+  </div>
+  <p>© 2026 SubHub - منصة ترجمات الأفلام والمسلسلات مفتوحة المصدر</p>
+</footer>
+
+<!-- Scripts -->
+<script src="js/security.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auth-ui.js"></script>
+<script src="js/data.js"></script>
+<script src="js/movie-page.js"></script>
 </body>
 </html>
