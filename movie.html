@@ -41,28 +41,27 @@
       display: flex;
       min-height: 100vh;
       position: relative;
+      opacity: 0; visibility: hidden; transition: opacity 0.8s ease;
     }
+    .split-container.loaded { opacity: 1; visibility: visible; }
 
-    /* 1. Left Side (Large Rectangle - Work Info) */
+    /* 1. Left Side */
     .left-panel {
       background-color: var(--bg-black);
       width: 45%;
       padding: 8rem 4rem 4rem;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* Align content to top */
+      justify-content: flex-start;
       align-items: center;
-      position: sticky; /* Keep it fixed on screen */
+      position: sticky;
       top: 0;
       height: 100vh;
       overflow-y: auto;
       z-index: 2;
       border-left: 1px solid var(--divider-color);
     }
-
-    .left-panel::-webkit-scrollbar {
-      display: none;
-    }
+    .left-panel::-webkit-scrollbar { display: none; }
 
     .left-content {
       max-width: 380px;
@@ -95,7 +94,6 @@
 
     .movie-meta { display: flex; gap: 1.5rem; margin-bottom: 2rem; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; align-items: center; justify-content: center; }
     .meta-item { display: flex; align-items: center; gap: 0.4rem; }
-    
     .rating-token {
       width: 45px; height: 45px; border-radius: 50%; background: black;
       box-shadow: 0 0 0 2px white, inset 0 0 0 3px black;
@@ -108,7 +106,7 @@
       text-align: center;
     }
 
-    /* 2. Right Side (Banner & Lists) */
+    /* 2. Right Side */
     .right-panel {
       width: 55%;
       position: relative;
@@ -140,21 +138,61 @@
       width: 100%;
       max-width: 650px;
       margin: 0 auto;
+      position: relative;
+    }
+
+    /* Controls Header */
+    .list-controls-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    
+    .view-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: white;
+      flex-grow: 1;
+    }
+
+    /* Neo Back Button */
+    .neo-back-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .neo-back-btn:hover {
+      background: white; color: black; border-color: transparent;
+      transform: scale(1.1) rotate(-10deg); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
     }
 
     /* Top: 5 Small Rectangles (Filters) */
     .filter-pills {
       display: grid;
-      grid-template-columns: repeat(5, 1fr); /* Exactly 5 columns */
+      grid-template-columns: repeat(5, 1fr);
       gap: 0.8rem;
-      margin-bottom: 2.5rem;
+      flex-grow: 1;
     }
     .pill {
       padding: 0.6rem 0.5rem; 
       background: rgba(255,255,255,0.05); 
       backdrop-filter: blur(10px);
       border: 1px solid var(--border-color); 
-      border-radius: 12px; /* Rectangular with slightly rounded corners */
+      border-radius: 12px; 
       cursor: pointer;
       transition: var(--transition); 
       font-size: 0.85rem; 
@@ -167,11 +205,8 @@
     .pill:hover { border-color: var(--border-hover); color: white; background: rgba(255,255,255,0.1); transform: translateY(-2px); }
     .pill.active { background: white; color: black; border-color: white; box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
 
-    /* Bottom: 5 Long Horizontal Rectangles (Subtitle List) */
-    .subtitles-list {
-      display: grid;
-      gap: 1.2rem;
-    }
+    /* Subtitles List */
+    .subtitles-list { display: grid; gap: 1.2rem; }
 
     .subtitle-item {
       display: flex; align-items: center; justify-content: space-between;
@@ -182,17 +217,10 @@
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       border: 1px solid var(--border-color); 
       box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-      
-      /* Independent Animation State */
       opacity: 0;
       transform: translateY(30px) scale(0.98);
     }
-    
-    .subtitle-item.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
+    .subtitle-item.visible { opacity: 1; transform: translateY(0) scale(1); }
     .subtitle-item:hover {
       background: rgba(255,255,255,0.08); 
       border-color: var(--border-hover);
@@ -202,8 +230,8 @@
 
     .sub-info { display: flex; flex-direction: column; gap: 0.5rem; }
     .sub-release {
-      font-weight: 700; font-size: 1.2rem; 
-      color: white; display: flex; align-items: center; gap: 1rem; letter-spacing: -0.02em;
+      font-weight: 700; font-size: 1.2rem; color: white; 
+      display: flex; align-items: center; gap: 1rem; letter-spacing: -0.02em;
     }
     .format-badge {
       background: white; color: black; padding: 0.2rem 0.6rem; border-radius: 6px;
@@ -212,19 +240,83 @@
     .sub-meta { display: flex; gap: 1.5rem; font-size: 0.9rem; color: var(--text-muted); }
     
     .download-btn {
-      background: rgba(255,255,255,0.05); color: white; 
-      width: 55px; height: 55px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); color: white; width: 55px; height: 55px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center; text-decoration: none; 
-      transition: var(--transition);
-      border: 1px solid var(--border-color);
-      font-size: 1.2rem;
+      transition: var(--transition); border: 1px solid var(--border-color); font-size: 1.2rem;
     }
-    .download-btn:hover { 
-      background: white; color: black; transform: scale(1.1) rotate(10deg); 
-      border-color: transparent; 
+    .download-btn:hover { background: white; color: black; transform: scale(1.1) rotate(10deg); border-color: transparent; }
+
+    /* === NEW: Seasons List View === */
+    .seasons-list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
 
-    /* Navbar */
+    .season-card {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(20px) saturate(150%);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .season-card.visible { opacity: 1; transform: translateY(0); }
+    .season-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--border-hover);
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+
+    .season-thumb {
+      width: 100px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border-color);
+      background: rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+
+    .season-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .season-title {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: white;
+      letter-spacing: -0.02em;
+    }
+
+    .season-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .season-arrow {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    .season-card:hover .season-arrow {
+      color: white;
+      transform: translateX(5px);
+    }
+
+    /* Navbar & Modal */
     .navbar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
       display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem;
@@ -238,7 +330,6 @@
     }
     .brand-logo:hover .brand-icon { transform: rotate(-10deg) scale(1.1); }
     .brand-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 800; }
-
     .nav-actions { display: flex; align-items: center; gap: 1rem; }
     .btn {
       padding: 0.8rem 1.8rem; border-radius: 50px; border: none; font-weight: 600; cursor: pointer;
@@ -248,8 +339,6 @@
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
     .btn-outline { background: transparent; color: white; border: 1px solid var(--border-color); }
     .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.05); }
-
-    /* Modal */
     .modal-backdrop {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
       backdrop-filter: blur(15px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;
@@ -285,18 +374,10 @@
       .movie-title { font-size: 2.5rem; }
       .filter-pills { grid-template-columns: repeat(3, 1fr); }
     }
-
-    /* Global Loader */
     #globalLoader {
       position: fixed; inset: 0; background: var(--bg-black); z-index: 9999;
       display: flex; align-items: center; justify-content: center;
       transition: opacity 0.3s ease;
-    }
-    .split-container {
-      opacity: 0; visibility: hidden; transition: opacity 0.8s ease;
-    }
-    .split-container.loaded {
-      opacity: 1; visibility: visible;
     }
   </style>
 </head>
@@ -322,41 +403,44 @@
   <!-- Main Split Layout -->
   <div class="split-container">
     
-    <!-- Left Panel (Large Rectangle - Work Info) -->
+    <!-- Left Panel (Work Info) -->
     <aside class="left-panel">
       <div class="left-content">
-        <img id="moviePoster" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Loading Poster" class="movie-poster" style="background: rgba(255,255,255,0.05); min-height: 420px;">
+        <img id="moviePoster" src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-poster">
         
         <div id="movieTags" class="movie-tags">
-          <!-- Tags injected by JS -->
+          <span class="tag">2024</span>
+          <span class="tag">Sci-Fi</span>
+          <span class="tag">Action</span>
         </div>
         
-        <h1 id="movieTitle" class="movie-title"></h1>
+        <h1 id="movieTitle" class="movie-title">Dune: Part Two</h1>
         
         <div id="movieMeta" class="movie-meta">
-          <!-- Meta injected by JS -->
+          <div class="rating-token"><span>8.6</span></div>
+          <div class="meta-item"><i class="fas fa-clock"></i> 2h 46m</div>
+          <div class="meta-item"><i class="fas fa-language"></i> EN</div>
         </div>
         
-        <p id="movieOverview" class="movie-desc"></p>
+        <p id="movieOverview" class="movie-desc">Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.</p>
       </div>
     </aside>
 
     <!-- Right Panel (Lists) -->
     <main class="right-panel">
-      <div id="movieBackdropSection" class="banner-bg"></div>
+      <div id="movieBackdropSection" class="banner-bg" style="background-image: url('https://image.tmdb.org/t/p/original/8Y43POKjjKDGI9MH89NW0NAzzp8.jpg');"></div>
       <div class="banner-overlay"></div>
 
       <div class="list-wrapper">
         
-        <!-- Controls Header: Back Button + Filters -->
+        <!-- Controls Header -->
         <div class="list-controls-header">
-          <!-- Back to Seasons Button (Creative Circle) -->
-          <button id="backToSeasonsBtn" class="neo-back-btn" title="Back to Seasons">
+          <button id="backToSeasonsBtn" class="neo-back-btn" style="display: none;" onclick="showSeasonsView()" title="Back to Seasons">
             <i class="fas fa-chevron-left"></i>
           </button>
-
-          <!-- Top: 5 Small Rectangles (Filters) -->
-          <div id="filterPillsContainer" class="filter-pills">
+          <h2 class="view-title" id="viewTitle">Seasons</h2>
+          
+          <div id="filterPillsContainer" class="filter-pills" style="display: none;">
             <div class="pill active" data-filter="all">All</div>
             <div class="pill" data-filter="lang:ar">Arabic</div>
             <div class="pill" data-filter="lang:en">English</div>
@@ -365,10 +449,41 @@
           </div>
         </div>
 
-        <!-- Bottom: 5 Long Rectangles (Subtitle Items / Seasons) -->
-        <div class="subtitles-list" id="subtitlesList">
-          <!-- Items injected by JS -->
+        <!-- Seasons List View -->
+        <div id="seasonsListView" class="seasons-list-view">
+          <div class="season-card" onclick="showSubtitlesView()">
+            <img src="https://via.placeholder.com/100x60/1a1a1a/ffffff?text=Specials" class="season-thumb" alt="Specials">
+            <div class="season-info">
+              <div class="season-title">Specials</div>
+              <div class="season-sub">Specials Season</div>
+            </div>
+            <i class="fas fa-chevron-right season-arrow"></i>
+          </div>
+          
+          <div class="season-card" onclick="showSubtitlesView()">
+            <img src="https://via.placeholder.com/100x60/1a1a1a/ffffff?text=Season+1" class="season-thumb" alt="Season 1">
+            <div class="season-info">
+              <div class="season-title">Season 1</div>
+              <div class="season-sub">First Season</div>
+            </div>
+            <i class="fas fa-chevron-right season-arrow"></i>
+          </div>
+
+          <div class="season-card" onclick="showSubtitlesView()">
+            <img src="https://via.placeholder.com/100x60/1a1a1a/ffffff?text=Season+2" class="season-thumb" alt="Season 2">
+            <div class="season-info">
+              <div class="season-title">Season 2</div>
+              <div class="season-sub">Second Season</div>
+            </div>
+            <i class="fas fa-chevron-right season-arrow"></i>
+          </div>
         </div>
+
+        <!-- Subtitles List View -->
+        <div id="subtitlesListView" style="display: none;">
+          <div class="subtitles-list" id="subtitlesList"></div>
+        </div>
+
       </div>
     </main>
 
@@ -406,6 +521,103 @@
   </div>
 
   <script>
+    // Mock Data
+    const subtitles = [
+      { release: "Dune.Part.Two.2024.2160p.4K.UHD", format: "SRT", lang: "English", flag: "GB", author: "Official", downloads: "24.1k" },
+      { release: "Dune.Part.Two.2024.1080p.WEB-DL", format: "SRT", lang: "English", flag: "US", author: "Crawler", downloads: "15.3k" },
+      { release: "Dune.Part.Two.2024.1080p.BluRay", format: "ZIP", lang: "Arabic", flag: "SA", author: "Sub Team X", downloads: "8.9k" },
+      { release: "Dune.Part.Two.2024.720p.HD", format: "SRT", lang: "Arabic", flag: "SA", author: "Translator Pro", downloads: "12.4k" },
+      { release: "Dune.Part.Two.2024.720p.WEBRip", format: "SRT", lang: "Arabic", flag: "EG", author: "Pro Subs", downloads: "5.2k" }
+    ];
+
+    // Render Subtitles List
+    const list = document.getElementById('subtitlesList');
+    subtitles.forEach((sub) => {
+      const item = document.createElement('div');
+      item.className = 'subtitle-item';
+      item.innerHTML = `
+        <div class="sub-info">
+          <div class="sub-release">
+            ${sub.release}
+            <span class="format-badge">${sub.format}</span>
+          </div>
+          <div class="sub-meta">
+            <span><i class="fas fa-flag"></i> ${sub.lang} (${sub.flag})</span>
+            <span><i class="fas fa-user"></i> ${sub.author}</span>
+            <span><i class="fas fa-download"></i> ${sub.downloads}</span>
+          </div>
+        </div>
+        <a href="#" class="download-btn"><i class="fas fa-download"></i></a>
+      `;
+      list.appendChild(item);
+    });
+
+    // Hide Loader and Show Content
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('globalLoader');
+      const container = document.querySelector('.split-container');
+      
+      // Simulate a small delay to ensure everything is rendered
+      setTimeout(() => {
+        loader.style.opacity = '0';
+        container.classList.add('loaded');
+        
+        // Remove loader from DOM after fade out
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 800);
+        
+        // Trigger Initial Load Animation for Season Cards
+        const seasonObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+              const delay = index * 150;
+              setTimeout(() => {
+                entry.target.classList.add('visible');
+              }, delay);
+              seasonObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.season-card').forEach(item => seasonObserver.observe(item));
+
+      }, 500); // 500ms delay
+    });
+
+    // View Toggling Logic
+    function showSubtitlesView() {
+      document.getElementById('seasonsListView').style.display = 'none';
+      document.getElementById('subtitlesListView').style.display = 'block';
+      document.getElementById('viewTitle').innerText = 'Available Subtitles';
+      document.getElementById('backToSeasonsBtn').style.display = 'flex';
+      document.getElementById('filterPillsContainer').style.display = 'grid';
+      
+      // Trigger Reveal Animation for Subtitles
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            const delay = index * 120;
+            setTimeout(() => {
+              entry.target.classList.add('visible');
+            }, delay);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.subtitle-item').forEach(item => observer.observe(item));
+    }
+
+    function showSeasonsView() {
+      document.getElementById('subtitlesListView').style.display = 'none';
+      document.getElementById('seasonsListView').style.display = 'flex';
+      document.getElementById('viewTitle').innerText = 'Seasons';
+      document.getElementById('backToSeasonsBtn').style.display = 'none';
+      document.getElementById('filterPillsContainer').style.display = 'none';
+      
+      // Reset visibility for re-animation when coming back
+      document.querySelectorAll('.subtitle-item').forEach(item => item.classList.remove('visible'));
+    }
+
     // Modal Logic
     function openUploadModal() { document.getElementById('uploadModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeUploadModal() { document.getElementById('uploadModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
@@ -417,17 +629,8 @@
       pill.addEventListener('click', function() {
         document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         this.classList.add('active');
-        if (typeof window.applyPillFilter === 'function') {
-          window.applyPillFilter(this.getAttribute('data-filter'));
-        }
       });
     });
   </script>
-  <script src="js/security.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/auth-ui.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/tmdb-service.js"></script>
-  <script src="js/movie-page.js"></script>
 </body>
 </html>
