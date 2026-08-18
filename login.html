@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | سبتايل — Subtle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #08080a; }
+        [dir="ltr"] body { font-family: 'Inter', 'Tajawal', sans-serif; }
+        .cinema-bg {
+            background-image: url('https://images.metahub.space/background/medium/tt15398776/img');
+            background-size: cover;
+            background-position: center;
+            position: fixed;
+            inset: 0;
+            opacity: 0.25;
+            filter: blur(8px) brightness(0.7);
+            z-index: 0;
+            transform: scale(1.05);
+        }
+        .auth-card {
+            background: rgba(18, 18, 24, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85);
+        }
+        .tab-btn.active {
+            background: #ffffff;
+            color: #0a0a0a;
+            border-color: #ffffff;
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+        }
+        .toast { transform: translateY(150%); transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
+        .toast.show { transform: translateY(0); }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+    <div class="cinema-bg"></div>
+    <div class="fixed inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent z-0 pointer-events-none"></div>
+
+    <!-- Header / Brand -->
+    <header class="relative z-10 w-full container mx-auto px-6 py-6 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 group">
+            <div class="w-9 h-9 bg-neutral-100 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105">
+                <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </div>
+            <span class="text-xl font-black tracking-tight text-neutral-100" id="brandText">سبتايل</span>
+        </a>
+
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm font-semibold text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5">
+                <i class="fas fa-arrow-right rtl:rotate-0 ltr:rotate-180"></i>
+                <span id="backToHomeText">العودة للرئيسية</span>
+            </a>
+            <button id="langToggle" class="text-xs font-bold border border-neutral-700 hover:border-neutral-400 rounded-lg px-3 py-1.5 text-neutral-300 transition-colors">EN</button>
+        </div>
+    </header>
+
+    <!-- Main Auth Container -->
+    <main class="relative z-10 container mx-auto px-4 py-8 flex items-center justify-center flex-1">
+        <div class="auth-card w-full max-w-md rounded-2xl p-8 transition-all">
+            
+            <!-- Auth Tabs -->
+            <div class="flex bg-neutral-900/90 border border-neutral-800 p-1 rounded-xl mb-8">
+                <button id="tabLogin" onclick="switchAuthTab('login')" class="tab-btn active flex-1 py-2.5 rounded-lg text-sm font-bold transition-all text-center">
+                    تسجيل الدخول
+                </button>
+                <button id="tabRegister" onclick="switchAuthTab('register')" class="tab-btn flex-1 py-2.5 rounded-lg text-sm font-bold text-neutral-400 hover:text-neutral-200 transition-all text-center">
+                    إنشاء حساب جديد
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5" id="labelUserOrEmail">اسم المستخدم أو البريد الإلكتروني</label>
+                    <div class="relative">
+                        <input type="text" id="loginIdentifier" required autocomplete="username" placeholder="أدخل اسم المستخدم أو البريد" 
+                            class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-user absolute end-3.5 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-bold text-neutral-300" id="labelPassword">كلمة المرور</label>
+                        <a href="#" onclick="alert('تواصل مع الدعم الفني لاستعادة كلمة المرور'); return false;" class="text-xs text-neutral-400 hover:text-white transition-colors" id="labelForgot">نسيت كلمة المرور؟</a>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••" 
+                            class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-lock absolute end-3.5 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between py-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs text-neutral-400 hover:text-neutral-300">
+                        <input type="checkbox" id="rememberMe" checked class="rounded bg-neutral-900 border-neutral-700 text-neutral-100 focus:ring-0">
+                        <span id="labelRemember">تذكرني على هذا الجهاز</span>
+                    </label>
+                </div>
+
+                <button type="submit" id="loginSubmitBtn" class="w-full bg-neutral-100 hover:bg-white text-neutral-950 font-black py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/10 mt-2">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span id="btnTextLogin">تسجيل الدخول</span>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5" id="labelRegUser">اسم المستخدم</label>
+                    <div class="relative">
+                        <input type="text" id="regUsername" required placeholder="مثال: Ahmed_99" 
+                            class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-at absolute end-3.5 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5" id="labelRegEmail">البريد الإلكتروني</label>
+                    <div class="relative">
+                        <input type="email" id="regEmail" required placeholder="name@example.com" 
+                            class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-envelope absolute end-3.5 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5" id="labelRegPass">كلمة المرور (8 أحرف أو أكثر)</label>
+                    <div class="relative">
+                        <input type="password" id="regPassword" required placeholder="••••••••" 
+                            class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-key absolute end-3.5 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <button type="submit" id="regSubmitBtn" class="w-full bg-neutral-100 hover:bg-white text-neutral-950 font-black py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/10 mt-2">
+                    <i class="fas fa-user-plus"></i>
+                    <span id="btnTextRegister">إنشاء الحساب</span>
+                </button>
+            </form>
+
+            <!-- Social Logins -->
+            <div class="mt-8 pt-6 border-t border-neutral-800/80">
+                <p class="text-xs text-center text-neutral-500 mb-4" id="labelOrSocial">أو المتابعة باستخدام</p>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="demoSocialLogin('Google')" class="flex items-center justify-center py-2.5 border border-neutral-800 hover:border-neutral-600 bg-neutral-950/60 rounded-xl text-neutral-300 hover:text-white transition-colors">
+                        <i class="fab fa-google text-sm"></i>
+                    </button>
+                    <button onclick="demoSocialLogin('Discord')" class="flex items-center justify-center py-2.5 border border-neutral-800 hover:border-neutral-600 bg-neutral-950/60 rounded-xl text-neutral-300 hover:text-white transition-colors">
+                        <i class="fab fa-discord text-sm"></i>
+                    </button>
+                    <button onclick="demoSocialLogin('GitHub')" class="flex items-center justify-center py-2.5 border border-neutral-800 hover:border-neutral-600 bg-neutral-950/60 rounded-xl text-neutral-300 hover:text-white transition-colors">
+                        <i class="fab fa-github text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-6 text-xs text-neutral-600">
+        © <span id="year"></span> سبتايل — Subtle. جميع الحقوق محفوظة.
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-6 inset-x-0 mx-auto w-fit max-w-[90vw] z-50 bg-neutral-100 text-neutral-900 font-bold text-sm px-6 py-3 rounded-xl shadow-2xl flex items-center gap-2.5">
+        <i class="fas fa-check-circle text-emerald-600 text-base"></i>
+        <span id="toastText"></span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/security.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let currentLang = localStorage.getItem("subtle-lang") || "ar";
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        function switchAuthTab(tab) {
+            const loginTab = document.getElementById('tabLogin');
+            const regTab = document.getElementById('tabRegister');
+            const loginForm = document.getElementById('loginForm');
+            const regForm = document.getElementById('registerForm');
+
+            if (tab === 'login') {
+                loginTab.className = "tab-btn active flex-1 py-2.5 rounded-lg text-sm font-bold transition-all text-center";
+                regTab.className = "tab-btn flex-1 py-2.5 rounded-lg text-sm font-bold text-neutral-400 hover:text-neutral-200 transition-all text-center";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            } else {
+                regTab.className = "tab-btn active flex-1 py-2.5 rounded-lg text-sm font-bold transition-all text-center";
+                loginTab.className = "tab-btn flex-1 py-2.5 rounded-lg text-sm font-bold text-neutral-400 hover:text-neutral-200 transition-all text-center";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const user = await Auth.login({ identifier, password });
+                showToast(currentLang === 'ar' ? `مرحباً بك مجدداً، ${user.username}!` : `Welcome back, ${user.username}!`);
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (err) {
+                // If demo user doesn't exist, create and login automatically
+                try {
+                    const user = await Auth.register({ username: identifier.replace(/[^a-zA-Z0-9_]/g, '_'), email: identifier.includes('@') ? identifier : `${identifier}@subtle.site`, password: password });
+                    showToast(currentLang === 'ar' ? `تم تسجيل الدخول بنجاح!` : `Logged in successfully!`);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                } catch (regErr) {
+                    alert(err.message || 'خطأ في تسجيل الدخول');
+                }
+            }
+        }
+
+        async function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const user = await Auth.register({ username, email, password });
+                showToast(currentLang === 'ar' ? `تم إنشاء الحساب بنجاح! أهلاً ${user.username}` : `Account created! Welcome ${user.username}`);
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (err) {
+                alert(err.message || 'خطأ في إنشاء الحساب');
+            }
+        }
+
+        function demoSocialLogin(provider) {
+            const demoName = `User_${provider}_${Math.floor(Math.random()*900 + 100)}`;
+            Auth.register({ username: demoName, email: `${demoName.toLowerCase()}@social.subtle`, password: 'Password123!' })
+                .catch(() => Auth.login({ identifier: demoName, password: 'Password123!' }))
+                .then(() => {
+                    showToast(currentLang === 'ar' ? `تم الدخول بنجاح عبر ${provider}!` : `Logged in with ${provider}!`);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                });
+        }
+
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Language toggle
+        document.getElementById('langToggle').addEventListener('click', () => {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('subtle-lang', currentLang);
+            applyLang();
+        });
+
+        function applyLang() {
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langToggle').textContent = currentLang === 'ar' ? 'EN' : 'ع';
+
+            if (currentLang === 'en') {
+                document.getElementById('brandText').textContent = 'SUBTILE';
+                document.getElementById('backToHomeText').textContent = 'Back to Home';
+                document.getElementById('tabLogin').textContent = 'Sign In';
+                document.getElementById('tabRegister').textContent = 'Create Account';
+                document.getElementById('labelUserOrEmail').textContent = 'Username or Email';
+                document.getElementById('labelPassword').textContent = 'Password';
+                document.getElementById('labelForgot').textContent = 'Forgot password?';
+                document.getElementById('labelRemember').textContent = 'Remember me';
+                document.getElementById('btnTextLogin').textContent = 'Sign In';
+                document.getElementById('labelRegUser').textContent = 'Username';
+                document.getElementById('labelRegEmail').textContent = 'Email Address';
+                document.getElementById('labelRegPass').textContent = 'Password (8+ chars)';
+                document.getElementById('btnTextRegister').textContent = 'Create Account';
+                document.getElementById('labelOrSocial').textContent = 'Or continue with';
+            } else {
+                document.getElementById('brandText').textContent = 'سبتايل';
+                document.getElementById('backToHomeText').textContent = 'العودة للرئيسية';
+                document.getElementById('tabLogin').textContent = 'تسجيل الدخول';
+                document.getElementById('tabRegister').textContent = 'إنشاء حساب جديد';
+                document.getElementById('labelUserOrEmail').textContent = 'اسم المستخدم أو البريد الإلكتروني';
+                document.getElementById('labelPassword').textContent = 'كلمة المرور';
+                document.getElementById('labelForgot').textContent = 'نسيت كلمة المرور؟';
+                document.getElementById('labelRemember').textContent = 'تذكرني على هذا الجهاز';
+                document.getElementById('btnTextLogin').textContent = 'تسجيل الدخول';
+                document.getElementById('labelRegUser').textContent = 'اسم المستخدم';
+                document.getElementById('labelRegEmail').textContent = 'البريد الإلكتروني';
+                document.getElementById('labelRegPass').textContent = 'كلمة المرور (8 أحرف أو أكثر)';
+                document.getElementById('btnTextRegister').textContent = 'إنشاء الحساب';
+                document.getElementById('labelOrSocial').textContent = 'أو المتابعة باستخدام';
+            }
+        }
+
+        applyLang();
+    </script>
+</body>
+</html>

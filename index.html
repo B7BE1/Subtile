@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --stroke: #333; }
         body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #0a0a0a; }
@@ -32,19 +33,29 @@
             color: #525252; font-weight: 700; padding: 1rem; border: 1px solid #262626;
         }
 
+        /* Rank numbers clearly layered on top of covers with contrast */
         .rank-number {
-            font-weight: 900; font-size: 6rem; line-height: 0.8;
-            color: transparent; -webkit-text-stroke: 2px var(--stroke);
-            position: absolute; bottom: -15px; z-index: 0; pointer-events: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 5.5rem;
+            line-height: 0.8;
+            color: #ffffff;
+            -webkit-text-stroke: 3px #0a0a0a;
+            text-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.8);
+            position: absolute;
+            bottom: -10px;
+            z-index: 25;
+            pointer-events: none;
+            user-select: none;
         }
-        [dir="rtl"] .rank-number { right: -10px; }
-        [dir="ltr"] .rank-number { left: -10px; }
+        [dir="rtl"] .rank-number { right: -8px; }
+        [dir="ltr"] .rank-number { left: -8px; }
 
         .movie-card { position: relative; z-index: 1; transition: transform 0.3s ease; }
         .movie-card:hover { transform: translateY(-5px); }
         .movie-card:hover .poster-img { filter: brightness(0.3); }
         .movie-card:hover .overlay-content { opacity: 1; }
-        .overlay-content { opacity: 0; transition: opacity 0.3s ease; }
+        .overlay-content { opacity: 0; transition: opacity 0.3s ease; z-index: 30; }
         .movie-card:focus-visible { outline: 2px solid #a3a3a3; outline-offset: 4px; border-radius: 12px; }
         .movie-card:focus-visible .overlay-content { opacity: 1; }
 
@@ -72,12 +83,12 @@
     <!-- Navbar -->
     <header class="fixed top-0 w-full z-50 nav-blur border-b border-neutral-800/50">
         <div class="container mx-auto px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3 flex-shrink-0">
+            <a href="index.html" class="flex items-center gap-3 flex-shrink-0">
                 <div class="w-8 h-8 bg-neutral-100 rounded-md flex items-center justify-center">
                     <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </div>
                 <span class="text-lg font-black tracking-tight text-neutral-200 hidden sm:block" data-i18n="brand">سبتايل</span>
-            </div>
+            </a>
 
             <div class="flex-1 max-w-xl">
                 <div class="relative">
@@ -93,6 +104,10 @@
                     <a href="browse.html#latest" class="hover:text-neutral-200 transition-colors" data-i18n="navLatest">الأحدث</a>
                     <a href="browse.html#discover" class="hover:text-neutral-200 transition-colors" data-i18n="navUpload">الاستكشاف</a>
                 </nav>
+                <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-900 px-3.5 py-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-user-circle text-sm"></i>
+                    <span id="navAuthText" data-i18n="loginBtn">دخول</span>
+                </a>
                 <button id="langToggle" class="text-xs font-bold border border-neutral-700 hover:border-neutral-400 rounded-lg px-3 py-2 text-neutral-300 transition-colors">EN</button>
             </div>
         </div>
@@ -214,6 +229,8 @@
         <svg class="w-5 h-5 mx-auto text-neutral-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
     </button>
 
+<script src="js/security.js"></script>
+<script src="js/auth.js"></script>
 <script>
 "use strict";
 
@@ -243,6 +260,7 @@ const I18N = {
     ar: {
         brand: "سبتايل", searchPh: "ابحث عن فيلم، مسلسل، أنمي...",
         navTrending: "الرائج", navLatest: "الأحدث", navUpload: "الاستكشاف",
+        loginBtn: "دخول", logoutBtn: "خروج",
         current1: "المرتبة الأولى حالياً", trendingToday: "الرائج اليوم",
         downloadSubs: "تحميل الترجمة", moreInfo: "معلومات أكثر",
         topCharts: "أعلى القوائم", trendingNow: "الرائج الآن",
@@ -259,6 +277,7 @@ const I18N = {
     en: {
         brand: "SUBTILE", searchPh: "Search movies, TV shows, anime...",
         navTrending: "Trending", navLatest: "Latest", navUpload: "Discover",
+        loginBtn: "Login", logoutBtn: "Logout",
         current1: "CURRENT #1", trendingToday: "Trending Today",
         downloadSubs: "Download Subtitles", moreInfo: "More Info",
         topCharts: "TOP CHARTS", trendingNow: "Trending Now",
@@ -294,8 +313,32 @@ function applyI18n() {
     $("langToggle").textContent = t("toggle");
     document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
     document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
+    updateAuthNav();
     renderFeatured();
     renderGrid();
+}
+
+function updateAuthNav() {
+    const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+    const btn = $("navAuthBtn");
+    const txt = $("navAuthText");
+    if (!btn || !txt) return;
+
+    if (user && user.username) {
+        txt.textContent = user.username;
+        btn.href = "#";
+        btn.onclick = (e) => {
+            e.preventDefault();
+            if (confirm(lang === 'ar' ? 'هل تريد تسجيل الخروج؟' : 'Do you want to log out?')) {
+                Auth.logout();
+                updateAuthNav();
+            }
+        };
+    } else {
+        txt.textContent = t("loginBtn");
+        btn.href = "login.html";
+        btn.onclick = null;
+    }
 }
 
 /* ---------------- Render: Featured ---------------- */
@@ -316,17 +359,17 @@ function renderFeatured() {
     $("featuredInfo").href = `movie.html?id=${f.id}&type=${f.type}`;
 }
 
-/* ---------------- Render: Grid ---------------- */
+/* ---------------- Render: Grid (Rank Number Layered on Top of Cover) ---------------- */
 function cardHTML(item, rank) {
     return `
     <div class="movie-card cursor-pointer group reveal" data-id="${item.id}" tabindex="0" role="button" aria-label="${item.title}">
         <div class="relative">
-            <span class="rank-number">${rank}</span>
             <div class="poster-container">
                 <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/60"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${item.title.replace(/'/g, "\\'")}'">
                 <div class="poster-fallback"></div>
-                <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-10">
+                <span class="rank-number">${rank}</span>
+                <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
                     <button class="dl-btn w-full bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         ${t("download")}
