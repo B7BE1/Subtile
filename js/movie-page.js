@@ -235,6 +235,59 @@ async function loadMetadata(id, type) {
           };
         }
       }
+
+      // AniList GraphQL Fallback (handles AniList IDs like 185874 or unindexed MAL entries)
+      try {
+        const numId = parseInt(malId, 10);
+        const alQuery = `
+          query ($id: Int) {
+            Media(id: $id, type: ANIME) {
+              id
+              idMal
+              title { english romaji userPreferred }
+              description
+              bannerImage
+              coverImage { extraLarge large }
+              episodes
+              genres
+              averageScore
+              seasonYear
+              status
+            }
+          }
+        `;
+        const alRes = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ query: alQuery, variables: { id: numId } }),
+          signal: controller.signal
+        });
+        if (alRes.ok) {
+          const alData = await alRes.json();
+          if (alData?.data?.Media) {
+            const m = alData.data.Media;
+            const p = m.coverImage?.extraLarge || m.coverImage?.large || '';
+            const bg = m.bannerImage || p;
+            const cleanDesc = (m.description || '').replace(/<[^>]*>?/gm, '');
+            clearTimeout(timeoutId);
+            return {
+              id: `anime-${m.idMal || m.id}`,
+              mal_id: m.idMal || m.id,
+              title: m.title.english || m.title.romaji || m.title.userPreferred,
+              type: 'anime',
+              year: m.seasonYear || null,
+              poster: p,
+              backdrop: bg,
+              overview: cleanDesc,
+              genres: m.genres || ['Anime'],
+              rating: m.averageScore ? (m.averageScore / 10).toFixed(1) : '8.0',
+              episodes: Array.from({length: m.episodes || 12}, (_, i) => ({season: 1, episode: i+1}))
+            };
+          }
+        }
+      } catch (alErr) {
+        console.warn('AniList fallback in movie-page:', alErr);
+      }
     } else {
       const cType = type === 'tv' ? 'series' : 'movie';
       const res = await fetch(`https://v3-cinemeta.strem.io/meta/${cType}/${id}.json`, { signal: controller.signal });
