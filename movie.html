@@ -7,10 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/movie.css?v=3">
   
   <style>
-    :root {
       --bg-black: #050507;
       --bg-dark: #0a0a0c;
       --bg-card-glass: rgba(20, 20, 24, 0.6);
@@ -324,11 +323,6 @@
     <!-- Left Panel (Large Rectangle - Work Info) -->
     <aside class="left-panel">
       <div class="left-content">
-        <!-- Back to Seasons Button -->
-        <button id="backToSeasonsBtn" class="back-btn">
-          <i class="fas fa-arrow-left"></i> All Seasons
-        </button>
-
         <img id="moviePoster" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Loading Poster" class="movie-poster" style="background: rgba(255,255,255,0.05); min-height: 420px;">
         
         <div id="movieTags" class="movie-tags">
@@ -352,13 +346,21 @@
 
       <div class="list-wrapper">
         
-        <!-- Top: 5 Small Rectangles (Filters) -->
-        <div id="filterPillsContainer" class="filter-pills">
-          <div class="pill active" data-filter="all">All</div>
-          <div class="pill" data-filter="lang:ar">Arabic</div>
-          <div class="pill" data-filter="lang:en">English</div>
-          <div class="pill" data-filter="quality:4K">4K</div>
-          <div class="pill" data-filter="quality:1080p">1080p</div>
+        <!-- Controls Header: Back Button + Filters -->
+        <div class="list-controls-header">
+          <!-- Back to Seasons Button (Creative Circle) -->
+          <button id="backToSeasonsBtn" class="neo-back-btn" title="Back to Seasons">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <!-- Top: 5 Small Rectangles (Filters) -->
+          <div id="filterPillsContainer" class="filter-pills">
+            <div class="pill active" data-filter="all">All</div>
+            <div class="pill" data-filter="lang:ar">Arabic</div>
+            <div class="pill" data-filter="lang:en">English</div>
+            <div class="pill" data-filter="quality:4K">4K</div>
+            <div class="pill" data-filter="quality:1080p">1080p</div>
+          </div>
         </div>
 
         <!-- Bottom: 5 Long Rectangles (Subtitle Items / Seasons) -->

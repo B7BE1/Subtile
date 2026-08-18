@@ -388,32 +388,36 @@
 }
 
 /* ---------- New: Back-to-seasons button ---------- */
-#backToSeasonsBtn {
-  display: none;
+/* ---------- New: Back-to-seasons button ---------- */
+.list-controls-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.neo-back-btn {
+  display: none; /* Controlled via JS */
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px;
-  padding: 0.6rem 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin: 0 auto 2.5rem auto;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  width: fit-content;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-#backToSeasonsBtn:hover {
+.neo-back-btn:hover {
   background: white;
   color: black;
+  transform: scale(1.1) rotate(-15deg);
   border-color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 25px rgba(255,255,255,0.2);
 }
 
 /* ---------- New: Filter pills (applyPillFilter) ---------- */
