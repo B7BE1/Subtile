@@ -1,6 +1,14 @@
 /**
  * Universal Search API (Cinemeta for Movies/Series + Jikan for Anime)
+ * Reuses the same source modules and normalized schema as api/metadata.js
+ * (lib/metadata/*) so search results and detail-page results never
+ * disagree in shape. Each source is best-effort: one failing source
+ * returns an empty list rather than failing the whole request.
  */
+
+import { searchCinemeta } from '../lib/metadata/sources/cinemeta.js';
+import { searchJikanByQuery } from '../lib/metadata/sources/jikan.js';
+import { normalizeCinemetaSearchResult, normalizeJikanSearchResult } from '../lib/metadata/normalize.js';
 
 export default async function handler(req, res) {
   const { q, type = 'all' } = req.query;
@@ -9,67 +17,25 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Search query "q" is required' });
   }
 
-  const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
-
   try {
     const searchPromises = [];
 
-    // Search Cinemeta Movies
     if (type === 'all' || type === 'movie') {
-      const pMovie = fetch(`https://v3-cinemeta.strem.io/catalog/movie/top/search=${encodeURIComponent(q)}.json`, {
-        headers: { 'User-Agent': USER_AGENT }
-      })
-      .then(r => r.ok ? r.json() : { metas: [] })
-      .then(d => (d.metas || []).map(m => ({
-        id: m.imdb_id || m.id,
-        title: m.name,
-        year: parseInt(m.year) || null,
-        type: 'movie',
-        rating: parseFloat(m.imdbRating) || 0,
-        poster: m.poster || '',
-        genres: m.genres || []
-      })))
-      .catch(() => []);
-      searchPromises.push(pMovie);
+      searchPromises.push(
+        searchCinemeta(q, 'movie').then((metas) => metas.map((m) => normalizeCinemetaSearchResult(m, 'movie')))
+      );
     }
 
-    // Search Cinemeta Series
     if (type === 'all' || type === 'tv' || type === 'series') {
-      const pSeries = fetch(`https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(q)}.json`, {
-        headers: { 'User-Agent': USER_AGENT }
-      })
-      .then(r => r.ok ? r.json() : { metas: [] })
-      .then(d => (d.metas || []).map(m => ({
-        id: m.imdb_id || m.id,
-        title: m.name,
-        year: parseInt(m.year) || null,
-        type: 'tv',
-        rating: parseFloat(m.imdbRating) || 0,
-        poster: m.poster || '',
-        genres: m.genres || []
-      })))
-      .catch(() => []);
-      searchPromises.push(pSeries);
+      searchPromises.push(
+        searchCinemeta(q, 'series').then((metas) => metas.map((m) => normalizeCinemetaSearchResult(m, 'tv')))
+      );
     }
 
-    // Search Jikan Anime
     if (type === 'all' || type === 'anime') {
-      const pAnime = fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=8`, {
-        headers: { 'User-Agent': USER_AGENT }
-      })
-      .then(r => r.ok ? r.json() : { data: [] })
-      .then(d => (d.data || []).map(a => ({
-        id: `anime-${a.mal_id}`,
-        mal_id: a.mal_id,
-        title: a.title_english || a.title,
-        year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
-        type: 'anime',
-        rating: parseFloat(a.score) || 0,
-        poster: (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '',
-        genres: (a.genres || []).map(g => g.name)
-      })))
-      .catch(() => []);
-      searchPromises.push(pAnime);
+      searchPromises.push(
+        searchJikanByQuery(q, 8).then((animeList) => animeList.map(normalizeJikanSearchResult))
+      );
     }
 
     const settled = await Promise.all(searchPromises);
@@ -77,9 +43,8 @@ export default async function handler(req, res) {
 
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     return res.status(200).json({ query: q, count: results.length, results });
-
   } catch (error) {
-    console.error('Search API Error:', error);
+    console.error(JSON.stringify({ source: 'search-handler', error: error.message }));
     return res.status(500).json({ error: 'Search failed' });
   }
 }
