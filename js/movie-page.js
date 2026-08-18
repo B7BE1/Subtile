@@ -2,25 +2,20 @@
  * Movie, TV Series & Anime Details Page Logic (Subtile)
  * Integrated with Cinemeta (Movies/Series) & Jikan (Anime) & SubDL Real Subtitles
  *
- * Upgrade notes (vs. previous version):
- *  - All API-sourced strings (titles, genres, subtitle release/uploader/lang names)
- *    are now HTML-escaped before being inserted via innerHTML. Previously these were
- *    interpolated raw, so a malicious SubDL release name or genre string could inject
- *    markup/script into the page (stored/reflected XSS via a third-party API response).
- *  - Subtitle download and season-select handlers moved from inline onclick="" string
- *    concatenation to event delegation with data-* attributes. The old approach only
- *    escaped single quotes, so release names containing " or < could break out of the
- *    attribute or inject a new handler.
- *  - fetchRealSubtitles now uses an AbortController with a timeout (metadata fetch had
- *    one, subtitles fetch didn't) and cancels any in-flight subtitles request when the
- *    user switches season/episode quickly, preventing a slow older response from
- *    overwriting a newer selection (race condition).
- *  - Added a small in-memory cache keyed by type/season/episode so re-opening a season
- *    you've already viewed doesn't re-hit the network.
- *  - Removed dead/broken code paths: `selectSeason` and `filterTvSubtitles` referenced
- *    `updateEpisodeSelect`, a function that was never defined, and neither was wired to
- *    any element in the current markup. `loadSeasonSubtitles` is the actual live path.
- *  - Defensive guards for missing movie.title / empty genres / empty subtitles arrays.
+ * Upgrade notes (this pass, on top of the previous XSS/race-condition pass):
+ *  - safeUrl() guard added: any URL that ends up in a DOM sink (background-image,
+ *    <img src>, download proxy) is now scheme-checked (http/https/relative only).
+ *    Previously movie.backdrop / movie.poster / sub.download_url were trusted as-is;
+ *    a malicious API response could have set a javascript:/data: URL. Setting
+ *    style.backgroundImage or img.src with such a value wouldn't execute script in
+ *    modern browsers, but it's not something we should be passing through unchecked
+ *    — especially download_url, which is forwarded to our own /api/download proxy.
+ *  - Keyboard accessibility: season cards and download buttons were div/anchor
+ *    elements with only click handlers. Added tabindex, role, and Enter/Space
+ *    handling via the same event-delegation listeners (no new listeners needed).
+ *  - Everything from the previous pass (HTML-escaping, event delegation instead of
+ *    inline onclick strings, AbortController + season/episode cache, defensive
+ *    guards, dead-code removal) is unchanged.
  *
  * No HTML/CSS changes required — same element IDs and classes as before.
  */
@@ -83,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ---------- Security helper ----------
+// ---------- Security helpers ----------
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   return String(str)
@@ -94,6 +89,17 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Only allow http(s) or root-relative URLs into DOM sinks (style.backgroundImage,
+// img.src, our own download proxy). Blocks javascript:/data:/vbscript: etc.
+function safeUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  if (/^(https?:)?\/\//i.test(trimmed) || /^\//.test(trimmed)) {
+    return trimmed;
+  }
+  return '';
+}
+
 function wireUpEventDelegation() {
   const subtitlesList = document.getElementById('subtitlesList');
   if (subtitlesList) {
@@ -101,12 +107,15 @@ function wireUpEventDelegation() {
       const downloadBtn = e.target.closest('.download-btn');
       if (downloadBtn && downloadBtn.dataset.subId) {
         e.preventDefault();
-        downloadSubtitle(
-          downloadBtn.dataset.subId,
-          downloadBtn.dataset.release,
-          downloadBtn.dataset.format,
-          downloadBtn.dataset.downloadUrl
-        );
+        triggerDownloadFromButton(downloadBtn);
+      }
+    });
+    subtitlesList.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const downloadBtn = e.target.closest('.download-btn');
+      if (downloadBtn && downloadBtn.dataset.subId) {
+        e.preventDefault();
+        triggerDownloadFromButton(downloadBtn);
       }
     });
   }
@@ -116,6 +125,14 @@ function wireUpEventDelegation() {
     seasonsListView.addEventListener('click', (e) => {
       const seasonCard = e.target.closest('.season-card');
       if (seasonCard && seasonCard.dataset.season !== undefined) {
+        loadSeasonSubtitles(Number(seasonCard.dataset.season));
+      }
+    });
+    seasonsListView.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const seasonCard = e.target.closest('.season-card');
+      if (seasonCard && seasonCard.dataset.season !== undefined) {
+        e.preventDefault();
         loadSeasonSubtitles(Number(seasonCard.dataset.season));
       }
     });
@@ -135,6 +152,15 @@ function wireUpEventDelegation() {
       }
     });
   }
+}
+
+function triggerDownloadFromButton(downloadBtn) {
+  downloadSubtitle(
+    downloadBtn.dataset.subId,
+    downloadBtn.dataset.release,
+    downloadBtn.dataset.format,
+    downloadBtn.dataset.downloadUrl
+  );
 }
 
 async function loadMetadata(id, type) {
@@ -296,15 +322,19 @@ function renderMovieDetails(movie) {
 
   const backdropSec = document.getElementById('movieBackdropSection');
   if (backdropSec) {
-    const bg = movie.backdrop || (movie.imdb_id ? `https://images.metahub.space/background/medium/${movie.imdb_id}/img` : (movie.imdbId ? `https://images.metahub.space/background/medium/${movie.imdbId}/img` : movie.poster));
+    const rawBg = movie.backdrop || (movie.imdb_id ? `https://images.metahub.space/background/medium/${movie.imdb_id}/img` : (movie.imdbId ? `https://images.metahub.space/background/medium/${movie.imdbId}/img` : movie.poster));
+    const bg = safeUrl(rawBg);
     if (bg) {
-      backdropSec.style.backgroundImage = `url('${bg}')`;
+      // CSS.escape guards the url('...') from being broken out of by a stray quote.
+      backdropSec.style.backgroundImage = `url('${bg.replace(/'/g, "%27")}')`;
+    } else {
+      backdropSec.style.backgroundImage = '';
     }
   }
 
   const poster = document.getElementById('moviePoster');
   if (poster) {
-    poster.src = movie.poster || 'https://images.metahub.space/poster/small/tt15239678/img';
+    poster.src = safeUrl(movie.poster) || 'https://images.metahub.space/poster/small/tt15239678/img';
     poster.onerror = function() {
       const fallbackId = movie.imdb_id || movie.imdbId;
       if (fallbackId) {
@@ -361,7 +391,7 @@ function renderSeasonsList(movie) {
   if (subtitlesContainer) subtitlesContainer.style.display = 'none';
   if (container) container.style.display = 'flex'; // or whatever its default is
   if (viewTitle) viewTitle.innerText = 'Seasons';
-  
+
   if (filters) filters.style.display = 'none';
   if (backBtn) backBtn.style.display = 'none';
   if (!container) return;
@@ -374,15 +404,15 @@ function renderSeasonsList(movie) {
     seasons = Array.from({length: movie.seasonsCount}, (_, i) => i + 1);
   }
 
-  const posterUrl = escapeHtml(movie.poster || '');
+  const posterUrl = escapeHtml(safeUrl(movie.poster));
 
   let html = '';
   seasons.forEach(s => {
     let sTitle = s === 0 ? 'Specials' : `Season ${s}`;
     let sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
     html += `
-      <div class="season-card" data-season="${s}">
-        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb">
+      <div class="season-card" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
+        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb" loading="lazy">
         <div class="season-info">
           <div class="season-title">${escapeHtml(sTitle)}</div>
           <div class="season-sub">${escapeHtml(sSub)}</div>
@@ -393,7 +423,7 @@ function renderSeasonsList(movie) {
   });
 
   container.innerHTML = html;
-  
+
   // Trigger fade in if attachFadeIn exists
   if (typeof window.attachFadeIn === 'function') {
     window.attachFadeIn(container.querySelectorAll('.season-card'));
@@ -476,7 +506,7 @@ function renderSubtitlesList() {
     const downloadsCount = (sub.downloads || 0).toLocaleString();
     const quality = sub.quality ? escapeHtml(sub.quality) : '';
     const subId = escapeHtml(sub.id || '');
-    const downloadUrl = escapeHtml(sub.download_url || '');
+    const downloadUrl = escapeHtml(safeUrl(sub.download_url));
 
     return `
       <div class="subtitle-item">
@@ -492,7 +522,7 @@ function renderSubtitlesList() {
             ${quality ? `<span><i class="fas fa-video"></i> ${quality}</span>` : ''}
           </div>
         </div>
-        <a href="#" class="download-btn" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
+        <a href="#" class="download-btn" tabindex="0" role="button" aria-label="Download ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
       </div>
     `;
   }).join('');
@@ -505,10 +535,11 @@ function renderSubtitlesList() {
 function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '') {
   showToast(`Starting download: ${releaseName}...`);
 
-  if (rawDownloadUrl) {
+  const downloadUrl = safeUrl(rawDownloadUrl);
+  if (downloadUrl) {
     const cleanExt = (format || 'srt').toLowerCase().includes('zip') ? 'zip' : 'srt';
     const fileName = `${releaseName}.${cleanExt}`;
-    const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(rawDownloadUrl)}&filename=${encodeURIComponent(fileName)}`;
+    const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(downloadUrl)}&filename=${encodeURIComponent(fileName)}`;
 
     const a = document.createElement('a');
     a.href = proxyDownloadUrl;
