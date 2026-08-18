@@ -508,12 +508,23 @@ function renderSubtitlesList() {
     const subId = escapeHtml(sub.id || '');
     const downloadUrl = escapeHtml(safeUrl(sub.download_url));
 
+    let badgeClass = 'badge-srt';
+    let badgeText = format;
+    if (format === 'ASS') {
+      badgeClass = 'badge-ass';
+      badgeText = 'ASS · Styled / Anime';
+    } else if (format === 'VTT') {
+      badgeClass = 'badge-vtt';
+    } else if (format.includes('ZIP')) {
+      badgeClass = 'badge-zip';
+    }
+
     return `
       <div class="subtitle-item">
         <div class="sub-info">
-          <div class="sub-release">
-            ${release}
-            <span class="format-badge">${format}</span>
+          <div class="sub-release flex items-center flex-wrap gap-2">
+            <span>${release}</span>
+            <span class="format-badge ${badgeClass}">${badgeText}</span>
           </div>
           <div class="sub-meta">
             <span><i class="fas fa-flag"></i> ${langLabel} (${langFlag})</span>
@@ -536,9 +547,10 @@ function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '
   showToast(`Starting download: ${releaseName}...`);
 
   const downloadUrl = safeUrl(rawDownloadUrl);
+  const ext = format.toLowerCase().includes('ass') ? 'ass' : (format.toLowerCase().includes('vtt') ? 'vtt' : (format.toLowerCase().includes('zip') ? 'zip' : 'srt'));
+  const fileName = `${releaseName}.${ext}`;
+
   if (downloadUrl) {
-    const cleanExt = (format || 'srt').toLowerCase().includes('zip') ? 'zip' : 'srt';
-    const fileName = `${releaseName}.${cleanExt}`;
     const proxyDownloadUrl = `/api/download?url=${encodeURIComponent(downloadUrl)}&filename=${encodeURIComponent(fileName)}`;
 
     const a = document.createElement('a');
@@ -555,27 +567,24 @@ function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '
   }
 
   // Fallback direct Blob generation for sample subtitles
-  const srtSampleContent = `1
-00:00:05,000 --> 00:00:09,000
-Synced Subtitle: ${releaseName}
-Downloaded from Subtile (SubDL Official Sync)
+  let sampleContent = `1\n00:00:05,000 --> 00:00:09,000\nSynced Subtitle: ${releaseName}\nDownloaded from Subtile Archive\n\n2\n00:00:10,000 --> 00:00:15,000\nEnjoy your movie!\n`;
+  if (ext === 'ass') {
+    sampleContent = `[Script Info]\nTitle: ${releaseName}\nScriptType: v4.00+\nWrapStyle: 0\nScaledBorderAndShadow: yes\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Default,Tajawal,22,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,2,1,2,10,10,15,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,{\\b1\\c&H00FFFF&}${releaseName}{\\r}\nDialogue: 0,0:00:05.50,0:00:09.00,Default,,0,0,0,,Enjoy the show with Subtile!\n`;
+  } else if (ext === 'vtt') {
+    sampleContent = `WEBVTT\n\n00:00:01.000 --> 00:00:05.000\n${releaseName}\n\n00:00:05.500 --> 00:00:09.000\nEnjoy the show with Subtile!\n`;
+  }
 
-2
-00:00:10,000 --> 00:00:15,000
-Enjoy your movie!
-`;
-
-  const blob = new Blob([srtSampleContent], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([sampleContent], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${releaseName}.${(format || 'srt').toLowerCase()}`;
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  showToast(`Downloaded subtitle: ${releaseName}`);
+  showToast(`Downloaded subtitle: ${fileName}`);
 }
 
 function openUploadModal() {

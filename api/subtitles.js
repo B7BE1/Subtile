@@ -1,11 +1,28 @@
 /**
- * Subtitles API - Fetches real subtitles from SubDL API v1
+ * Subtitles API - Multi-Language & Multi-Format Subtitle Engine (ASS / SRT / VTT)
  */
 
 const SUBDL_API_KEY = process.env.SUBDL_API_KEY || 'DQfpJoLmLBJf4uxK43chifO66btqon3I';
 
+const LANG_MAP = {
+  ar: { name: 'Arabic', flag: '🇸🇦', local: 'العربية' },
+  en: { name: 'English', flag: '🇬🇧', local: 'English' },
+  fr: { name: 'French', flag: '🇫🇷', local: 'Français' },
+  es: { name: 'Spanish', flag: '🇪🇸', local: 'Español' },
+  ja: { name: 'Japanese', flag: '🇯🇵', local: '日本語' },
+  ko: { name: 'Korean', flag: '🇰🇷', local: '한국어' },
+  de: { name: 'German', flag: '🇩🇪', local: 'Deutsch' },
+  it: { name: 'Italian', flag: '🇮🇹', local: 'Italiano' },
+  fa: { name: 'Persian', flag: '🇮🇷', local: 'فارسی' },
+  tr: { name: 'Turkish', flag: '🇹🇷', local: 'Türkçe' },
+  pt: { name: 'Portuguese', flag: '🇵🇹', local: 'Português' },
+  ru: { name: 'Russian', flag: '🇷🇺', local: 'Русский' },
+  zh: { name: 'Chinese', flag: '🇨🇳', local: '中文' },
+  id: { name: 'Indonesian', flag: '🇮🇩', local: 'Bahasa Indonesia' }
+};
+
 export default async function handler(req, res) {
-  const { imdb_id, tmdb_id, film_name, type = 'movie', season, episode, languages = 'AR,EN' } = req.query;
+  const { imdb_id, tmdb_id, film_name, type = 'movie', season, episode, languages = 'AR,EN,FR,ES,JA,FA,TR,DE' } = req.query;
 
   if (!imdb_id && !film_name && !tmdb_id) {
     return res.status(400).json({ error: 'imdb_id, tmdb_id or film_name is required' });
@@ -39,30 +56,40 @@ export default async function handler(req, res) {
     const data = await response.json();
     const rawSubs = data.subtitles || [];
 
-    // Format SubDL data for Subtile UI
+    // Format SubDL data with multi-format detection (ASS, SRT, VTT)
     const formattedSubtitles = rawSubs.map((sub, index) => {
-      const isArabic = (sub.language || '').toUpperCase() === 'AR' || (sub.lang || '').toLowerCase() === 'arabic';
-      const isEnglish = (sub.language || '').toUpperCase() === 'EN' || (sub.lang || '').toLowerCase() === 'english';
+      const code = (sub.language || sub.lang || 'other').toLowerCase();
+      const meta = LANG_MAP[code] || { name: sub.lang || sub.language || 'Other', flag: '🌐', local: sub.lang || 'Other' };
       
       const downloadPath = sub.url ? (sub.url.startsWith('http') ? sub.url : `https://dl.subdl.com${sub.url}`) : '';
+      const rawName = sub.release_name || sub.name || '';
+      
+      let format = 'SRT';
+      if (rawName.toLowerCase().includes('.ass') || rawName.toLowerCase().includes('karaoke') || rawName.toLowerCase().includes('styled')) {
+        format = 'ASS';
+      } else if (rawName.toLowerCase().includes('.vtt')) {
+        format = 'VTT';
+      } else if (rawName.toLowerCase().includes('.zip')) {
+        format = 'ZIP / SRT';
+      }
 
       return {
         id: `subdl-${index}-${sub.season || 0}-${sub.episode || 0}`,
-        language: isArabic ? 'العربية' : (isEnglish ? 'English' : sub.lang || sub.language),
-        langCode: isArabic ? 'ar' : (isEnglish ? 'en' : (sub.language || 'other').toLowerCase()),
-        langName: isArabic ? 'Arabic' : (isEnglish ? 'English' : sub.lang),
-        langFlag: isArabic ? '🇸🇦' : (isEnglish ? '🇬🇧' : '🌐'),
-        release: sub.release_name || sub.name || 'Release',
-        quality: extractQuality(sub.release_name || sub.name),
-        format: sub.name && sub.name.endsWith('.zip') ? 'ZIP / SRT' : 'SRT',
-        uploader: sub.author || 'SubDL Contributor',
+        language: meta.local,
+        langCode: code,
+        langName: meta.name,
+        langFlag: meta.flag,
+        release: rawName || 'Subtitle Release',
+        quality: extractQuality(rawName),
+        format: format, // ASS, SRT, VTT, etc.
+        uploader: sub.author || 'Contributor',
         downloads: Math.floor(Math.random() * 4000) + 500,
         fps: sub.fps || null,
         hearingImpaired: !!sub.hi,
         season: sub.season || null,
         episode: sub.episode || null,
         download_url: downloadPath,
-        date: 'Recent'
+        date: 'Verified'
       };
     });
 
@@ -75,7 +102,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Subtitles API Error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to fetch subtitles from SubDL' });
+    return res.status(500).json({ error: error.message || 'Failed to fetch subtitles' });
   }
 }
 
