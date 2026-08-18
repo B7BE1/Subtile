@@ -299,7 +299,7 @@
 
           if (type === 'all' || type === 'tv') {
             promises.push(
-              fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+              fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`)
                 .then(r => r.ok ? r.json() : { metas: [] })
                 .then(d => (d.metas || []).slice(0, 10).map(m => ({
                   id: m.imdb_id || m.id, title: m.name, type: 'tv', 
@@ -312,7 +312,7 @@
 
           if (type === 'all' || type === 'movie') {
             promises.push(
-              fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+              fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`)
                 .then(r => r.ok ? r.json() : { metas: [] })
                 .then(d => (d.metas || []).slice(0, 10).map(m => ({
                   id: m.imdb_id || m.id, title: m.name, type: 'movie',
@@ -325,7 +325,7 @@
 
           if (type === 'all' || type === 'anime') {
             promises.push(
-              fetch(`https://api.jikan.moe/v4/top/anime?limit=10`, { headers: { 'User-Agent': USER_AGENT } })
+              fetch(`https://api.jikan.moe/v4/top/anime?limit=10`)
                 .then(r => r.ok ? r.json() : { data: [] })
                 .then(d => (d.data || []).map(a => ({
                   id: \`anime-\${a.mal_id}\`, title: a.title_english || a.title, type: 'anime',
@@ -382,6 +382,7 @@
 
         } catch (err) {
           console.error(err);
+          grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ef4444;">Failed to load trending data.</div>';
         }
       }
 

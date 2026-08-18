@@ -37,11 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
 async function triggerLiveTrending(type) {
   try {
     const promises = [];
-    const USER_AGENT = 'Subtile/1.0 (https://b7be.site)';
 
     if (type === 'all' || type === 'tv') {
       promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+        fetch(`https://v3-cinemeta.strem.io/catalog/series/top.json`)
           .then(r => r.ok ? r.json() : { metas: [] })
           .then(d => (d.metas || []).slice(0, 15).map(m => ({
             id: m.imdb_id || m.id, imdb_id: m.imdb_id || m.id, title: m.name, type: 'tv', 
@@ -55,7 +54,7 @@ async function triggerLiveTrending(type) {
 
     if (type === 'all' || type === 'movie') {
       promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`, { headers: { 'User-Agent': USER_AGENT } })
+        fetch(`https://v3-cinemeta.strem.io/catalog/movie/top.json`)
           .then(r => r.ok ? r.json() : { metas: [] })
           .then(d => (d.metas || []).slice(0, 15).map(m => ({
             id: m.imdb_id || m.id, imdb_id: m.imdb_id || m.id, title: m.name, type: 'movie',
@@ -69,7 +68,7 @@ async function triggerLiveTrending(type) {
 
     if (type === 'all' || type === 'anime') {
       promises.push(
-        fetch(`https://api.jikan.moe/v4/top/anime?limit=15`, { headers: { 'User-Agent': USER_AGENT } })
+        fetch(`https://api.jikan.moe/v4/top/anime?limit=15`)
           .then(r => r.ok ? r.json() : { data: [] })
           .then(d => (d.data || []).map(a => ({
             id: `anime-${a.mal_id}`, mal_id: a.mal_id, title: a.title_english || a.title, type: 'anime',
