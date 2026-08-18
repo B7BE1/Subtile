@@ -120,19 +120,48 @@
         </div>
     </header>
 
-    <!-- Featured Banner -->
+    <!-- Featured Banner (Initial State) -->
     <section id="homeHeroBanner" class="relative w-full min-h-[85vh] flex items-center pt-24 pb-12">
-        <div class="banner-bg bg-neutral-950"></div>
+        <div class="banner-bg" style="background-image: url('https://images.metahub.space/background/medium/tt15239678/img'); filter: brightness(0.4);"></div>
         
         <div class="relative z-10 container mx-auto px-8 flex flex-col md:flex-row items-center gap-12">
             <div class="hidden md:block w-64 flex-shrink-0">
-                <div class="poster-container animate-pulse bg-neutral-900 rounded-xl" style="height: 384px;"></div>
+                <div class="poster-container">
+                    <img src="https://images.metahub.space/poster/small/tt15239678/img" alt="Dune: Part Two" class="poster-img shadow-2xl shadow-black/80 border border-neutral-800">
+                </div>
             </div>
 
-            <div class="max-w-2xl mt-8 md:mt-0 w-full animate-pulse">
-                <div class="h-16 bg-neutral-900 rounded-lg w-32 mb-4"></div>
-                <div class="h-24 bg-neutral-900 rounded-lg w-full mb-6"></div>
-                <div class="h-4 bg-neutral-900 rounded-lg w-1/2 mb-8"></div>
+            <div class="max-w-2xl mt-8 md:mt-0">
+                <div class="flex items-center gap-4 mb-4">
+                    <span class="text-neutral-100 font-black text-7xl md:text-8xl tracking-terse">01</span>
+                    <div class="border-l border-neutral-700 pl-4">
+                        <p class="text-neutral-400 text-sm font-medium tracking-widest">CURRENT #1</p>
+                        <p class="text-neutral-500 text-sm">Trending Worldwide</p>
+                    </div>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-black text-neutral-50 mb-3 tracking-tight leading-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Dune: Part Two</h1>
+                <div class="flex items-center gap-4 mb-6 text-neutral-400 text-sm font-medium">
+                    <span>2024</span>
+                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                    <span>Sci-Fi / Adventure</span>
+                    <span class="w-1 h-1 bg-neutral-600 rounded-full"></span>
+                    <span>5.4M Downloads</span>
+                </div>
+                
+                <p class="text-neutral-300 text-lg leading-relaxed mb-8 max-w-xl" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Experience the epic in verified subtitles.
+                </p>
+
+                <div class="flex items-center gap-4">
+                    <a href="movie.html?id=tt15239678&type=movie" class="bg-neutral-100 hover:bg-white text-neutral-900 font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download Subtitles
+                    </a>
+                    <a href="movie.html?id=tt15239678&type=movie" class="border border-neutral-600 hover:border-neutral-300 hover:text-neutral-100 text-neutral-300 font-bold py-3 px-8 rounded-lg transition-colors">
+                        More Info
+                    </a>
+                </div>
             </div>
         </div>
     </section>
