@@ -80,6 +80,7 @@ async function fetchRealSubtitles(movie) {
   renderSubtitlesList();
 }
 
+
 function showSubtitlesLoading() {
   const container = document.getElementById('subtitlesList');
   if (!container) return;
@@ -114,7 +115,18 @@ function generateFallbackSubtitles(movie) {
 
 function showPageLoading() {
   const title = document.getElementById('movieTitle');
-  if (title) title.textContent = 'Loading metadata...';
+  const overview = document.getElementById('movieOverview');
+  const poster = document.getElementById('moviePoster');
+  const tags = document.getElementById('movieTags');
+  const meta = document.getElementById('movieMeta');
+  const backdrop = document.getElementById('movieBackdropSection');
+
+  if (title) title.textContent = '';
+  if (overview) overview.textContent = '';
+  if (tags) tags.innerHTML = '';
+  if (meta) meta.innerHTML = '';
+  if (poster) poster.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  if (backdrop) backdrop.style.backgroundImage = 'none';
 }
 
 function renderMovieDetails(movie) {

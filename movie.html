@@ -115,7 +115,7 @@
     .banner-bg {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background-image: url('https://image.tmdb.org/t/p/original/8Y43POKjjKDGI9MH89NW0NAzzp8.jpg');
+      background-color: var(--bg-dark);
       background-size: cover; background-position: center;
       filter: grayscale(90%) brightness(0.25) contrast(1.2);
       z-index: -2;
@@ -298,25 +298,19 @@
     <!-- Left Panel (Large Rectangle - Work Info) -->
     <aside class="left-panel">
       <div class="left-content">
-        <img id="moviePoster" src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Poster" class="movie-poster">
+        <img id="moviePoster" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Loading Poster" class="movie-poster" style="background: rgba(255,255,255,0.05); min-height: 420px;">
         
         <div id="movieTags" class="movie-tags">
-          <span class="tag">2024</span>
-          <span class="tag">Sci-Fi</span>
-          <span class="tag">Action</span>
+          <!-- Tags injected by JS -->
         </div>
         
-        <h1 id="movieTitle" class="movie-title">Dune: Part Two</h1>
+        <h1 id="movieTitle" class="movie-title"></h1>
         
         <div id="movieMeta" class="movie-meta">
-          <div class="rating-token"><span>8.6</span></div>
-          <div class="meta-item"><i class="fas fa-clock"></i> 2h 46m</div>
-          <div class="meta-item"><i class="fas fa-language"></i> EN</div>
+          <!-- Meta injected by JS -->
         </div>
         
-        <p id="movieOverview" class="movie-desc">
-          Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe.
-        </p>
+        <p id="movieOverview" class="movie-desc"></p>
       </div>
     </aside>
 
