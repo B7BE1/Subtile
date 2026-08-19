@@ -349,17 +349,24 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
     // /api/search's normalized shape already carries id/type/title/year/
     // rating/poster — renderCatalog needs no further mapping, just a
     // fallback for the 'N/A' year placeholder the old client-side path used.
-    liveSearchResults = (data.results || []).map(r => ({
+    let apiResults = (data.results || []).map(r => ({
       ...r,
       year: r.year || 'N/A',
     }));
 
-    if (liveSearchResults.length === 0) {
-      const lowerQ = q.toLowerCase();
-      liveSearchResults = MOVIES_DATABASE.filter(m =>
-        m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
-      );
-    }
+    const lowerQ = q.toLowerCase();
+    const localMatches = MOVIES_DATABASE.filter(m =>
+      m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
+    );
+
+    const existingIds = new Set(apiResults.map(r => r.id));
+    localMatches.forEach(m => {
+      if (!existingIds.has(m.id) && !existingIds.has(m.imdbId)) {
+        apiResults.unshift(m); // Push local database matches to the top
+      }
+    });
+
+    liveSearchResults = apiResults;
   } catch (err) {
     if (err.name === 'AbortError') return; // superseded by a newer query — not an error
     console.error('Catalog search error:', err);
