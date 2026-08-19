@@ -8,6 +8,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // Basic auth check: require a session token in headers
+  const sessionToken = req.headers['x-session-token'];
+  if (!sessionToken) {
+    return res.status(401).json({ error: 'Authentication required. Please log in to upload.' });
+  }
+
   const {
     tmdb_id,
     title,

@@ -526,36 +526,31 @@ function setupAuthNavbar() {
   const slot = document.getElementById('navAuthSlot');
   if (!slot) return;
 
-  const currentUser = localStorage.getItem('subhub_current_user');
-  if (currentUser) {
-    try {
-      const user = JSON.parse(currentUser);
-      // user.username came out of localStorage — treat it like any other
-      // untrusted string and escape it before it hits innerHTML.
-      const safeUsername = esc(user.username);
-      slot.innerHTML = `
-        <div style="position: relative; display: inline-block;">
-          <button onclick="toggleNavUserDropdown(event)" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(15, 15, 18, 0.55); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); padding: 0.5rem 1.2rem; border-radius: 50px; color: #fff; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <img src="assets/default-avatar.svg" alt="" style="width: 24px; height: 24px; border-radius: 50%;">
-            <span>${safeUsername}</span>
-            <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  if (user && user.username) {
+    const safeUsername = esc(user.username);
+    slot.innerHTML = `
+      <div style="position: relative; display: inline-block;">
+        <button onclick="toggleNavUserDropdown(event)" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(15, 15, 18, 0.55); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); padding: 0.5rem 1.2rem; border-radius: 50px; color: #fff; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+          <img src="assets/default-avatar.svg" alt="" style="width: 24px; height: 24px; border-radius: 50%;">
+          <span>${safeUsername}</span>
+          <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+        </button>
+        <div id="navUserDropdown" style="position: absolute; top: 110%; right: 0; background: rgba(15, 15, 18, 0.95); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); border-radius: 1rem; padding: 0.5rem; min-width: 200px; display: none; flex-direction: column; gap: 0.2rem; z-index: 100;">
+          <a href="profile.html?user=${encodeURIComponent(user.username)}" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+            <i class="fas fa-user-circle"></i> Profile
+          </a>
+          <button onclick="openUploadModal()" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); background: transparent; border: none; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+            <i class="fas fa-upload"></i> Upload Subtitle
           </button>
-          <div id="navUserDropdown" style="position: absolute; top: 110%; right: 0; background: rgba(15, 15, 18, 0.95); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); border-radius: 1rem; padding: 0.5rem; min-width: 200px; display: none; flex-direction: column; gap: 0.2rem; z-index: 100;">
-            <a href="profile.html?user=${encodeURIComponent(user.username)}" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
-              <i class="fas fa-user-circle"></i> Profile
-            </a>
-            <button onclick="openUploadModal()" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); background: transparent; border: none; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
-              <i class="fas fa-upload"></i> Upload Subtitle
-            </button>
-            <div style="height: 1px; background: var(--border-color); margin: 0.3rem 0;"></div>
-            <button onclick="handleLogout()" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); background: transparent; border: none; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
-              <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-          </div>
+          <div style="height: 1px; background: var(--border-color); margin: 0.3rem 0;"></div>
+          <button onclick="handleLogout()" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); background: transparent; border: none; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
         </div>
-      `;
-      return;
-    } catch (e) {}
+      </div>
+    `;
+    return;
   }
 
   slot.innerHTML = `
@@ -579,8 +574,11 @@ document.addEventListener('click', () => {
 });
 
 function handleLogout() {
-  localStorage.removeItem('subhub_current_user');
-  localStorage.removeItem('subhub_session_token');
+  if (typeof Auth !== 'undefined') Auth.logout();
+  else {
+    localStorage.removeItem('subhub_current_user');
+    localStorage.removeItem('subhub_session_token');
+  }
   setupAuthNavbar();
   showToast('Logged out successfully.');
 }
@@ -605,6 +603,22 @@ function handleUploadSubtitle(event) {
   event.preventDefault();
   closeUploadModal();
   showToast('Subtitle uploaded successfully!');
+}
+
+async function handleAuthLogin(e) {
+  e.preventDefault();
+  const identifier = document.getElementById('authLoginIdentifier').value.trim();
+  const password = document.getElementById('authLoginPassword').value;
+  try {
+    if (typeof Auth !== 'undefined') {
+      await Auth.login({ identifier, password });
+      closeAuthModal();
+      setupAuthNavbar();
+      showToast('Logged in successfully!');
+    }
+  } catch (err) {
+    showToast(err.message || 'Login failed', true);
+  }
 }
 
 function showToast(message) {

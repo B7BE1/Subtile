@@ -250,7 +250,7 @@
 .subtitle-item.visible {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease, border-color var(--transition), background var(--transition);
+  transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .sub-info {

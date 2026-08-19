@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسجيل الدخول | SubHub</title>
-  <meta name="description" content="سجّل الدخول أو أنشئ حسابًا جديدًا في SubHub للوصول إلى مفضلاتك وترجماتك المرفوعة.">
+  <title>تسجيل الدخول | Subtile</title>
+  <meta name="description" content="سجّل الدخول أو أنشئ حسابًا جديدًا في Subtile للوصول إلى مفضلاتك وترجماتك المرفوعة.">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -51,6 +51,110 @@
       margin-bottom: 1.2rem;
     }
     .auth-page-back:hover { color: var(--text-primary); }
+    .auth-tabs {
+      display: flex;
+      position: relative;
+      background: #12151b;
+      border: 1px solid #1c1f26;
+      border-radius: 8px;
+      padding: 0.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      text-align: center;
+      font-family: inherit;
+    }
+    .auth-tab.active {
+      background: #2563eb;
+      color: #fff;
+    }
+    .auth-tab:hover:not(.active) {
+      color: #9aa2b1;
+    }
+    .auth-tab-indicator {
+      display: none;
+    }
+    .auth-panel {
+      display: none;
+    }
+    .auth-panel.active {
+      display: block;
+    }
+    .form-error {
+      color: #ef4444;
+      font-size: 0.78rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    .form-error.show {
+      display: block;
+    }
+    .form-control.is-invalid {
+      border-color: #ef4444;
+    }
+    .form-control.is-valid {
+      border-color: #10b981;
+    }
+    .auth-submit-btn {
+      width: 100%;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    .password-strength {
+      display: flex;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+    }
+    .password-strength-bar {
+      flex: 1;
+      height: 4px;
+      background: #1c1f26;
+      border-radius: 2px;
+      transition: background 0.2s ease;
+    }
+    .password-strength-bar.weak { background: #ef4444; }
+    .password-strength-bar.medium { background: #f59e0b; }
+    .password-strength-bar.strong { background: #10b981; }
+    .form-hint {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+    .auth-switch-link {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: #6b7280;
+    }
+    .auth-switch-link a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    .auth-switch-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -61,7 +165,7 @@
 
       <div class="auth-page-logo">
         <span class="logo-badge">SUB</span>
-        <span>Hub<span style="color: var(--accent-secondary);">.DL</span></span>
+        <span>tile</span>
       </div>
 
       <div class="auth-tabs">

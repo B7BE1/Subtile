@@ -95,7 +95,7 @@ export default async function handler(req, res) {
         quality: extractQuality(rawName),
         format: format, // ASS, SRT, VTT, etc.
         uploader: sub.author || 'Contributor',
-        downloads: Math.floor(Math.random() * 4000) + 500,
+        downloads: stableHash(rawName || String(index)) % 3500 + 500,
         fps: sub.fps || null,
         hearingImpaired: !!sub.hi,
         season: sub.season || null,
@@ -128,4 +128,14 @@ function extractQuality(name) {
   if (upper.includes('BLURAY')) return 'BluRay';
   if (upper.includes('WEB-DL') || upper.includes('WEBRIP')) return 'WEB-DL';
   return 'HD';
+}
+
+function stableHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash);
 }

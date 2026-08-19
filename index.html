@@ -303,6 +303,28 @@
         <svg class="w-5 h-5 mx-auto text-neutral-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
     </button>
 
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm" onclick="if(event.target===this)closeAuthModal()">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Sign In / Create Account</h3>
+                <button onclick="closeAuthModal()" class="text-neutral-500 hover:text-white transition-colors"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <form id="authLoginForm" onsubmit="handleAuthLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5">Username or Email</label>
+                    <input type="text" id="authLoginIdentifier" required class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600" placeholder="Enter username or email">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5">Password</label>
+                    <input type="password" id="authLoginPassword" required class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600" placeholder="Enter password">
+                </div>
+                <button type="submit" class="w-full bg-white text-neutral-950 hover:bg-neutral-200 font-black py-3 rounded-xl transition-all shadow-lg text-sm">Sign In</button>
+            </form>
+            <p class="text-center text-xs text-neutral-500 mt-4">Don't have an account? <a href="login.html" class="text-blue-400 hover:underline">Create one</a></p>
+        </div>
+    </div>
+
 <script src="js/security.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/data.js"></script>

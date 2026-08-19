@@ -176,6 +176,27 @@
          build and append toast elements here — this container was missing. -->
     <div id="toastContainer"></div>
 
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal-backdrop" onclick="if(event.target===this)closeAuthModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Sign In / Create Account</h3>
+                <button class="modal-close" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="authLoginForm" onsubmit="handleAuthLogin(event)" class="space-y-4">
+                <div class="form-group">
+                    <label class="form-label">Username or Email</label>
+                    <input type="text" id="authLoginIdentifier" class="form-control" required placeholder="Enter username or email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="authLoginPassword" class="form-control" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn-subdl-submit">Sign In</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/security.js"></script>
     <script src="js/data.js"></script>
     <script src="js/browse.js"></script>

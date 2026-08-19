@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await fetchRealSubtitles(currentMovie);
     }
   } catch (err) {
-    alert("Error loading page: " + (err.message || err));
+    showToast('Error loading page: ' + (err.message || err), true);
     const loader = document.getElementById('globalLoader');
     if (loader) loader.style.display = 'none';
   }
@@ -326,7 +326,7 @@ async function loadMetadata(id, type) {
 }
 
 async function fetchRealSubtitles(movie) {
-  const type = movie.type === 'tv' ? 'tv' : 'movie';
+  const type = movie.type === 'anime' ? 'anime' : (movie.type === 'tv' ? 'tv' : 'movie');
   const cacheKey = `${type}:${currentSeason}:${currentEpisode}`;
 
   if (subtitlesCache.has(cacheKey)) {
@@ -516,9 +516,9 @@ function renderSeasonsList(movie) {
     html += `
       <div class="season-card" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
         <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb" loading="lazy">
-        <div class="season-info">
-          <div class="season-title">${escapeHtml(sTitle)}</div>
-          <div class="season-sub">${escapeHtml(sSub)}</div>
+        <div class="season-card-content">
+          <div class="season-card-title">${escapeHtml(sTitle)}</div>
+          <div class="season-card-subtitle">${escapeHtml(sSub)}</div>
         </div>
         <i class="fas fa-chevron-right season-arrow"></i>
       </div>
@@ -706,13 +706,14 @@ function handleUploadSubtitle(event) {
   showToast('Subtitle uploaded successfully!');
 }
 
-function showToast(message) {
+function showToast(message, isError = false) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
 
   const toast = document.createElement('div');
   toast.className = 'toast';
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--brand-yellow);"></i> <span>${escapeHtml(message)}</span>`;
+  const iconColor = isError ? '#ef4444' : 'var(--brand-yellow)';
+  toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color: ${iconColor};"></i> <span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {

@@ -20,6 +20,8 @@ function renderMostDownloaded() {
     return bDl - aDl;
   });
 
+  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : escapeText;
+
   grid.innerHTML = sorted.map((movie, index) => {
     const mainLang = (movie.subtitles && movie.subtitles[0]) ? movie.subtitles[0].langName : 'Arabic';
     const totalDl = movie.subtitles 
@@ -27,15 +29,15 @@ function renderMostDownloaded() {
       : 14250;
 
     return `
-      <a href="movie.html?id=${movie.id}&type=${movie.type || 'movie'}" class="movie-card most-downloaded">
+      <a href="movie.html?id=${encodeURIComponent(movie.id)}&type=${encodeURIComponent(movie.type || 'movie')}" class="movie-card most-downloaded">
         <div class="movie-card-poster-wrap">
-          <img src="${movie.poster}" alt="${movie.title}" class="movie-card-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
+          <img src="${esc(movie.poster)}" alt="${esc(movie.title)}" class="movie-card-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
           <span class="rank-badge">#${index + 1}</span>
         </div>
         <div class="movie-card-info">
-          <div class="movie-card-title" title="${movie.title}">${movie.title} (${movie.year})</div>
+          <div class="movie-card-title" title="${esc(movie.title)}">${esc(movie.title)} (${esc(movie.year)})</div>
           <div class="movie-card-meta-row">
-            <span class="movie-card-lang-pill">${movie.type === 'anime' ? 'Anime' : mainLang}</span>
+            <span class="movie-card-lang-pill">${movie.type === 'anime' ? 'Anime' : esc(mainLang)}</span>
             <span class="movie-card-downloads"><i class="fas fa-arrow-down"></i> ${totalDl.toLocaleString()}</span>
           </div>
         </div>
@@ -192,33 +194,31 @@ function setupAuthNavbar() {
   const slot = document.getElementById('navAuthSlot');
   if (!slot) return;
 
-  const currentUser = localStorage.getItem('subhub_current_user');
-  if (currentUser) {
-    try {
-      const user = JSON.parse(currentUser);
-      slot.innerHTML = `
-        <div class="user-menu">
-          <button class="user-menu-trigger" onclick="toggleNavUserDropdown(event)">
-            <img src="assets/default-avatar.svg" class="avatar avatar-sm" alt="">
-            <span class="user-menu-name">${escapeText(user.username)}</span>
-            <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  if (user && user.username) {
+    const safeUsername = escapeText(user.username);
+    slot.innerHTML = `
+      <div class="user-menu">
+        <button class="user-menu-trigger" onclick="toggleNavUserDropdown(event)">
+          <img src="assets/default-avatar.svg" class="avatar avatar-sm" alt="">
+          <span class="user-menu-name">${safeUsername}</span>
+          <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+        </button>
+        <div id="navUserDropdown" class="user-menu-dropdown">
+          <a href="profile.html?user=${encodeURIComponent(user.username)}" class="user-menu-item">
+            <i class="fas fa-user-circle"></i> <span>Profile</span>
+          </a>
+          <button class="user-menu-item" onclick="openUploadModal()">
+            <i class="fas fa-upload"></i> <span>Upload Subtitle</span>
           </button>
-          <div id="navUserDropdown" class="user-menu-dropdown">
-            <a href="profile.html?user=${encodeURIComponent(user.username)}" class="user-menu-item">
-              <i class="fas fa-user-circle"></i> <span>Profile</span>
-            </a>
-            <button class="user-menu-item" onclick="openUploadModal()">
-              <i class="fas fa-upload"></i> <span>Upload Subtitle</span>
-            </button>
-            <div class="user-menu-divider"></div>
-            <button class="user-menu-item danger" onclick="handleLogout()">
-              <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-            </button>
-          </div>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-item danger" onclick="handleLogout()">
+            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+          </button>
         </div>
-      `;
-      return;
-    } catch(e){}
+      </div>
+    `;
+    return;
   }
 
   slot.innerHTML = `
@@ -240,8 +240,11 @@ document.addEventListener('click', () => {
 });
 
 function handleLogout() {
-  localStorage.removeItem('subhub_current_user');
-  localStorage.removeItem('subhub_session_token');
+  if (typeof Auth !== 'undefined') Auth.logout();
+  else {
+    localStorage.removeItem('subhub_current_user');
+    localStorage.removeItem('subhub_session_token');
+  }
   setupAuthNavbar();
   showToast('Logged out successfully.');
 }
@@ -249,14 +252,17 @@ function handleLogout() {
 function openAuthModal(tab = 'login') {
   const modal = document.getElementById('authModal');
   if (modal) {
-    modal.classList.add('show');
-    switchAuthTab(tab);
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
   }
 }
 
 function closeAuthModal() {
   const modal = document.getElementById('authModal');
-  if (modal) modal.classList.remove('show');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
 }
 
 function switchAuthTab(tab) {
@@ -310,6 +316,22 @@ function handleUploadSubtitle(event) {
   event.preventDefault();
   closeUploadModal();
   showToast('Subtitle uploaded successfully!');
+}
+
+async function handleAuthLogin(e) {
+  e.preventDefault();
+  const identifier = document.getElementById('authLoginIdentifier').value.trim();
+  const password = document.getElementById('authLoginPassword').value;
+  try {
+    if (typeof Auth !== 'undefined') {
+      await Auth.login({ identifier, password });
+      closeAuthModal();
+      setupAuthNavbar();
+      showToast('Logged in successfully!');
+    }
+  } catch (err) {
+    showToast(err.message || 'Login failed', true);
+  }
 }
 
 function showToast(message) {

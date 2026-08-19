@@ -45,12 +45,12 @@
     panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === tab));
 
     if (indicator) {
-      const order = ['login', 'register'];
+      const order = ['login', 'register', 'forgot'];
       const idx = order.indexOf(tab);
       if (idx !== -1) {
         const isRTL = document.documentElement.dir === 'rtl';
-        const offset = idx === 0 ? '0%' : (isRTL ? '-100%' : '100%');
-        indicator.style.transform = `translateX(${offset})`;
+        const offset = idx * (isRTL ? -100 : 100);
+        indicator.style.transform = `translateX(${offset}%)`;
       }
     }
     clearAuthErrors();

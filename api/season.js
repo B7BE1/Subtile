@@ -27,13 +27,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const tmdbUrl = `https://api.themoviedb.org/3/tv/${id}/season/${season}?api_key=${apiKey}&language=ar-SA`;
-    const response = await fetch(tmdbUrl);
+    const tmdbUrl = `https://api.themoviedb.org/3/tv/${id}/season/${season}?language=ar-SA`;
+    const response = await fetch(tmdbUrl, {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
 
     if (!response.ok) {
       // Fallback to English if Arabic is not available
-      const enUrl = `https://api.themoviedb.org/3/tv/${id}/season/${season}?api_key=${apiKey}&language=en-US`;
-      const enRes = await fetch(enUrl);
+      const enUrl = `https://api.themoviedb.org/3/tv/${id}/season/${season}?language=en-US`;
+      const enRes = await fetch(enUrl, {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
       if (!enRes.ok) {
         throw new Error(`TMDB Season error: ${enRes.statusText}`);
       }

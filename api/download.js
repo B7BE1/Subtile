@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Target host not allowed for security reasons' });
     }
 
-    // Fetch the file stream from provider
+    // Fetch the file stream from provider (max 10MB to prevent OOM)
     const response = await fetch(url, {
       headers: {
         'User-Agent': process.env.OPENSUBTITLES_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -40,8 +40,18 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: `Failed to fetch file from source (${response.statusText})` });
     }
 
+    const contentLength = response.headers.get('content-length');
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (contentLength && parseInt(contentLength) > MAX_SIZE) {
+      return res.status(413).json({ error: 'File too large (max 10MB)' });
+    }
+
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     const buffer = await response.arrayBuffer();
+
+    if (buffer.byteLength > MAX_SIZE) {
+      return res.status(413).json({ error: 'File too large (max 10MB)' });
+    }
 
     // Sanitize filename to prevent header injection
     const cleanFileName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
