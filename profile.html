@@ -401,7 +401,7 @@
 
     function toggleMobileNav() {
         const nav = document.getElementById('mobileNav');
-        if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+        if (nav) nav.classList.toggle('active');
     }
 
     function toggleLang() {
