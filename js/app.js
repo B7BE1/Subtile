@@ -73,11 +73,13 @@ function setupLiveSearch() {
     const thisRequest = ++searchRequestToken;
 
     searchDebounceTimer = setTimeout(async () => {
-      // First show local instant matches — no network round trip needed.
+      // First show local instant matches - no network round trip needed.
+      const tokens = query.toLowerCase().split(/\s+/).filter(t => t);
       const localMatches = MOVIES_DATABASE.filter(item => {
-        return item.title.toLowerCase().includes(query.toLowerCase()) ||
-               (item.arabicTitle && item.arabicTitle.includes(query)) ||
-               (item.imdbId && item.imdbId.toLowerCase().includes(query.toLowerCase()));
+        const eng = item.title.toLowerCase();
+        const ar = item.arabicTitle ? item.arabicTitle.toLowerCase() : '';
+        const id = item.imdbId ? item.imdbId.toLowerCase() : (item.id ? item.id.toLowerCase() : '');
+        return tokens.every(token => eng.includes(token) || ar.includes(token) || id.includes(token));
       });
 
       if (thisRequest === searchRequestToken) {
@@ -87,7 +89,14 @@ function setupLiveSearch() {
       // Fetch live matches from Cinemeta & Jikan (via /api/search).
       searchAbortController = new AbortController();
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+        let apiQuery = query;
+        const isArabic = /[\u0600-\u06FF]/.test(query);
+        if (isArabic && localMatches.length > 0) {
+          // Translate Arabic to English using local DB to get broader API results
+          apiQuery = localMatches[0].title.split(' ')[0];
+        }
+
+        const res = await fetch(`/api/search?q=${encodeURIComponent(apiQuery)}`, {
           signal: searchAbortController.signal,
         });
 

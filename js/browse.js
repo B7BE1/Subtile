@@ -170,17 +170,23 @@ function normalizeSearchText(s) {
     .trim();
 }
 
-function matchesQuery(text, normalizedQuery) {
+function matchesQuery(text, token) {
   if (!text) return false;
-  return normalizeSearchText(text).includes(normalizedQuery);
+  return normalizeSearchText(text).includes(token);
 }
 
 function localMovieMatches(query) {
   const nq = normalizeSearchText(query);
   if (!nq) return [];
-  return MOVIES_DATABASE.filter(m =>
-    matchesQuery(m.title, nq) || (m.arabicTitle && matchesQuery(m.arabicTitle, nq))
-  );
+  
+  const tokens = nq.split(/\s+/).filter(t => t);
+  return MOVIES_DATABASE.filter(m => {
+    return tokens.every(token => 
+      matchesQuery(m.title, token) || 
+      (m.arabicTitle && matchesQuery(m.arabicTitle, token)) ||
+      (m.imdbId && m.imdbId.toLowerCase().includes(token))
+    );
+  });
 }
 
 // Case-insensitive literal highlight. Falls back to plain escaped text when
@@ -508,7 +514,18 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
       : currentTypeFilter === 'anime' ? 'anime'
       : 'all';
 
-    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`, {
+    let apiQuery = q;
+    const isArabic = /[\u0600-\u06FF]/.test(q);
+    if (isArabic) {
+      // Find the best local match to translate the Arabic query to English for the external API
+      const localForMap = localMovieMatches(q)[0];
+      if (localForMap) {
+        // Use the first word of the English title (e.g. "Batman Begins" -> "Batman") to get broader API results
+        apiQuery = localForMap.title.split(' ')[0];
+      }
+    }
+
+    const res = await fetch(`/api/search?q=${encodeURIComponent(apiQuery)}&type=${apiType}&limit=45`, {
       signal: catalogSearchAbortController.signal,
     });
 
