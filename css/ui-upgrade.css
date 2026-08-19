@@ -1,0 +1,224 @@
+/* Subtile UI/UX Upgrade - Shared Styles */
+
+/* ===== Smooth Scrolling ===== */
+html { scroll-behavior: smooth; }
+
+/* ===== Selection ===== */
+::selection { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* ===== Focus Visible ===== */
+:focus-visible { outline: 2px solid rgba(255,255,255,0.4); outline-offset: 2px; border-radius: 4px; }
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* ===== Skeleton Loader ===== */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* ===== Fade In Up ===== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ===== Scale In ===== */
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ===== Pulse Glow ===== */
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+.pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* ===== Toast Upgrade ===== */
+.toast-upgraded {
+    background: rgba(15, 15, 18, 0.92);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 0.8rem 1.2rem;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    max-width: 380px;
+}
+.toast-upgraded.toast-exit {
+    animation: toastOut 0.3s ease forwards;
+}
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(16px) scale(0.96); }
+}
+
+/* ===== Better Buttons ===== */
+.btn-upgraded {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-upgraded::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.btn-upgraded:hover::after { opacity: 1; }
+.btn-upgraded:active { transform: scale(0.97); }
+
+/* ===== Card Hover Glow ===== */
+.card-glow {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-glow:hover {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ===== Gradient Text ===== */
+.gradient-text {
+    background: linear-gradient(135deg, #ffffff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== Glass Card ===== */
+.glass-card {
+    background: rgba(18, 18, 24, 0.6);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+}
+
+/* ===== Input Focus Glow ===== */
+.input-glow:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Mobile Nav ===== */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+@media (max-width: 768px) {
+    .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+    .desktop-nav { display: none !important; }
+    .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(5, 5, 7, 0.98);
+        backdrop-filter: blur(20px);
+        z-index: 200;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        animation: fadeIn 0.3s ease;
+    }
+    .mobile-nav a, .mobile-nav button {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fff;
+        text-decoration: none;
+        padding: 0.8rem 2rem;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+    .mobile-nav a:hover, .mobile-nav button:hover {
+        background: rgba(255,255,255,0.08);
+    }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.mobile-nav { display: none; }
+
+/* ===== Better Footer ===== */
+.footer-upgraded {
+    background: rgba(5, 5, 7, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 3rem 0 1.5rem;
+}
+.footer-upgraded a {
+    color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+.footer-upgraded a:hover { color: rgba(255, 255, 255, 0.8); }
+
+/* ===== Stagger Animation ===== */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* ===== Rating Stars ===== */
+.star-interactive i {
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: rgba(255,255,255,0.15);
+}
+.star-interactive i:hover { transform: scale(1.2); }
+.star-interactive i.active { color: #fbbf24; }
+
+/* ===== Badge Shine ===== */
+@keyframes badgeShine {
+    0% { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+}
+.badge-shine {
+    background-size: 200% 100%;
+    animation: badgeShine 3s linear infinite;
+}
+
+/* ===== Page Transition ===== */
+.page-enter {
+    animation: pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes pageEnter {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}

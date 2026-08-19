@@ -651,31 +651,18 @@ function switchBrowseModalTab(tab) {
   if (registerForm) registerForm.style.display = !isLogin ? '' : 'none';
 }
 
-function showToast(message) {
+function showToast(message, isError = false) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toast = document.createElement('div');
-  toast.style.background = 'rgba(15, 15, 18, 0.55)';
-  toast.style.backdropFilter = 'blur(30px) saturate(150%)';
-  toast.style.border = '1px solid rgba(255, 255, 255, 0.25)';
-  toast.style.padding = '1rem 1.5rem';
-  toast.style.borderRadius = '0.75rem';
-  toast.style.color = '#ffffff';
-  toast.style.fontFamily = "'Inter', sans-serif";
-  toast.style.display = 'flex';
-  toast.style.alignItems = 'center';
-  toast.style.gap = '0.6rem';
-  toast.style.transition = 'opacity 0.3s ease';
-  toast.style.opacity = '1';
-  toast.style.marginBottom = '0.5rem';
-
-  // message is currently always a static string we control, but escape it
-  // anyway so this stays safe if it's ever passed dynamic content later.
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: #ffffff;"></i> <span>${esc(message)}</span>`;
+  toast.className = 'toast-upgraded';
+  const icon = isError ? 'fa-exclamation-circle' : 'fa-check-circle';
+  const color = isError ? '#ef4444' : '#34d399';
+  toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${esc(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.style.opacity = '0';
+    toast.classList.add('toast-exit');
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, 3500);
 }

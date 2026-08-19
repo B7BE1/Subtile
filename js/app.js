@@ -364,19 +364,21 @@ function switchModalAuthTab(tab) {
   if (registerForm) registerForm.classList.toggle('hidden', isLogin);
 }
 
-function showToast(message) {
+function showToast(message, isError = false) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--brand-yellow);"></i> <span>${escapeText(message)}</span>`;
+  toast.className = 'toast-upgraded';
+  const icon = isError ? 'fa-exclamation-circle' : 'fa-check-circle';
+  const color = isError ? '#ef4444' : '#34d399';
+  toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${escapeText(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.style.opacity = '0';
+    toast.classList.add('toast-exit');
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, 3500);
 }
 
 function escapeText(str) {

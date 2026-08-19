@@ -8,6 +8,7 @@
     <title>Subtile — Discover & Browse Archive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/ui-upgrade.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050507; color: #fff; scroll-behavior: smooth; }
@@ -87,28 +88,40 @@
             
             <div class="flex-1 max-w-xl mx-4 relative">
                 <div class="relative">
-                    <input type="text" id="catalogSearchInput" oninput="onCatalogSearch()" placeholder="Search movies, TV shows, anime..." autocomplete="off" data-i18n="searchPlaceholder" class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-500">
+                    <input type="text" id="catalogSearchInput" oninput="onCatalogSearch()" placeholder="Search movies, TV shows, anime..." autocomplete="off" data-i18n="searchPlaceholder" class="w-full bg-white/[0.06] border border-white/[0.08] rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-white/25 focus:bg-white/[0.09] transition-all text-neutral-200 placeholder:text-neutral-500">
                     <svg class="absolute end-3.5 top-3 w-4 h-4 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <div id="browseSearchDropdown" class="search-dropdown"></div>
             </div>
 
-            <div class="flex items-center gap-4 flex-shrink-0">
+            <div class="flex items-center gap-3 flex-shrink-0">
                 <div id="themeToggleNav"></div>
-                <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.75rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
-                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-neutral-400">
-                    <a href="index.html" class="hover:text-white transition-colors" data-i18n="trending">Trending</a>
-                    <a href="browse.html" class="text-white border-b-2 border-white pb-0.5" data-i18n="browse">Browse</a>
+                <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#9ca3af; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.7rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
+                <nav class="desktop-nav hidden md:flex items-center gap-5 text-sm font-semibold text-neutral-400">
+                    <a href="index.html" class="hover:text-white transition-colors py-1" data-i18n="trending">Trending</a>
+                    <a href="browse.html" class="text-white relative py-1" data-i18n="browse">Browse<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"></span></a>
                 </nav>
                 <div id="navAuthSlot">
-                    <a href="login.html" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                    <a href="login.html" class="text-xs font-bold bg-white hover:bg-neutral-200 text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md hover:shadow-white/10">
                         <i class="fas fa-user-circle text-sm"></i>
                         <span data-i18n="login">Login</span>
                     </a>
                 </div>
+                <button class="mobile-menu-btn md:hidden" onclick="toggleMobileNav()" aria-label="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- Mobile Nav -->
+    <div id="mobileNav" class="mobile-nav">
+        <button onclick="toggleMobileNav()" style="position:absolute; top:1.2rem; right:1.2rem; background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer;"><i class="fas fa-times"></i></button>
+        <a href="index.html" style="font-size:1.5rem;"><i class="fas fa-fire"></i> Trending</a>
+        <a href="browse.html" style="font-size:1.5rem;"><i class="fas fa-compass"></i> Browse</a>
+        <a href="profile.html" style="font-size:1.5rem;"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="login.html" style="font-size:1.5rem; color:#fff; background:rgba(255,255,255,0.1); padding:0.8rem 2.5rem;"><i class="fas fa-sign-in-alt"></i> Login</a>
+    </div>
 
     <div class="pt-24"></div>
 
@@ -126,13 +139,13 @@
             </div>
             
             <div class="flex gap-2 flex-wrap items-center" id="browseCategoryFilters">
-                <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('all', this)" data-i18n="browseMovies">All Titles</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('movie', this)" data-i18n="browseMovies">Movies</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('tv', this)" data-i18n="browseSeries">TV Shows</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('anime', this)" data-i18n="browseAnime">Anime</button>
+                <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('all', this)" data-i18n="browseMovies">All Titles</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('movie', this)" data-i18n="browseMovies">Movies</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('tv', this)" data-i18n="browseSeries">TV Shows</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('anime', this)" data-i18n="browseAnime">Anime</button>
                 <!-- CONNECTED: js/browse.js already implements onCatalogSort()/currentSort
                      fully (rating/year/title) but browse.html had no control to trigger it. -->
-                <select id="catalogSortSelect" onchange="onCatalogSort()" class="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm font-bold focus:outline-none focus:border-neutral-500 transition-colors">
+                <select id="catalogSortSelect" onchange="onCatalogSort()" class="px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-300 text-sm font-bold focus:outline-none focus:border-white/25 transition-all cursor-pointer">
                     <option value="rating" selected>Sort: Rating</option>
                     <option value="year">Sort: Year</option>
                     <option value="title">Sort: Title</option>
@@ -156,13 +169,29 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-neutral-900 mt-20 bg-neutral-950/80">
-        <div class="container mx-auto px-4 sm:px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-neutral-500 text-sm">© Subtile — Subtitles Archive. Built for Cinephiles.</p>
-            <div class="flex gap-8 text-sm text-neutral-500 font-medium">
-                <a href="#" class="hover:text-neutral-300 transition-colors">Contact</a>
-                <a href="#" class="hover:text-neutral-300 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-neutral-300 transition-colors">DMCA</a>
+    <footer class="footer-upgraded relative z-30">
+        <div class="container mx-auto px-4 sm:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </div>
+                    <span class="text-lg font-black tracking-tight text-white">SUBTILE</span>
+                </div>
+                <div class="flex gap-8 text-sm">
+                    <a href="#">Contact</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">DMCA</a>
+                    <a href="#">About</a>
+                </div>
+            </div>
+            <div class="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-white/25 text-xs">© Subtile — Subtitles Archive. Built for Cinephiles.</p>
+                <div class="flex items-center gap-4">
+                    <a href="#" class="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.12] transition-all"><i class="fab fa-twitter text-xs"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.12] transition-all"><i class="fab fa-discord text-xs"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.12] transition-all"><i class="fab fa-github text-xs"></i></a>
+                </div>
             </div>
         </div>
     </footer>
@@ -261,7 +290,7 @@
     <script src="js/data.js"></script>
     <script src="js/browse.js"></script>
     <script>
-    if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+    if (typeof ThemeToggle !== 'undefined') { ThemeToggle.renderToggle('themeToggleNav'); }
     if (typeof I18n !== 'undefined') {
         I18n.translatePage();
         const langBtn = document.getElementById('langToggleBtn');
@@ -275,6 +304,10 @@
         const langBtn = document.getElementById('langToggleBtn');
         if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
         if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+    }
+    function toggleMobileNav() {
+        const nav = document.getElementById('mobileNav');
+        if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
     }
     </script>
 </body>
