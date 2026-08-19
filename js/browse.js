@@ -35,6 +35,23 @@
  * - Clearing the search box aborts any in-flight /api/search call before
  *   falling back to trending, closing a race where a slow stale search
  *   response could clobber trending results on screen.
+ *
+ * Search upgrade + project wiring (this pass):
+ * - Arabic-aware local matching: folds alef forms (أ/إ/آ→ا), ta marbuta
+ *   (ة→ه), alif maqsura (ى→ي) and strips diacritics before comparing, so
+ *   "احمد" matches "أحمد" against MOVIES_DATABASE's arabicTitle field.
+ * - Dropdown highlights the matched substring, shows a brief loading row
+ *   while /api/search is in flight, and offers recent searches (kept in
+ *   localStorage) when the input is focused empty.
+ * - Queries under 2 characters stay local-only — no /api/search call.
+ * - openAuthModal() now falls back to login.html when #authModal isn't on
+ *   the page (it never was — no page in this project defines that markup),
+ *   instead of silently doing nothing on click.
+ * - CSS/markup fixes made in browse.html to actually connect this file:
+ *   .filter-btn.active → .filter-tab-btn.active (class name never matched,
+ *   so the active category tab had no highlight), plus added the missing
+ *   #navAuthSlot, #toastContainer and #catalogSortSelect elements that
+ *   setupAuthNavbar()/showToast()/onCatalogSort() already expected.
  */
 
 let currentTypeFilter = 'all';
@@ -42,6 +59,7 @@ let currentSearchQuery = '';
 let currentSort = 'rating';
 let liveSearchResults = [];
 let browseDebounceTimer = null;
+const MIN_LIVE_SEARCH_LENGTH = 2;
 
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -70,9 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('catalogSearchInput');
   const dropdown = document.getElementById('browseSearchDropdown');
   if (searchInput && dropdown) {
+    searchInput.addEventListener('focus', () => {
+      if (!searchInput.value.trim()) renderRecentSearchesDropdown(dropdown);
+    });
+
     searchInput.addEventListener('keydown', (e) => {
       const items = Array.from(dropdown.querySelectorAll('.search-item'));
-      const activeIdx = items.findIndex(i => i.classList.contains('is-active'));
+      const activeIdx = items.findIndex(i => i.dataset.active === '1');
 
       if (e.key === 'Escape') {
         dropdown.classList.remove('active');
@@ -86,8 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextIdx = activeIdx === -1
           ? (dir === 1 ? 0 : items.length - 1)
           : (activeIdx + dir + items.length) % items.length;
-        items.forEach(i => i.classList.remove('is-active'));
-        items[nextIdx].classList.add('is-active');
+        // Inline style, not a CSS class — .is-active has no rule in
+        // browse.html's stylesheet, so a class toggle alone rendered nothing.
+        items.forEach(i => { i.style.background = ''; delete i.dataset.active; });
+        items[nextIdx].style.background = 'rgba(255,255,255,0.08)';
+        items[nextIdx].dataset.active = '1';
         items[nextIdx].scrollIntoView({ block: 'nearest' });
       } else if (e.key === 'Enter' && activeIdx !== -1) {
         e.preventDefault();
@@ -129,6 +154,49 @@ const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : fallbackEs
 const safeImg = (typeof Security !== 'undefined')
   ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
   : (url) => fallbackSanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img');
+
+// ---- Search text normalization -----------------------------------------
+// Folds Arabic alef/ta-marbuta/alif-maqsura variants, strips diacritics and
+// tatweel, and lowercases — so "أحمد"/"احمد", "قصة"/"قصه" etc. match each
+// other against MOVIES_DATABASE's arabicTitle field instead of requiring
+// the exact same characters.
+function normalizeSearchText(s) {
+  return String(s ?? '')
+    .toLowerCase()
+    .replace(/[\u064B-\u0652\u0670\u0640]/g, '') // diacritics + tatweel
+    .replace(/[إأآا]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .trim();
+}
+
+function matchesQuery(text, normalizedQuery) {
+  if (!text) return false;
+  return normalizeSearchText(text).includes(normalizedQuery);
+}
+
+function localMovieMatches(query) {
+  const nq = normalizeSearchText(query);
+  if (!nq) return [];
+  return MOVIES_DATABASE.filter(m =>
+    matchesQuery(m.title, nq) || (m.arabicTitle && matchesQuery(m.arabicTitle, nq))
+  );
+}
+
+// Case-insensitive literal highlight. Falls back to plain escaped text when
+// the raw query isn't a literal substring (e.g. it only matched via Arabic
+// normalization) — a missed highlight is a fine tradeoff for not maintaining
+// a normalized-to-raw index map.
+function highlightMatch(text, query) {
+  const t = String(text ?? '');
+  if (!query) return esc(t);
+  const idx = t.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return esc(t);
+  const before = t.slice(0, idx);
+  const match = t.slice(idx, idx + query.length);
+  const after = t.slice(idx + query.length);
+  return `${esc(before)}<mark style="background: rgba(255,255,255,0.18); color: inherit; border-radius: 3px; padding: 0 2px;">${esc(match)}</mark>${esc(after)}`;
+}
 
 // Normalize any rating (string or number, 0-10 scale) to a single decimal,
 // or '' if there's nothing to show.
@@ -394,25 +462,29 @@ function onCatalogSearch() {
   currentPage = 1;
   hasMore = true;
 
+  const dropdown = document.getElementById('browseSearchDropdown');
+
   if (!currentSearchQuery) {
-    const dropdown = document.getElementById('browseSearchDropdown');
-    if (dropdown) dropdown.classList.remove('active');
+    if (dropdown) renderRecentSearchesDropdown(dropdown);
     liveSearchResults = [];
     triggerLiveTrending(currentTypeFilter, currentPage);
     return;
   }
 
-  const dropdown = document.getElementById('browseSearchDropdown');
-  if (dropdown) {
-    const lowerQ = currentSearchQuery.toLowerCase();
-    const localMatches = MOVIES_DATABASE.filter(m =>
-      m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
-    );
-    renderBrowseDropdown(localMatches, dropdown);
+  const localMatches = localMovieMatches(currentSearchQuery);
+  if (dropdown) renderBrowseDropdown(localMatches, dropdown, currentSearchQuery);
+
+  // Short queries stay local-only — skip hitting /api/search for noise.
+  if (currentSearchQuery.length < MIN_LIVE_SEARCH_LENGTH) {
+    liveSearchResults = localMatches;
+    renderCatalog();
+    return;
   }
 
   const thisRequest = ++catalogSearchRequestToken;
   browseDebounceTimer = setTimeout(() => {
+    addRecentSearch(currentSearchQuery);
+    if (dropdown) appendDropdownLoading(dropdown);
     triggerLiveCatalogSearch(currentSearchQuery, thisRequest);
   }, 300);
 }
@@ -454,10 +526,7 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
       year: r.year || 'N/A',
     }));
 
-    const lowerQ = q.toLowerCase();
-    const localMatches = MOVIES_DATABASE.filter(m =>
-      m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
-    );
+    const localMatches = localMovieMatches(q);
 
     const existingIds = new Set(apiResults.map(r => r.id));
     localMatches.forEach(m => {
@@ -476,12 +545,22 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
     renderCatalog();
     const dropdown = document.getElementById('browseSearchDropdown');
     if (dropdown && currentSearchQuery) {
-      renderBrowseDropdown(liveSearchResults, dropdown);
+      renderBrowseDropdown(liveSearchResults, dropdown, currentSearchQuery);
     }
   }
 }
 
-function renderBrowseDropdown(items, dropdown) {
+function appendDropdownLoading(dropdown) {
+  if (dropdown.querySelector('[data-loading-row]')) return;
+  const row = document.createElement('div');
+  row.setAttribute('data-loading-row', '1');
+  row.style.cssText = 'padding: 0.7rem 0.9rem; text-align: center; color: #6b7280; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-family: "Inter", sans-serif;';
+  row.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating results...';
+  dropdown.appendChild(row);
+  dropdown.classList.add('active');
+}
+
+function renderBrowseDropdown(items, dropdown, query = '') {
   if (items.length === 0) {
     dropdown.innerHTML = `
       <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
@@ -505,13 +584,81 @@ function renderBrowseDropdown(items, dropdown) {
       <a href="${targetUrl}" class="search-item">
         <img src="${safeImg(movie.poster || movie.backdrop)}" alt="">
         <div>
-          <div style="font-weight: 600; font-size: 0.9rem;">${esc(movie.title)}</div>
+          <div style="font-weight: 600; font-size: 0.9rem;">${highlightMatch(movie.title, query)}</div>
           <div style="font-size: 0.75rem; color: #8a8a92;">${esc(movie.year || 'N/A')} • ${typeLabel}</div>
         </div>
       </a>
     `;
   }).join('');
   dropdown.classList.add('active');
+}
+
+// ---- Recent searches -----------------------------------------------------
+const RECENT_SEARCHES_KEY = 'subhub_recent_searches';
+
+function getRecentSearches() {
+  try {
+    const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(s => typeof s === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function addRecentSearch(q) {
+  const query = q.trim();
+  if (!query) return;
+  try {
+    let arr = getRecentSearches().filter(s => s.toLowerCase() !== query.toLowerCase());
+    arr.unshift(query);
+    arr = arr.slice(0, 6);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(arr));
+  } catch {}
+}
+
+function clearRecentSearches() {
+  try { localStorage.removeItem(RECENT_SEARCHES_KEY); } catch {}
+}
+
+function renderRecentSearchesDropdown(dropdown) {
+  const recents = getRecentSearches();
+  if (recents.length === 0) {
+    dropdown.classList.remove('active');
+    return;
+  }
+
+  const header = `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.9rem; font-size: 0.75rem; color: #6b7280; font-family: 'Inter', sans-serif;">
+      <span>Recent searches</span>
+      <button type="button" onclick="clearRecentSearchesUI(event)" style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 0.75rem; text-decoration: underline; font-family: 'Inter', sans-serif;">Clear</button>
+    </div>
+  `;
+  const rows = recents.map(q => `
+    <button type="button" class="search-item" data-query="${esc(q)}" onclick="applyRecentSearch(this)" style="display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: inherit; background: none; border: none; cursor: pointer; padding: 0.6rem 0.9rem; color: inherit; font-family: 'Inter', sans-serif;">
+      <i class="fas fa-history" style="color: #6b7280; font-size: 0.8rem;"></i>
+      <span style="font-size: 0.85rem;">${esc(q)}</span>
+    </button>
+  `).join('');
+
+  dropdown.innerHTML = header + rows;
+  dropdown.classList.add('active');
+}
+
+function applyRecentSearch(el) {
+  const q = el.getAttribute('data-query');
+  const input = document.getElementById('catalogSearchInput');
+  if (input) {
+    input.value = q;
+    onCatalogSearch();
+  }
+}
+
+function clearRecentSearchesUI(e) {
+  e.stopPropagation();
+  clearRecentSearches();
+  const dropdown = document.getElementById('browseSearchDropdown');
+  if (dropdown) dropdown.classList.remove('active');
 }
 
 function onCatalogSort() {
@@ -586,8 +733,16 @@ function handleLogout() {
 }
 
 function openAuthModal(tab = 'login') {
+  // No page in this project actually defines #authModal markup — it's
+  // called from the logged-out nav button, so silently doing nothing on
+  // click was a dead end. login.html is the real, working auth entry point
+  // every other flow on the site already uses.
   const modal = document.getElementById('authModal');
-  if (modal) modal.classList.add('show');
+  if (modal) {
+    modal.classList.add('show');
+  } else {
+    window.location.href = 'login.html';
+  }
 }
 function closeAuthModal() {
   const modal = document.getElementById('authModal');
