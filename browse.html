@@ -59,12 +59,18 @@
             flex-shrink: 0;
         }
 
-        .filter-btn.active {
+        /* BUG FIX: this rule used to target ".filter-btn.active", but the
+           buttons below use class "filter-tab-btn" — the two names never
+           matched, so the active category tab never got its highlighted
+           style. Selector corrected to actually match the markup. */
+        .filter-tab-btn.active {
             background: #ffffff;
             color: #050507;
             border-color: #ffffff;
             box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
         }
+
+        #toastContainer { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.8rem; }
     </style>
 </head>
 <body class="overflow-x-hidden min-h-screen">
@@ -92,10 +98,19 @@
                     <a href="index.html" class="hover:text-white transition-colors">Trending</a>
                     <a href="browse.html" class="text-white border-b-2 border-white pb-0.5">Browse</a>
                 </nav>
-                <a href="login.html" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
-                    <i class="fas fa-user-circle text-sm"></i>
-                    <span>Login</span>
-                </a>
+                <!-- CONNECTED: js/browse.js's setupAuthNavbar() already builds the
+                     logged-in user dropdown (avatar, Profile, Upload, Logout) and
+                     falls back to a login button — it just had no #navAuthSlot to
+                     render into on this page, so it always looked logged-out even
+                     when subhub_current_user was set. This div gives it a target;
+                     the static markup below is the no-JS fallback and is replaced
+                     on load. -->
+                <div id="navAuthSlot">
+                    <a href="login.html" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                        <i class="fas fa-user-circle text-sm"></i>
+                        <span>Login</span>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -115,11 +130,18 @@
                 </div>
             </div>
             
-            <div class="flex gap-2 flex-wrap" id="browseCategoryFilters">
+            <div class="flex gap-2 flex-wrap items-center" id="browseCategoryFilters">
                 <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('all', this)">All Titles</button>
                 <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('movie', this)">Movies</button>
                 <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('tv', this)">TV Shows</button>
                 <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('anime', this)">Anime</button>
+                <!-- CONNECTED: js/browse.js already implements onCatalogSort()/currentSort
+                     fully (rating/year/title) but browse.html had no control to trigger it. -->
+                <select id="catalogSortSelect" onchange="onCatalogSort()" class="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm font-bold focus:outline-none focus:border-neutral-500 transition-colors">
+                    <option value="rating" selected>Sort: Rating</option>
+                    <option value="year">Sort: Year</option>
+                    <option value="title">Sort: Title</option>
+                </select>
             </div>
         </div>
 
@@ -149,6 +171,10 @@
             </div>
         </div>
     </footer>
+
+    <!-- CONNECTED: showToast()/handleLogout() etc. in js/browse.js already
+         build and append toast elements here — this container was missing. -->
+    <div id="toastContainer"></div>
 
     <script src="js/security.js"></script>
     <script src="js/data.js"></script>
