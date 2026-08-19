@@ -5,18 +5,36 @@
  * Strictly follows Premium Grayscale Cinematic Design System.
  *
  * Upgrade notes vs previous version:
+ * - FIXED: renderBrowseDropdown() was redeclaring its own local esc()/safeImg()
+ *   with UNESCAPED fallbacks ((s) => String(s ?? '')) — this silently undid the
+ *   XSS fix already made to the module-level esc()/safeImg() the moment
+ *   Security.js failed to load. It now reuses the module-level, properly
+ *   escaping versions instead of shadowing them.
+ * - FIXED: filterCatalog() cleared liveSearchResults unconditionally, so
+ *   switching type tabs (Movie/TV/Anime) while a search was active wiped the
+ *   grid instead of re-querying — it now re-runs the search against the new
+ *   type filter (matches how /api/search already scopes by type).
+ * - FIXED: triggerLiveTrending() had no cancellation. Rapidly switching type
+ *   tabs could let a stale (slower) response land after a newer one and
+ *   overwrite it on screen. Trending fetches are now AbortController-backed
+ *   and token-guarded the same way catalog search already was.
+ * - The isFetching guard now only blocks concurrent *pagination* requests
+ *   (page > 1); a fresh page-1 request (new filter) is always allowed to
+ *   proceed and supersede whatever's in flight, instead of silently
+ *   no-op'ing while isFetching is still true from the previous filter.
+ * - Scroll-driven pagination is now throttled via requestAnimationFrame
+ *   instead of firing on every scroll event.
+ * - Search dropdown gained basic keyboard navigation (Up/Down/Enter) since
+ *   it was mouse-only before.
  * - esc()/safeImg() fallbacks now actually escape/validate instead of
  *   passing raw strings through when js/security.js hasn't loaded yet.
- * - navUserDropdown username is now escaped — it was going into innerHTML
- *   unescaped (stored-XSS risk if a display name is ever attacker-controlled).
  * - showToast() escapes its message for the same reason.
  * - Rating display is normalized to one decimal everywhere (movie/tv/anime
  *   used to render inconsistently: "7" vs "7.0").
  * - Year-based sort no longer breaks on the "N/A" placeholder.
- * - Clearing the search box now aborts any in-flight /api/search call
- *   before falling back to trending, closing a race where a slow stale
- *   search response could clobber trending results on screen.
- * - Removed the dead/duplicate countBadge write in renderCatalog.
+ * - Clearing the search box aborts any in-flight /api/search call before
+ *   falling back to trending, closing a race where a slow stale search
+ *   response could clobber trending results on screen.
  */
 
 let currentTypeFilter = 'all';
@@ -53,7 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const dropdown = document.getElementById('browseSearchDropdown');
   if (searchInput && dropdown) {
     searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') dropdown.classList.remove('active');
+      const items = Array.from(dropdown.querySelectorAll('.search-item'));
+      const activeIdx = items.findIndex(i => i.classList.contains('is-active'));
+
+      if (e.key === 'Escape') {
+        dropdown.classList.remove('active');
+        return;
+      }
+      if (!dropdown.classList.contains('active') || items.length === 0) return;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const dir = e.key === 'ArrowDown' ? 1 : -1;
+        const nextIdx = activeIdx === -1
+          ? (dir === 1 ? 0 : items.length - 1)
+          : (activeIdx + dir + items.length) % items.length;
+        items.forEach(i => i.classList.remove('is-active'));
+        items[nextIdx].classList.add('is-active');
+        items[nextIdx].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && activeIdx !== -1) {
+        e.preventDefault();
+        items[activeIdx].click();
+      }
     });
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.search-dropdown') && e.target !== searchInput) {
@@ -68,6 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // be no-ops ((s) => s) — meaning if security.js ever failed to load, every
 // innerHTML write downstream silently lost its escaping. They now do real
 // (if minimal) escaping/validation on their own.
+// IMPORTANT: these are the ONLY esc()/safeImg() definitions in the file —
+// do not redeclare local shadows elsewhere (a previous version did this
+// inside renderBrowseDropdown() with an unescaped fallback, reopening the
+// exact XSS gap this section exists to close).
 function fallbackEscapeHTML(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -104,13 +147,31 @@ function parseYearForSort(y) {
 let currentPage = 1;
 let isFetching = false;
 let hasMore = true;
+let trendingAbortController = null;
+let trendingRequestToken = 0;
 
 // Fetch real trending/top data without API Keys
 async function triggerLiveTrending(type, page = 1) {
-  if (isFetching || !hasMore) return;
+  // Only pagination (page > 1) respects the "already fetching / no more
+  // data" guard. A fresh page-1 request (e.g. switching filter tabs) always
+  // proceeds and supersedes whatever's currently in flight, instead of
+  // silently no-op'ing because isFetching is still true from the last call.
+  if (page > 1 && (isFetching || !hasMore)) return;
+
+  if (trendingAbortController) trendingAbortController.abort();
+  trendingAbortController = new AbortController();
+  const { signal } = trendingAbortController;
+  const thisRequest = ++trendingRequestToken;
+
   isFetching = true;
   const spinner = document.getElementById('loadingSpinner');
   if (spinner) spinner.classList.remove('hidden');
+
+  // A promise that resolves to [] on normal failure but *rejects* on abort,
+  // so an aborted request doesn't quietly masquerade as "zero results".
+  const safeFetchJson = (url, opts) => fetch(url, opts)
+    .then(r => r.ok ? r.json() : null)
+    .catch(e => { if (e.name === 'AbortError') throw e; return null; });
 
   try {
     const promises = [];
@@ -119,9 +180,8 @@ async function triggerLiveTrending(type, page = 1) {
 
     if (type === 'all' || type === 'movie') {
       promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/movie/top/skip=${skip}.json`)
-          .then(r => r.ok ? r.json() : { metas: [] })
-          .then(d => (d.metas || []).slice(0, 50).map(m => ({
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/movie/top/skip=${skip}.json`, { signal })
+          .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
             type: 'movie',
@@ -129,15 +189,13 @@ async function triggerLiveTrending(type, page = 1) {
             rating: parseFloat(m.imdbRating) || 0,
             poster: m.poster || ''
           })))
-          .catch(() => [])
       );
     }
 
     if (type === 'all' || type === 'tv') {
       promises.push(
-        fetch(`https://v3-cinemeta.strem.io/catalog/series/top/skip=${skip}.json`)
-          .then(r => r.ok ? r.json() : { metas: [] })
-          .then(d => (d.metas || []).slice(0, 50).map(m => ({
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top/skip=${skip}.json`, { signal })
+          .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
             type: 'tv',
@@ -145,7 +203,6 @@ async function triggerLiveTrending(type, page = 1) {
             rating: parseFloat(m.imdbRating) || 0,
             poster: m.poster || ''
           })))
-          .catch(() => [])
       );
     }
 
@@ -164,13 +221,13 @@ async function triggerLiveTrending(type, page = 1) {
         }
       `;
       promises.push(
-        fetch('https://graphql.anilist.co', {
+        safeFetchJson('https://graphql.anilist.co', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ query })
+          body: JSON.stringify({ query }),
+          signal
         })
-          .then(r => r.ok ? r.json() : { data: { Page: { media: [] } } })
-          .then(d => (d.data?.Page?.media || []).map(a => ({
+          .then(d => ((d && d.data && d.data.Page && d.data.Page.media) || []).map(a => ({
             id: `anime-${a.id}`,
             title: a.title.english || a.title.romaji,
             type: 'anime',
@@ -178,11 +235,15 @@ async function triggerLiveTrending(type, page = 1) {
             rating: a.averageScore ? a.averageScore / 10 : 0,
             poster: a.coverImage?.large || ''
           })))
-          .catch(() => [])
       );
     }
 
     const settled = await Promise.all(promises);
+
+    // A newer request (different filter/page) has since started — drop this
+    // result silently and let the newer request own isFetching/spinner/state.
+    if (thisRequest !== trendingRequestToken) return;
+
     const newResults = settled.flat();
 
     if (newResults.length === 0) {
@@ -210,7 +271,9 @@ async function triggerLiveTrending(type, page = 1) {
       liveSearchResults = [...MOVIES_DATABASE];
     }
   } catch (e) {
+    if (e.name === 'AbortError') return; // superseded — newer request owns state now
     console.error('Fetch Error:', e);
+    if (thisRequest !== trendingRequestToken) return;
     if (page === 1) liveSearchResults = [...MOVIES_DATABASE];
   }
 
@@ -219,16 +282,22 @@ async function triggerLiveTrending(type, page = 1) {
   renderCatalog();
 }
 
+let scrollRafPending = false;
 window.addEventListener('scroll', () => {
   if (currentSearchQuery) return; // Disable infinite scroll during search
-  const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-  if (window.scrollY >= scrollableHeight - 800) {
-    if (!isFetching && hasMore) {
-      currentPage++;
-      triggerLiveTrending(currentTypeFilter, currentPage);
+  if (scrollRafPending) return;
+  scrollRafPending = true;
+  requestAnimationFrame(() => {
+    scrollRafPending = false;
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY >= scrollableHeight - 800) {
+      if (!isFetching && hasMore) {
+        currentPage++;
+        triggerLiveTrending(currentTypeFilter, currentPage);
+      }
     }
-  }
-});
+  });
+}, { passive: true });
 
 function renderCatalog() {
   const grid = document.getElementById('catalogGrid');
@@ -299,12 +368,15 @@ function filterCatalog(type, btn) {
 
   currentPage = 1;
   hasMore = true;
-  liveSearchResults = [];
 
   if (!currentSearchQuery) {
+    liveSearchResults = [];
     triggerLiveTrending(type, currentPage);
   } else {
-    renderCatalog();
+    // Was: liveSearchResults = [] then renderCatalog() — which wiped the
+    // grid instead of refetching, since /api/search already scopes results
+    // by type server-side. Re-run the search against the new type instead.
+    triggerLiveCatalogSearch(currentSearchQuery);
   }
 }
 
@@ -352,6 +424,10 @@ let catalogSearchRequestToken = 0;
 // hero search in js/app.js, so search behavior never drifts between the two
 // entry points.
 async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequestToken) {
+  // Abort here (not just in onCatalogSearch) so every caller — including
+  // filterCatalog() re-searching on a type-tab switch — gets the same
+  // in-flight-request cancellation for free instead of having to remember it.
+  if (catalogSearchAbortController) catalogSearchAbortController.abort();
   catalogSearchAbortController = new AbortController();
   try {
     const apiType = currentTypeFilter === 'all' ? 'all'
@@ -416,11 +492,9 @@ function renderBrowseDropdown(items, dropdown) {
     return;
   }
 
-  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
-  const safeImg = (typeof Security !== 'undefined')
-    ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
-    : (url) => url || 'https://images.metahub.space/poster/small/tt15239678/img';
-
+  // Reuses the module-level esc()/safeImg() — do NOT redeclare local
+  // versions here (a previous version did, with an unescaped fallback,
+  // which reopened the XSS gap those helpers exist to close).
   dropdown.innerHTML = items.slice(0, 10).map(movie => {
     const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
     const targetId = encodeURIComponent(movie.id || movie.imdb_id);
