@@ -125,9 +125,20 @@ async function triggerLiveTrending(type, page = 1) {
     }
 
     if (page === 1) {
-      liveSearchResults = newResults;
+      const seen = new Set();
+      liveSearchResults = newResults.filter(item => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
     } else {
-      liveSearchResults.push(...newResults);
+      const existingIds = new Set(liveSearchResults.map(i => i.id));
+      const uniqueNew = newResults.filter(i => {
+        if (existingIds.has(i.id)) return false;
+        existingIds.add(i.id);
+        return true;
+      });
+      liveSearchResults.push(...uniqueNew);
     }
 
     if (liveSearchResults.length === 0 && page === 1) {
