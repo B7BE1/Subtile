@@ -575,10 +575,6 @@ document.addEventListener('click', () => {
 
 function handleLogout() {
   if (typeof Auth !== 'undefined') Auth.logout();
-  else {
-    localStorage.removeItem('subhub_current_user');
-    localStorage.removeItem('subhub_session_token');
-  }
   setupAuthNavbar();
   showToast('Logged out successfully.');
 }

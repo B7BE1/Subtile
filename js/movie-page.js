@@ -477,11 +477,6 @@ function renderMovieDetails(movie) {
   if (overview) {
     overview.textContent = movie.overview || 'No synopsis available.';
   }
-
-  const modalInput = document.getElementById('modalMovieNameInput');
-  if (modalInput) {
-    modalInput.value = `${movie.title || ''} (${movie.year || ''})`;
-  }
 }
 
 function renderSeasonsList(movie) {

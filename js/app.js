@@ -241,10 +241,6 @@ document.addEventListener('click', () => {
 
 function handleLogout() {
   if (typeof Auth !== 'undefined') Auth.logout();
-  else {
-    localStorage.removeItem('subhub_current_user');
-    localStorage.removeItem('subhub_session_token');
-  }
   setupAuthNavbar();
   showToast('Logged out successfully.');
 }
@@ -255,6 +251,7 @@ function openAuthModal(tab = 'login') {
     modal.classList.remove('hidden');
     modal.classList.add('flex');
   }
+  if (typeof switchModalAuthTab === 'function') switchModalAuthTab(tab);
 }
 
 function closeAuthModal() {
@@ -263,43 +260,6 @@ function closeAuthModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
   }
-}
-
-function switchAuthTab(tab) {
-  const loginForm = document.getElementById('loginForm');
-  const regForm = document.getElementById('registerForm');
-  const tabLogin = document.getElementById('authTabLogin');
-  const tabReg = document.getElementById('authTabRegister');
-
-  if (tab === 'login') {
-    if (loginForm) loginForm.style.display = 'block';
-    if (regForm) regForm.style.display = 'none';
-    if (tabLogin) { tabLogin.className = 'btn-subdl-submit'; tabLogin.style.flex = '1'; }
-    if (tabReg) { tabReg.className = 'btn-auth-subdl'; tabReg.style.flex = '1'; tabReg.style.justifyContent = 'center'; }
-  } else {
-    if (loginForm) loginForm.style.display = 'none';
-    if (regForm) regForm.style.display = 'block';
-    if (tabReg) { tabReg.className = 'btn-subdl-submit'; tabReg.style.flex = '1'; }
-    if (tabLogin) { tabLogin.className = 'btn-auth-subdl'; tabLogin.style.flex = '1'; tabLogin.style.justifyContent = 'center'; }
-  }
-}
-
-function handleLoginSubmit(e) {
-  e.preventDefault();
-  const username = document.getElementById('loginUsername').value.trim();
-  localStorage.setItem('subhub_current_user', JSON.stringify({ username }));
-  closeAuthModal();
-  setupAuthNavbar();
-  showToast(`Welcome back, ${username}!`);
-}
-
-function handleRegisterSubmit(e) {
-  e.preventDefault();
-  const username = document.getElementById('regUsername').value.trim();
-  localStorage.setItem('subhub_current_user', JSON.stringify({ username }));
-  closeAuthModal();
-  setupAuthNavbar();
-  showToast(`Account created for ${username}!`);
 }
 
 function openUploadModal() {

@@ -418,6 +418,33 @@
 
   <div id="toastContainer"></div>
 
+  <!-- Upload Modal -->
+  <div id="uploadModal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)closeUploadModal()">
+    <div style="background:#12151b; border:1px solid #23262e; border-radius:16px; max-width:500px; width:100%; padding:2rem; box-shadow:0 16px 40px rgba(0,0,0,0.8); position:relative;">
+      <button onclick="closeUploadModal()" style="position:absolute; top:1rem; left:1rem; background:none; border:none; color:#6b7280; cursor:pointer; font-size:1.1rem;"><i class="fas fa-times"></i></button>
+      <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:1.5rem;"><i class="fas fa-upload" style="margin-right:0.5rem;"></i> Upload Subtitle</h3>
+      <form id="uploadForm" onsubmit="handleUploadSubtitle(event)" class="space-y-4">
+        <div>
+          <label style="display:block; font-size:0.8rem; font-weight:700; color:#9ca3af; margin-bottom:6px;">Subtitle File (.srt, .ass, .vtt)</label>
+          <input type="file" accept=".srt,.ass,.vtt,.zip" style="width:100%; background:rgba(5,5,7,0.8); border:1px solid #27272a; border-radius:12px; padding:12px; color:#fff; font-size:0.875rem; outline:none; box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.8rem; font-weight:700; color:#9ca3af; margin-bottom:6px;">Language</label>
+          <select style="width:100%; background:rgba(5,5,7,0.8); border:1px solid #27272a; border-radius:12px; padding:12px; color:#fff; font-size:0.875rem; outline:none; box-sizing:border-box;">
+            <option value="ar">Arabic</option>
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+            <option value="ja">Japanese</option>
+          </select>
+        </div>
+        <button type="submit" style="width:100%; background:#fff; color:#050507; font-weight:900; border:none; padding:12px; border-radius:12px; cursor:pointer; font-size:0.875rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i class="fas fa-upload"></i> Upload
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="js/security.js"></script>
   <script src="js/auth.js"></script>
