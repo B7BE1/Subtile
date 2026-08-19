@@ -3,6 +3,20 @@
  * 100% Keyless API. No TMDB.
  * Uses Cinemeta (IMDb Top) for Movies/TV and AniList GraphQL for Anime.
  * Strictly follows Premium Grayscale Cinematic Design System.
+ *
+ * Upgrade notes vs previous version:
+ * - esc()/safeImg() fallbacks now actually escape/validate instead of
+ *   passing raw strings through when js/security.js hasn't loaded yet.
+ * - navUserDropdown username is now escaped — it was going into innerHTML
+ *   unescaped (stored-XSS risk if a display name is ever attacker-controlled).
+ * - showToast() escapes its message for the same reason.
+ * - Rating display is normalized to one decimal everywhere (movie/tv/anime
+ *   used to render inconsistently: "7" vs "7.0").
+ * - Year-based sort no longer breaks on the "N/A" placeholder.
+ * - Clearing the search box now aborts any in-flight /api/search call
+ *   before falling back to trending, closing a race where a slow stale
+ *   search response could clobber trending results on screen.
+ * - Removed the dead/duplicate countBadge write in renderCatalog.
  */
 
 let currentTypeFilter = 'all';
@@ -15,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const q = urlParams.get('q');
   const typeParam = urlParams.get('type');
-  
+
   if (typeParam) {
     currentTypeFilter = typeParam;
     const typeBtn = document.querySelector(`.filter-tab-btn[onclick*="'${typeParam}'"]`);
@@ -35,6 +49,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setupAuthNavbar();
 });
+
+// ---- Escaping / sanitizing helpers -----------------------------------
+// Security.js is the source of truth when present. These fallbacks used to
+// be no-ops ((s) => s) — meaning if security.js ever failed to load, every
+// innerHTML write downstream silently lost its escaping. They now do real
+// (if minimal) escaping/validation on their own.
+function fallbackEscapeHTML(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function fallbackSanitizeImageURL(url, fallback) {
+  if (typeof url !== 'string') return fallback;
+  try {
+    const u = new URL(url, window.location.href);
+    return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : fallbackEscapeHTML;
+const safeImg = (typeof Security !== 'undefined')
+  ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
+  : (url) => fallbackSanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img');
+
+// Normalize any rating (string or number, 0-10 scale) to a single decimal,
+// or '' if there's nothing to show.
+function formatRating(r) {
+  const n = parseFloat(r);
+  return Number.isFinite(n) && n > 0 ? n.toFixed(1) : '';
+}
+
+// Parse a year for sorting; unknown/"N/A" years sort to the bottom instead
+// of colliding with year 0 / producing NaN comparisons.
+function parseYearForSort(y) {
+  const n = parseInt(y, 10);
+  return Number.isFinite(n) ? n : -Infinity;
+}
 
 let currentPage = 1;
 let isFetching = false;
@@ -110,7 +162,7 @@ async function triggerLiveTrending(type, page = 1) {
             title: a.title.english || a.title.romaji,
             type: 'anime',
             year: a.startDate?.year || 'N/A',
-            rating: a.averageScore ? (a.averageScore / 10).toFixed(1) : 0,
+            rating: a.averageScore ? a.averageScore / 10 : 0,
             poster: a.coverImage?.large || ''
           })))
           .catch(() => [])
@@ -119,9 +171,9 @@ async function triggerLiveTrending(type, page = 1) {
 
     const settled = await Promise.all(promises);
     const newResults = settled.flat();
-    
+
     if (newResults.length === 0) {
-        hasMore = false;
+      hasMore = false;
     }
 
     if (page === 1) {
@@ -145,24 +197,24 @@ async function triggerLiveTrending(type, page = 1) {
       liveSearchResults = [...MOVIES_DATABASE];
     }
   } catch (e) {
-    console.error("Fetch Error:", e);
+    console.error('Fetch Error:', e);
     if (page === 1) liveSearchResults = [...MOVIES_DATABASE];
   }
-  
+
   isFetching = false;
   if (spinner) spinner.classList.add('hidden');
   renderCatalog();
 }
 
 window.addEventListener('scroll', () => {
-    if (currentSearchQuery) return; // Disable infinite scroll during search
-    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-    if (window.scrollY >= scrollableHeight - 800) {
-        if (!isFetching && hasMore) {
-            currentPage++;
-            triggerLiveTrending(currentTypeFilter, currentPage);
-        }
+  if (currentSearchQuery) return; // Disable infinite scroll during search
+  const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+  if (window.scrollY >= scrollableHeight - 800) {
+    if (!isFetching && hasMore) {
+      currentPage++;
+      triggerLiveTrending(currentTypeFilter, currentPage);
     }
+  }
 });
 
 function renderCatalog() {
@@ -177,31 +229,12 @@ function renderCatalog() {
     return true;
   });
 
-  if (countBadge) {
-      countBadge.innerText = `${results.length} titles`;
-  }
-
-  if (results.length === 0) {
-    grid.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
-  }
-
-  empty.classList.add('hidden');
-  // Titles/genres below can come straight from Cinemeta/Jikan (external
-  // APIs) via /api/search — per js/security.js's policy, anything
-  // external- or user-controlled must be escaped before reaching
-  // innerHTML.
-  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
-  const safeImg = (typeof Security !== 'undefined')
-    ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
-    : (url) => url || 'https://images.metahub.space/poster/small/tt15239678/img';
   let list = [...results];
 
   if (currentSort === 'rating') {
-    list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    list.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
   } else if (currentSort === 'year') {
-    list.sort((a, b) => (b.year || 0) - (a.year || 0));
+    list.sort((a, b) => parseYearForSort(b.year) - parseYearForSort(a.year));
   } else if (currentSort === 'title') {
     list.sort((a, b) => a.title.localeCompare(b.title));
   }
@@ -211,29 +244,27 @@ function renderCatalog() {
   }
 
   if (list.length === 0) {
-    grid.innerHTML = `
-      <div style="grid-column: 1 / -1; padding: 4rem; text-align: center; color: var(--text-faded);">
-        <i class="fas fa-film" style="font-size: 3rem; margin-bottom: 1.5rem; display: block; opacity: 0.5;"></i>
-        <div style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.5rem; color: #fff;">No titles found</div>
-        <div style="font-size: 1rem; font-family: 'Inter', sans-serif;">Try adjusting your search or filters.</div>
-      </div>
-    `;
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
     return;
   }
 
+  empty.classList.add('hidden');
+
   grid.innerHTML = list.map((movie) => {
-    const totalDl = movie.subtitles 
-      ? movie.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) 
+    const totalDl = movie.subtitles
+      ? movie.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0)
       : Math.floor(Math.random() * 15000) + 1000;
     const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
     const targetUrl = `movie.html?id=${encodeURIComponent(movie.id || movie.imdb_id)}&type=${encodeURIComponent(movie.type || 'movie')}`;
+    const ratingDisplay = formatRating(movie.rating);
 
     return `
       <a href="${targetUrl}" class="movie-card" style="position: relative; text-decoration: none; color: inherit; display: block;">
-        <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 1.5rem; filter: grayscale(20%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border-color);">
-        ${movie.rating ? `
+        <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 1.5rem; filter: grayscale(20%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border-color);">
+        ${ratingDisplay ? `
           <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(8px); border: 1px solid var(--border-color); color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; z-index: 2; font-family: 'Inter', sans-serif;">
-            <i class="fas fa-star" style="font-size: 0.65rem; margin-right: 0.2rem;"></i> ${esc(movie.rating)}
+            <i class="fas fa-star" style="font-size: 0.65rem; margin-right: 0.2rem;"></i> ${ratingDisplay}
           </span>
         ` : ''}
         <div style="margin-top: 1rem;">
@@ -252,11 +283,11 @@ function filterCatalog(type, btn) {
   currentTypeFilter = type;
   document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  
+
   currentPage = 1;
   hasMore = true;
   liveSearchResults = [];
-  
+
   if (!currentSearchQuery) {
     triggerLiveTrending(type, currentPage);
   } else {
@@ -295,10 +326,7 @@ let catalogSearchRequestToken = 0;
 
 // Search via /api/search — same endpoint and ranked/deduped results as the
 // hero search in js/app.js, so search behavior never drifts between the two
-// entry points. Replaces the old direct Cinemeta + AniList calls this
-// function used to make on its own (no ranking, separate dedup logic,
-// AniList instead of Jikan for anime — three ways this could disagree with
-// the hero search's results for the same query).
+// entry points.
 async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequestToken) {
   catalogSearchAbortController = new AbortController();
   try {
@@ -328,7 +356,7 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
 
     if (liveSearchResults.length === 0) {
       const lowerQ = q.toLowerCase();
-      liveSearchResults = MOVIES_DATABASE.filter(m => 
+      liveSearchResults = MOVIES_DATABASE.filter(m =>
         m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
       );
     }
@@ -356,11 +384,14 @@ function setupAuthNavbar() {
   if (currentUser) {
     try {
       const user = JSON.parse(currentUser);
+      // user.username came out of localStorage — treat it like any other
+      // untrusted string and escape it before it hits innerHTML.
+      const safeUsername = esc(user.username);
       slot.innerHTML = `
         <div style="position: relative; display: inline-block;">
           <button onclick="toggleNavUserDropdown(event)" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(15, 15, 18, 0.55); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); padding: 0.5rem 1.2rem; border-radius: 50px; color: #fff; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
             <img src="assets/default-avatar.svg" alt="" style="width: 24px; height: 24px; border-radius: 50%;">
-            <span>${user.username}</span>
+            <span>${safeUsername}</span>
             <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
           </button>
           <div id="navUserDropdown" style="position: absolute; top: 110%; right: 0; background: rgba(15, 15, 18, 0.95); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); border-radius: 1rem; padding: 0.5rem; min-width: 200px; display: none; flex-direction: column; gap: 0.2rem; z-index: 100;">
@@ -378,7 +409,7 @@ function setupAuthNavbar() {
         </div>
       `;
       return;
-    } catch(e){}
+    } catch (e) {}
   }
 
   slot.innerHTML = `
@@ -447,10 +478,12 @@ function showToast(message) {
   toast.style.transition = 'opacity 0.3s ease';
   toast.style.opacity = '1';
   toast.style.marginBottom = '0.5rem';
-  
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: #ffffff;"></i> <span>${message}</span>`;
+
+  // message is currently always a static string we control, but escape it
+  // anyway so this stays safe if it's ever passed dynamic content later.
+  toast.innerHTML = `<i class="fas fa-check-circle" style="color: #ffffff;"></i> <span>${esc(message)}</span>`;
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
