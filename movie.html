@@ -127,6 +127,7 @@
       margin-bottom: 1rem;
       color: #ffffff;
       letter-spacing: -0.02em;
+      word-break: break-word;
     }
 
     .tags {
@@ -287,11 +288,29 @@
     /* Navbar */
     .nav-header {
       position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
-      padding: 1.2rem 3rem; display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem clamp(1rem, 4vw, 3rem); display: flex; justify-content: space-between; align-items: center;
       background: rgba(6, 6, 8, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
     }
     .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #fff; font-weight: 900; font-size: 1.2rem; }
+    .nav-right { display: flex; gap: 1rem; align-items: center; }
+    .nav-right .back-btn { display: inline-flex; }
+    .movie-nav-hamburger { display: none; background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
+
+    @media (max-width: 768px) {
+      .nav-right .back-btn { display: none; }
+      .movie-nav-hamburger { display: flex; align-items: center; justify-content: center; }
+    }
+    #movieMobileNav {
+      display: none; position: fixed; inset: 0; background: rgba(5,5,7,0.98); backdrop-filter: blur(20px);
+      z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+    }
+    #movieMobileNav.active { display: flex; }
+    #movieMobileNav a, #movieMobileNav button {
+      font-size: 1.3rem; font-weight: 700; color: #fff; text-decoration: none;
+      padding: 0.8rem 2rem; border-radius: 12px; transition: all 0.2s; background: none; border: none; cursor: pointer;
+    }
+    #movieMobileNav a:hover, #movieMobileNav button:hover { background: rgba(255,255,255,0.08); }
     
     /* Toast */
     #toastContainer { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.8rem; }
@@ -306,8 +325,18 @@
 
     @media (max-width: 900px) {
       .split-container { flex-direction: column; }
-      .left-panel { width: 100%; height: auto; position: relative; padding: 6rem 2rem 2rem; }
-      .right-panel { width: 100%; padding: 2rem; }
+      .left-panel { width: 100%; height: auto; position: relative; padding: 5rem 1.5rem 2rem; }
+      .right-panel { width: 100%; padding: 1.5rem; }
+      .movie-title { font-size: clamp(1.5rem, 5vw, 3rem) !important; }
+      .meta { flex-wrap: wrap; gap: 0.8rem !important; }
+      .overview { font-size: 0.9rem; -webkit-line-clamp: 3; }
+      .reviews-section { padding: 1.5rem 1rem 3rem !important; }
+    }
+    @media (max-width: 480px) {
+      .left-panel { padding: 4.5rem 1rem 1.5rem; }
+      .right-panel { padding: 1rem; }
+      .movie-poster { max-width: 180px !important; }
+      .season-card { padding: 0.8rem !important; }
     }
   </style>
 </head>
@@ -330,12 +359,21 @@
       </div>
       <span>SUBTILE</span>
     </a>
-    <div style="display: flex; gap: 1rem; align-items: center;">
+    <div class="nav-right">
       <a href="index.html" class="back-btn"><i class="fas fa-home"></i> Trending</a>
       <a href="browse.html" class="back-btn"><i class="fas fa-compass"></i> Browse</a>
       <div id="navAuthSlot"></div>
+      <button class="movie-nav-hamburger" onclick="document.getElementById('movieMobileNav').classList.toggle('active')"><i class="fas fa-bars"></i></button>
     </div>
   </header>
+
+  <!-- Mobile Nav Overlay -->
+  <div id="movieMobileNav" class="mobile-nav">
+    <button onclick="this.parentElement.classList.remove('active')" style="position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+    <a href="index.html"><i class="fas fa-fire"></i> Trending</a>
+    <a href="browse.html"><i class="fas fa-compass"></i> Browse</a>
+    <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+  </div>
 
   <!-- Split Container -->
   <div class="split-container">

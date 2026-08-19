@@ -60,7 +60,7 @@
         .rank-number {
             font-family: 'Inter', sans-serif;
             font-weight: 900;
-            font-size: 6.5rem;
+            font-size: clamp(3rem, 8vw, 6.5rem);
             line-height: 0.8;
             color: transparent;
             -webkit-text-stroke: 2px rgba(255, 255, 255, 0.45);
@@ -93,15 +93,16 @@
 
         /* Category Selector Pills */
         .category-tab {
-            padding: 0.65rem 1.6rem;
+            padding: clamp(0.4rem, 1.5vw, 0.65rem) clamp(0.8rem, 2vw, 1.6rem);
             border-radius: 50px;
             font-weight: 800;
-            font-size: 0.9rem;
+            font-size: clamp(0.75rem, 2vw, 0.9rem);
             cursor: pointer;
             transition: var(--transition-cine);
             border: 1px solid var(--border-color);
             background: rgba(18, 18, 24, 0.8);
             color: var(--text-faded);
+            white-space: nowrap;
             display: inline-flex;
             align-items: center;
             gap: 0.6rem;
@@ -277,9 +278,9 @@
                 <h2 id="gridTitle" class="text-3xl md:text-4xl font-black text-neutral-50 tracking-tight">Top Ranked #02 — #10</h2>
             </div>
             
-            <div class="flex items-center gap-6">
+            <div class="flex flex-wrap items-center gap-3 sm:gap-6">
                 <!-- Category Tabs Switcher -->
-                <div class="flex gap-2 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-full backdrop-blur-xl shadow-lg">
+                <div class="flex gap-2 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-full backdrop-blur-xl shadow-lg overflow-x-auto">
                     <button data-cat="movie" class="category-tab active">
                         <i class="fas fa-film"></i> Movies
                     </button>
@@ -316,7 +317,7 @@
                     </div>
                     <span class="text-lg font-black tracking-tight text-white">SUBTILE</span>
                 </div>
-                <div class="flex gap-8 text-sm">
+                <div class="flex flex-wrap gap-4 sm:gap-8 text-sm">
                     <a href="#">Contact</a>
                     <a href="#">Privacy Policy</a>
                     <a href="#">DMCA</a>
