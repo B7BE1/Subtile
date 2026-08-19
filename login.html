@@ -207,32 +207,32 @@
             setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        function handleLoginSubmit(e) {
+        async function handleLoginSubmit(e) {
             e.preventDefault();
-            const id = document.getElementById('loginIdentifier').value.trim();
-            const pw = document.getElementById('loginPassword').value;
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value;
             
-            const res = Auth.login(id, pw);
-            if (res.success) {
-                showToast(`Welcome back, ${res.user.username}!`);
+            try {
+                await Auth.login({ identifier, password });
+                showToast('Welcome back!');
                 setTimeout(() => window.location.href = 'index.html', 1000);
-            } else {
-                showToast(res.message || 'Login failed', true);
+            } catch (err) {
+                showToast(err.message || 'Login failed', true);
             }
         }
 
-        function handleRegisterSubmit(e) {
+        async function handleRegisterSubmit(e) {
             e.preventDefault();
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
 
-            const res = Auth.register({ username, email, password });
-            if (res.success) {
-                showToast(`Account created successfully! Welcome, ${username}`);
+            try {
+                await Auth.register({ username, email, password });
+                showToast(`Account created! Welcome, ${username}`);
                 setTimeout(() => window.location.href = 'index.html', 1200);
-            } else {
-                showToast(res.message || 'Registration failed', true);
+            } catch (err) {
+                showToast(err.message || 'Registration failed', true);
             }
         }
     </script>

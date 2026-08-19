@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       rank: idx + 2, // Shift rank since we're inserting Spider-Man at #1
       id: m.id,
       title: m.name,
-      year: parseInt(m.year) || 2025,
+      year: parseInt(m.year) || new Date().getFullYear(),
       type: 'movie',
       genre: (m.genres && m.genres.slice(0, 2).join(' / ')) || 'Movie',
       rating: m.imdbRating || '8.2',
