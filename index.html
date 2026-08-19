@@ -46,7 +46,9 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
             border-radius: 1rem; background: #121216; border: 1px solid var(--border-color);
             transition: var(--transition-cine);
+            opacity: 0;
         }
+        .poster-img.loaded { opacity: 1; }
         .poster-fallback {
             position: absolute; inset: 0; border-radius: 1rem; background: #121216;
             display: none; align-items: center; justify-content: center; text-align: center;
@@ -81,7 +83,11 @@
         .movie-card:hover .overlay-content { opacity: 1; }
         .overlay-content { opacity: 0; transition: opacity 0.3s ease; z-index: 30; }
 
-        .reveal { opacity: 1; transform: none; }
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
         .reveal.visible { opacity: 1; transform: none; }
 
         /* Category Selector Pills */
@@ -750,7 +756,15 @@ function switchCategory(cat) {
         btn.classList.toggle("active", btn.dataset.cat === cat);
     });
 
-    renderActiveCategory();
+    // Fade the hero out, swap its content while invisible, fade back in —
+    // uses the .switching state that was already defined in CSS but never
+    // triggered, instead of jump-cutting straight to the new title/poster.
+    const hero = $("heroContent");
+    hero.classList.add("switching");
+    setTimeout(() => {
+        renderActiveCategory();
+        requestAnimationFrame(() => hero.classList.remove("switching"));
+    }, 220);
 }
 
 function renderActiveCategory() {
@@ -780,7 +794,9 @@ function renderActiveCategory() {
     
     const img = $("featuredPoster"), fb = $("featuredFallback");
     img.alt = featured.title; img.style.display = "";
+    img.classList.remove("loaded");
     img.onerror = () => { img.style.display = "none"; fb.style.display = "flex"; fb.textContent = featured.title; };
+    img.onload = () => { img.classList.add("loaded"); };
     img.src = featured.poster;
     
     const movieUrl = `movie.html?id=${featured.id}&type=${featured.type}`;
@@ -799,6 +815,7 @@ function cardHTML(item, rank) {
         <div class="relative">
             <div class="poster-container">
                 <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"
+                     onload="this.classList.add('loaded')"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${item.title.replace(/'/g, "\\'")}'">
                 <div class="poster-fallback"></div>
                 <span class="rank-number">${rank}</span>
