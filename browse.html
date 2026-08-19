@@ -177,22 +177,22 @@
     <div id="toastContainer"></div>
 
     <!-- Auth Modal -->
-    <div id="authModal" class="modal-backdrop" onclick="if(event.target===this)closeAuthModal()">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Sign In / Create Account</h3>
-                <button class="modal-close" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
+    <div id="authModal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)closeAuthModal()">
+        <div style="background:#12151b; border:1px solid #23262e; border-radius:12px; max-width:440px; width:100%; padding:2rem; box-shadow:0 16px 40px rgba(0,0,0,0.8); position:relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="font-size:1.2rem; font-weight:700; color:#fff;">Sign In / Create Account</h3>
+                <button onclick="closeAuthModal()" style="background:transparent; border:none; color:#6b7280; cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
             </div>
-            <form id="authLoginForm" onsubmit="handleAuthLogin(event)" class="space-y-4">
-                <div class="form-group">
-                    <label class="form-label">Username or Email</label>
-                    <input type="text" id="authLoginIdentifier" class="form-control" required placeholder="Enter username or email">
+            <form id="authLoginForm" onsubmit="handleAuthLogin(event)">
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#9aa2b1; margin-bottom:0.4rem;">Username or Email</label>
+                    <input type="text" id="authLoginIdentifier" required placeholder="Enter username or email" style="width:100%; background:#0e1117; border:1px solid #23262e; border-radius:8px; padding:0.7rem 0.9rem; color:#fff; font-size:0.9rem; outline:none;">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" id="authLoginPassword" class="form-control" required placeholder="Enter password">
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#9aa2b1; margin-bottom:0.4rem;">Password</label>
+                    <input type="password" id="authLoginPassword" required placeholder="Enter password" style="width:100%; background:#0e1117; border:1px solid #23262e; border-radius:8px; padding:0.7rem 0.9rem; color:#fff; font-size:0.9rem; outline:none;">
                 </div>
-                <button type="submit" class="btn-subdl-submit">Sign In</button>
+                <button type="submit" style="width:100%; background:#2563eb; color:#fff; font-weight:700; border:none; padding:0.75rem; border-radius:8px; cursor:pointer; font-size:0.9rem;">Sign In</button>
             </form>
         </div>
     </div>

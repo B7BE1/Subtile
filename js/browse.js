@@ -180,7 +180,7 @@ async function triggerLiveTrending(type, page = 1) {
 
     if (type === 'all' || type === 'movie') {
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/movie/top/skip=${skip}.json`, { signal })
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/movie/top.json`, { signal })
           .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
@@ -194,7 +194,7 @@ async function triggerLiveTrending(type, page = 1) {
 
     if (type === 'all' || type === 'tv') {
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top/skip=${skip}.json`, { signal })
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top.json`, { signal })
           .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
@@ -585,11 +585,11 @@ function handleLogout() {
 
 function openAuthModal(tab = 'login') {
   const modal = document.getElementById('authModal');
-  if (modal) modal.classList.add('show');
+  if (modal) modal.style.display = 'flex';
 }
 function closeAuthModal() {
   const modal = document.getElementById('authModal');
-  if (modal) modal.classList.remove('show');
+  if (modal) modal.style.display = 'none';
 }
 function openUploadModal() {
   const modal = document.getElementById('uploadModal');
