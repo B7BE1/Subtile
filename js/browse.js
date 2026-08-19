@@ -48,6 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
     triggerLiveTrending(currentTypeFilter, currentPage);
   }
   setupAuthNavbar();
+
+  const searchInput = document.getElementById('catalogSearchInput');
+  const dropdown = document.getElementById('browseSearchDropdown');
+  if (searchInput && dropdown) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') dropdown.classList.remove('active');
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-dropdown') && e.target !== searchInput) {
+        dropdown.classList.remove('active');
+      }
+    });
+  }
 });
 
 // ---- Escaping / sanitizing helpers -----------------------------------
@@ -310,9 +323,20 @@ function onCatalogSearch() {
   hasMore = true;
 
   if (!currentSearchQuery) {
+    const dropdown = document.getElementById('browseSearchDropdown');
+    if (dropdown) dropdown.classList.remove('active');
     liveSearchResults = [];
     triggerLiveTrending(currentTypeFilter, currentPage);
     return;
+  }
+
+  const dropdown = document.getElementById('browseSearchDropdown');
+  if (dropdown) {
+    const lowerQ = currentSearchQuery.toLowerCase();
+    const localMatches = MOVIES_DATABASE.filter(m =>
+      m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
+    );
+    renderBrowseDropdown(localMatches, dropdown);
   }
 
   const thisRequest = ++catalogSearchRequestToken;
@@ -372,7 +396,48 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
     console.error('Catalog search error:', err);
     if (requestToken === catalogSearchRequestToken) liveSearchResults = [];
   }
-  if (requestToken === catalogSearchRequestToken) renderCatalog();
+  if (requestToken === catalogSearchRequestToken) {
+    renderCatalog();
+    const dropdown = document.getElementById('browseSearchDropdown');
+    if (dropdown && currentSearchQuery) {
+      renderBrowseDropdown(liveSearchResults, dropdown);
+    }
+  }
+}
+
+function renderBrowseDropdown(items, dropdown) {
+  if (items.length === 0) {
+    dropdown.innerHTML = `
+      <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
+        No matches found
+      </div>
+    `;
+    dropdown.classList.add('active');
+    return;
+  }
+
+  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
+  const safeImg = (typeof Security !== 'undefined')
+    ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
+    : (url) => url || 'https://images.metahub.space/poster/small/tt15239678/img';
+
+  dropdown.innerHTML = items.slice(0, 10).map(movie => {
+    const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
+    const targetId = encodeURIComponent(movie.id || movie.imdb_id);
+    const targetType = encodeURIComponent(movie.type || 'movie');
+    const targetUrl = `movie.html?id=${targetId}&type=${targetType}`;
+
+    return `
+      <a href="${targetUrl}" class="search-item">
+        <img src="${safeImg(movie.poster || movie.backdrop)}" alt="">
+        <div>
+          <div style="font-weight: 600; font-size: 0.9rem;">${esc(movie.title)}</div>
+          <div style="font-size: 0.75rem; color: #8a8a92;">${esc(movie.year || 'N/A')} • ${typeLabel}</div>
+        </div>
+      </a>
+    `;
+  }).join('');
+  dropdown.classList.add('active');
 }
 
 function onCatalogSort() {
