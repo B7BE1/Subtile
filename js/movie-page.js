@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderMovieDetails(currentMovie);
     wireUpEventDelegation();
+    setupAuthNavbar();
 
     // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
     const loader = document.getElementById('globalLoader');
@@ -104,6 +105,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loader) loader.style.display = 'none';
   }
 });
+
+// ---------- Auth Navbar ----------
+function setupAuthNavbar() {
+  const slot = document.getElementById('navAuthSlot');
+  if (!slot) return;
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  if (user && user.username) {
+    const safe = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
+    slot.innerHTML = `
+      <div style="position:relative;">
+        <button onclick="document.getElementById('movieUserDD').classList.toggle('show')" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:6px 12px;color:#fff;cursor:pointer;font-size:0.8rem;font-weight:700;">
+          <img src="assets/default-avatar.svg" style="width:22px;height:22px;border-radius:50%;" alt="">
+          <span>${safe(user.username)}</span>
+          <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
+        </button>
+        <div id="movieUserDD" style="position:absolute;top:110%;right:0;background:rgba(15,15,18,0.95);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0.5rem;min-width:180px;display:none;flex-direction:column;gap:2px;z-index:100;">
+          <a href="profile.html?user=${encodeURIComponent(user.username)}" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:#d1d5db;text-decoration:none;font-size:0.85rem;"><i class="fas fa-user-circle"></i> Profile</a>
+          <a href="browse.html" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:#d1d5db;text-decoration:none;font-size:0.85rem;"><i class="fas fa-compass"></i> Browse</a>
+          <div style="height:1px;background:rgba(255,255,255,0.08);margin:4px 0;"></div>
+          <button onclick="if(typeof Auth!=='undefined')Auth.logout();" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:#ef4444;background:none;border:none;cursor:pointer;font-size:0.85rem;text-align:left;width:100%;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+      </div>`;
+    slot.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('click', () => { const dd = document.getElementById('movieUserDD'); if (dd) dd.classList.remove('show'); });
+  } else {
+    slot.innerHTML = `<a href="login.html?redirect=${encodeURIComponent(window.location.href)}" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#000;padding:6px 14px;border-radius:12px;font-size:0.8rem;font-weight:700;text-decoration:none;transition:all 0.2s;"><i class="fas fa-sign-in-alt"></i> Login</a>`;
+  }
+}
+
+if (typeof Auth !== 'undefined') Auth.onChange(setupAuthNavbar);
 
 // ---------- Security helpers ----------
 function escapeHtml(str) {

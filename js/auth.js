@@ -233,6 +233,13 @@ const Auth = (() => {
 
   restoreSession();
 
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'subhub_session' || e.key === 'subhub_users') {
+      restoreSession();
+      emit();
+    }
+  });
+
   return {
     register,
     login,

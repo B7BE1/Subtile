@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     triggerLiveTrending(currentTypeFilter, currentPage);
   }
   setupAuthNavbar();
+  if (typeof Auth !== 'undefined') Auth.onChange(setupAuthNavbar);
 
   const searchInput = document.getElementById('catalogSearchInput');
   const dropdown = document.getElementById('browseSearchDropdown');

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMostDownloaded();
   setupLiveSearch();
   setupAuthNavbar();
+  if (typeof Auth !== 'undefined') Auth.onChange(setupAuthNavbar);
 });
 
 // Render Most Downloaded Grid

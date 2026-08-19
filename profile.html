@@ -213,6 +213,7 @@
         loadWatchlist(profileUser.username);
         loadReviews(profileUser.username);
         setupNavbar();
+        if (typeof Auth !== 'undefined') Auth.onChange(setupNavbar);
     });
 
     function renderProfile(user) {
