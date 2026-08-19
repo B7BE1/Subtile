@@ -222,9 +222,9 @@ function setupAuthNavbar() {
   }
 
   slot.innerHTML = `
-    <button class="btn-auth-subdl" onclick="openAuthModal('login')">
+    <a href="login.html?redirect=${encodeURIComponent(window.location.href)}" class="btn-auth-subdl">
       <i class="fas fa-sign-in-alt"></i> Login / Sign Up
-    </button>
+    </a>
   `;
 }
 

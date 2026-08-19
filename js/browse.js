@@ -554,9 +554,9 @@ function setupAuthNavbar() {
   }
 
   slot.innerHTML = `
-    <button onclick="openAuthModal('login')" style="padding: 0.6rem 1.2rem; border-radius: 50px; background: transparent; color: #fff; border: 1px solid var(--border-color); cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    <a href="login.html?redirect=${encodeURIComponent(window.location.href)}" style="padding: 0.6rem 1.2rem; border-radius: 50px; background: transparent; color: #fff; border: 1px solid var(--border-color); cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
       <i class="fas fa-sign-in-alt"></i> Login / Sign Up
-    </button>
+    </a>
   `;
 }
 
