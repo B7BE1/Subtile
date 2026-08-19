@@ -190,7 +190,7 @@
 
             <div class="flex-1 max-w-xl">
                 <div class="relative search-wrapper">
-                    <input id="searchInput" type="search" placeholder="Search movies, TV shows, anime..." autocomplete="off"
+                    <input id="searchInput" type="search" placeholder="Search movies, TV shows, anime..." autocomplete="off" data-i18n="searchPlaceholder"
                         class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-500">
                     <svg class="absolute end-3.5 top-3 w-4 h-4 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     <div id="searchResultsDropdown" class="search-results-dropdown"></div>
@@ -198,13 +198,15 @@
             </div>
 
             <div class="flex items-center gap-4 flex-shrink-0">
+                <div id="themeToggleNav"></div>
+                <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.75rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
                 <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-neutral-400">
-                    <a href="index.html" class="text-white border-b-2 border-white pb-0.5">Trending</a>
-                    <a href="browse.html" class="hover:text-neutral-200 transition-colors">Browse</a>
+                    <a href="index.html" class="text-white border-b-2 border-white pb-0.5" data-i18n="trending">Trending</a>
+                    <a href="browse.html" class="hover:text-neutral-200 transition-colors" data-i18n="browse">Browse</a>
                 </nav>
                 <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
                     <i class="fas fa-user-circle text-sm"></i>
-                    <span id="navAuthText">Login</span>
+                    <span id="navAuthText" data-i18n="login">Login</span>
                 </a>
             </div>
         </div>
@@ -327,6 +329,8 @@
 
 <script src="js/security.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -965,6 +969,23 @@ document.querySelectorAll(".category-tab").forEach(btn => {
 });
 renderActiveCategory();
 fetchLiveTrending();
+
+// Theme & i18n
+if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+if (typeof I18n !== 'undefined') {
+    I18n.translatePage();
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) langBtn.textContent = I18n.getLang() === 'ar' ? 'EN' : 'AR';
+}
+function toggleLang() {
+    if (typeof I18n === 'undefined') return;
+    const next = I18n.getLang() === 'en' ? 'ar' : 'en';
+    I18n.setLang(next);
+    I18n.translatePage();
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
+    if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+}
 </script>
 </body>
 </html>

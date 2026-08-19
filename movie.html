@@ -353,13 +353,16 @@
     <div class="right-panel">
       
       <div class="panel-header">
-        <h2 id="viewTitle" class="panel-title"><i class="fas fa-closed-captioning"></i> Subtitles Archive</h2>
-        <button id="backToSeasonsBtn" class="back-btn" style="display: none;"><i class="fas fa-arrow-left"></i> Back to Seasons</button>
+        <h2 id="viewTitle" class="panel-title"><i class="fas fa-closed-captioning"></i> <span data-i18n="subtitlesArchive">Subtitles Archive</span></h2>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <button id="watchlistBtn" class="back-btn" onclick="toggleWatchlist()"><i class="far fa-bookmark"></i> <span id="watchlistBtnText" data-i18n="addToWatchlist">Add to Watchlist</span></button>
+          <button id="backToSeasonsBtn" class="back-btn" style="display: none;"><i class="fas fa-arrow-left"></i> <span data-i18n="backToSeasons">Back to Seasons</span></button>
+        </div>
       </div>
 
       <!-- Filter Pills -->
       <div id="filterPillsContainer" class="filter-pills">
-        <button class="pill active" data-filter="all">All Languages</button>
+        <button class="pill active" data-filter="all" data-i18n="allLanguages">All Languages</button>
         <button class="pill" data-filter="lang:ar">Arabic 🇸🇦</button>
         <button class="pill" data-filter="lang:en">English 🇬🇧</button>
         <button class="pill" data-filter="lang:fr">Français 🇫🇷</button>
@@ -380,10 +383,45 @@
 
   </div>
 
+  <!-- Reviews Section -->
+  <div id="reviewsSection" style="max-width:1100px; margin: 0 auto; padding: 2rem 2rem 4rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+      <h2 style="font-size:1.4rem; font-weight:900; color: var(--text-main);"><i class="fas fa-star" style="color:#fbbf24;"></i> <span data-i18n="reviews">Reviews</span></h2>
+      <span id="reviewCount" style="font-size:0.85rem; color: var(--text-muted);"></span>
+    </div>
+
+    <!-- Review Form -->
+    <div id="reviewFormContainer" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;">
+      <div id="reviewFormLoggedOut" style="text-align:center; padding: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+        <span data-i18n="loginToReview">Login to leave a review</span>
+      </div>
+      <div id="reviewFormActive" style="display:none;">
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:700; color: var(--text-muted); margin-bottom:0.4rem;" data-i18n="rateAndReview">Rate & Review</label>
+          <div id="starRating" style="display:flex; gap:0.3rem; font-size:1.4rem; cursor:pointer;">
+            <i class="far fa-star" data-star="1" onmouseover="previewStars(1)" onmouseout="resetStars()" onclick="setRating(1)"></i>
+            <i class="far fa-star" data-star="2" onmouseover="previewStars(2)" onmouseout="resetStars()" onclick="setRating(2)"></i>
+            <i class="far fa-star" data-star="3" onmouseover="previewStars(3)" onmouseout="resetStars()" onclick="setRating(3)"></i>
+            <i class="far fa-star" data-star="4" onmouseover="previewStars(4)" onmouseout="resetStars()" onclick="setRating(4)"></i>
+            <i class="far fa-star" data-star="5" onmouseover="previewStars(5)" onmouseout="resetStars()" onclick="setRating(5)"></i>
+          </div>
+        </div>
+        <textarea id="reviewComment" rows="3" maxlength="500" placeholder="Write your thoughts..." style="width:100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.7rem 1rem; color: var(--text-main); font-size: 0.9rem; resize: vertical; outline: none; margin-bottom:1rem;"></textarea>
+        <button onclick="submitReview()" style="background:#fff; color:#050507; font-weight:800; padding:0.6rem 1.4rem; border-radius:0.5rem; border:none; cursor:pointer; font-size:0.85rem;" data-i18n="submitReview">Submit Review</button>
+      </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div id="reviewsList" class="space-y-3"></div>
+  </div>
+
   <div id="toastContainer"></div>
 
   <!-- Scripts -->
   <script src="js/security.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/data.js"></script>
   <script src="js/movie-page.js"></script>
 </body>

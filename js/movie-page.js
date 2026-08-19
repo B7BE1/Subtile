@@ -722,7 +722,170 @@ function showToast(message, isError = false) {
   }, 3000);
 }
 
-// Exposed for inline onclick="" still present in the (unmodified) HTML markup
+// ========== Watchlist System ==========
+function toggleWatchlist() {
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  if (!user || !user.username) {
+    showToast('Login to use watchlist', true);
+    return;
+  }
+  if (!currentMovie) return;
+  const key = 'subtile_watchlist_' + user.username;
+  let list = JSON.parse(localStorage.getItem(key) || '[]');
+  const idx = list.findIndex(w => w.id === currentMovie.id);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+    localStorage.setItem(key, JSON.stringify(list));
+    updateWatchlistButton(false);
+    showToast('Removed from watchlist');
+  } else {
+    list.push({
+      id: currentMovie.id,
+      title: currentMovie.title,
+      year: currentMovie.year,
+      type: currentMovie.type,
+      poster: currentMovie.poster
+    });
+    localStorage.setItem(key, JSON.stringify(list));
+    updateWatchlistButton(true);
+    showToast('Added to watchlist!');
+  }
+}
+
+function updateWatchlistButton(inWatchlist) {
+  const btn = document.getElementById('watchlistBtn');
+  const text = document.getElementById('watchlistBtnText');
+  if (!btn) return;
+  if (inWatchlist) {
+    btn.innerHTML = '<i class="fas fa-bookmark"></i> <span id="watchlistBtnText">In Watchlist</span>';
+    btn.style.borderColor = 'var(--brand-yellow)';
+    btn.style.color = 'var(--brand-yellow)';
+  } else {
+    btn.innerHTML = '<i class="far fa-bookmark"></i> <span id="watchlistBtnText" data-i18n="addToWatchlist">Add to Watchlist</span>';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
+function checkWatchlistStatus() {
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  if (!user || !user.username || !currentMovie) return;
+  const key = 'subtile_watchlist_' + user.username;
+  const list = JSON.parse(localStorage.getItem(key) || '[]');
+  const inWatchlist = list.some(w => w.id === currentMovie.id);
+  updateWatchlistButton(inWatchlist);
+}
+
+// ========== Reviews System ==========
+let selectedRating = 0;
+
+function getMovieReviews() {
+  if (!currentMovie) return [];
+  const key = 'subtile_reviews_' + currentMovie.id;
+  return JSON.parse(localStorage.getItem(key) || '[]');
+}
+
+function renderReviews() {
+  const reviews = getMovieReviews();
+  const container = document.getElementById('reviewsList');
+  const countEl = document.getElementById('reviewCount');
+  if (countEl) countEl.textContent = reviews.length + ' review' + (reviews.length !== 1 ? 's' : '');
+  if (!container) return;
+
+  if (reviews.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.9rem;"><i class="fas fa-comment-dots" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;"></i> No reviews yet</div>`;
+    return;
+  }
+
+  container.innerHTML = reviews.map(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    return `
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.2rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.4rem;">
+          <a href="profile.html?user=${encodeURIComponent(r.username)}" style="font-weight:700; font-size:0.9rem; color:var(--text-main); text-decoration:none;">${escapeHtml(r.username)}</a>
+          <span style="color:#fbbf24; font-size:0.85rem;">${stars}</span>
+        </div>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 0.3rem; line-height:1.5;">${escapeHtml(r.comment || '')}</p>
+        <div style="font-size:0.75rem; color: var(--text-muted); opacity:0.6;">${escapeHtml(r.date || '')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setupReviewForm() {
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  const loggedOut = document.getElementById('reviewFormLoggedOut');
+  const formActive = document.getElementById('reviewFormActive');
+  if (user && user.username) {
+    if (loggedOut) loggedOut.style.display = 'none';
+    if (formActive) formActive.style.display = '';
+  } else {
+    if (loggedOut) loggedOut.style.display = '';
+    if (formActive) formActive.style.display = 'none';
+  }
+}
+
+function previewStars(n) {
+  const stars = document.querySelectorAll('#starRating i');
+  stars.forEach((s, i) => { s.className = i < n ? 'fas fa-star' : 'far fa-star'; s.style.color = '#fbbf24'; });
+}
+function resetStars() { previewStars(selectedRating); }
+function setRating(n) { selectedRating = n; previewStars(n); }
+
+function submitReview() {
+  const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+  if (!user || !user.username) { showToast('Login to leave a review', true); return; }
+  if (!currentMovie) return;
+  if (selectedRating < 1 || selectedRating > 5) { showToast('Select a star rating', true); return; }
+
+  const comment = (document.getElementById('reviewComment') || {}).value || '';
+  const reviews = getMovieReviews();
+  const existing = reviews.findIndex(r => r.username === user.username);
+  const review = {
+    username: user.username,
+    rating: selectedRating,
+    comment: comment.trim(),
+    date: new Date().toISOString().split('T')[0]
+  };
+  if (existing >= 0) {
+    reviews[existing] = review;
+  } else {
+    reviews.push(review);
+  }
+  localStorage.setItem('subtile_reviews_' + currentMovie.id, JSON.stringify(reviews));
+
+  // Store in user's reviews too
+  const userReviewsKey = 'subtile_reviews_' + user.username;
+  const userReviews = JSON.parse(localStorage.getItem(userReviewsKey) || '[]');
+  const uidx = userReviews.findIndex(r => r.movieId === currentMovie.id);
+  const userReview = { movieId: currentMovie.id, movieTitle: currentMovie.title, type: currentMovie.type, rating: selectedRating, comment: comment.trim(), date: review.date };
+  if (uidx >= 0) { userReviews[uidx] = userReview; } else { userReviews.push(userReview); }
+  localStorage.setItem(userReviewsKey, JSON.stringify(userReviews));
+
+  selectedRating = 0;
+  const textarea = document.getElementById('reviewComment');
+  if (textarea) textarea.value = '';
+  resetStars();
+  renderReviews();
+  showToast('Review submitted!');
+}
+
+// ========== Theme & i18n Init ==========
+(function initMoviePageFeatures() {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof ThemeToggle !== 'undefined') ThemeToggle.applyTheme();
+    if (typeof I18n !== 'undefined') I18n.translatePage();
+    checkWatchlistStatus();
+    setupReviewForm();
+    renderReviews();
+  });
+})();
+
+window.toggleWatchlist = toggleWatchlist;
+window.setRating = setRating;
+window.previewStars = previewStars;
+window.resetStars = resetStars;
+window.submitReview = submitReview;
 window.openUploadModal = openUploadModal;
 window.closeUploadModal = closeUploadModal;
 window.handleUploadSubtitle = handleUploadSubtitle;

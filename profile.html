@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — Subtile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #050507;
+            --bg-glass: rgba(15, 15, 18, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.25);
+            --text-main: #ffffff;
+            --text-faded: #8a8a92;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); }
+        .nav-blur { backdrop-filter: blur(24px) saturate(160%); background: var(--bg-glass); border-bottom: 1px solid var(--border-color); }
+        .profile-card { background: rgba(15, 15, 18, 0.6); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: 1.25rem; }
+        .stat-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1.2rem; text-align: center; transition: all 0.3s ease; }
+        .stat-card:hover { border-color: var(--border-hover); background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); }
+        .sub-item { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1rem 1.2rem; transition: all 0.3s ease; display: flex; align-items: center; gap: 1rem; }
+        .sub-item:hover { border-color: var(--border-hover); background: rgba(255, 255, 255, 0.06); }
+        .tab-btn { padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid var(--border-color); background: transparent; color: var(--text-faded); }
+        .tab-btn.active { background: #ffffff; color: #050507; border-color: #ffffff; }
+        .tab-btn:hover:not(.active) { border-color: var(--border-hover); color: #fff; }
+        .badge { padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .badge-ar { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-en { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .badge-srt { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+        .edit-input { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.5rem 0.8rem; color: #fff; font-size: 0.9rem; width: 100%; outline: none; transition: border-color 0.2s; }
+        .edit-input:focus { border-color: rgba(255, 255, 255, 0.3); }
+    </style>
+</head>
+<body class="overflow-x-hidden min-h-screen">
+
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-50 nav-blur">
+        <div class="container mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center gap-3 flex-shrink-0 group">
+                <div class="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105">
+                    <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </div>
+                <span class="text-lg font-black tracking-tight text-neutral-100 hidden sm:block">SUBTILE</span>
+            </a>
+            <div class="flex items-center gap-4 flex-shrink-0">
+                <div id="themeToggleNav"></div>
+                <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.75rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
+                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-neutral-400">
+                    <a href="index.html" class="hover:text-white transition-colors" data-i18n="trending">Trending</a>
+                    <a href="browse.html" class="hover:text-white transition-colors" data-i18n="browse">Browse</a>
+                </nav>
+                <div id="navAuthSlot"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="pt-24"></div>
+
+    <!-- Profile Content -->
+    <main class="container mx-auto px-4 sm:px-8 py-8">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- Profile Header -->
+            <div class="profile-card p-8 mb-8">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                    <!-- Avatar -->
+                    <div class="relative group">
+                        <div class="w-32 h-32 rounded-full overflow-hidden border-2 border-neutral-700 bg-neutral-800 flex items-center justify-center">
+                            <img id="profileAvatar" src="assets/default-avatar.svg" alt="Avatar" class="w-full h-full object-cover">
+                        </div>
+                        <label class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                            <i class="fas fa-camera text-white text-xl"></i>
+                            <input type="file" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
+                        </label>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1 text-center md:text-left">
+                        <div class="flex flex-col md:flex-row items-center gap-4 mb-4">
+                            <h1 id="profileUsername" class="text-3xl font-black"></h1>
+                            <span id="profileBadge" class="badge hidden"></span>
+                            <span id="profileMemberSince" class="text-sm text-neutral-500"></span>
+                        </div>
+                        <p id="profileBio" class="text-neutral-400 text-sm mb-4 max-w-lg"></p>
+                        <div id="profileEditArea">
+                            <button onclick="enableEditProfile()" class="text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 px-4 py-2 rounded-xl">
+                                <i class="fas fa-pen mr-1"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <button onclick="handleProfileLogout()" class="text-sm text-neutral-500 hover:text-red-400 transition-colors border border-neutral-700 hover:border-red-400/30 px-4 py-2 rounded-xl">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card">
+                    <div id="statUploads" class="text-2xl font-black text-white">0</div>
+                    <div class="text-xs text-neutral-500 font-semibold mt-1">Uploads</div>
+                </div>
+                <div class="stat-card">
+                    <div id="statDownloads" class="text-2xl font-black text-white">0</div>
+                    <div class="text-xs text-neutral-500 font-semibold mt-1">Downloads</div>
+                </div>
+                <div class="stat-card">
+                    <div id="statWatchlist" class="text-2xl font-black text-white">0</div>
+                    <div class="text-xs text-neutral-500 font-semibold mt-1">Watchlist</div>
+                </div>
+                <div class="stat-card">
+                    <div id="statReviews" class="text-2xl font-black text-white">0</div>
+                    <div class="text-xs text-neutral-500 font-semibold mt-1">Reviews</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-6 flex-wrap">
+                <button class="tab-btn active" onclick="switchProfileTab('uploads', this)">
+                    <i class="fas fa-upload mr-1"></i> <span data-i18n="myUploads">My Uploads</span>
+                </button>
+                <button class="tab-btn" onclick="switchProfileTab('watchlist', this)">
+                    <i class="fas fa-bookmark mr-1"></i> <span data-i18n="watchlist">Watchlist</span>
+                </button>
+                <button class="tab-btn" onclick="switchProfileTab('reviews', this)">
+                    <i class="fas fa-star mr-1"></i> <span data-i18n="myReviews">My Reviews</span>
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="profileTabContent">
+                <div id="tabUploads" class="space-y-3"></div>
+                <div id="tabWatchlist" class="space-y-3 hidden"></div>
+                <div id="tabReviews" class="space-y-3 hidden"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="profileEmpty" class="hidden text-center py-16">
+                <p class="text-4xl mb-4">🎬</p>
+                <p class="text-neutral-300 font-bold text-lg mb-1">Nothing here yet</p>
+                <p class="text-neutral-500 text-sm">Start exploring and adding content!</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-neutral-900 mt-20 bg-neutral-950/80">
+        <div class="container mx-auto px-4 sm:px-8 py-6 text-center text-neutral-600 text-xs">
+            © Subtile — Subtitles Archive. Built for Cinephiles.
+        </div>
+    </footer>
+
+    <div id="toastContainer" class="fixed bottom-6 end-6 z-50 flex flex-col gap-2"></div>
+
+    <script src="js/security.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/data.js"></script>
+    <script>
+    "use strict";
+
+    let profileUser = null;
+    const $ = id => document.getElementById(id);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+        if (typeof I18n !== 'undefined') {
+            I18n.translatePage();
+            const langBtn = document.getElementById('langToggleBtn');
+            if (langBtn) langBtn.textContent = I18n.getLang() === 'ar' ? 'EN' : 'AR';
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const username = params.get('user');
+
+        if (!username) {
+            profileUser = Auth.getCurrentUser();
+            if (!profileUser) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent('profile.html');
+                return;
+            }
+        } else {
+            profileUser = Auth.getPublicProfileByUsername(username);
+            if (!profileUser) {
+                showToast('User not found', true);
+                return;
+            }
+        }
+
+        renderProfile(profileUser);
+        loadUploads(profileUser.username);
+        loadWatchlist(profileUser.username);
+        loadReviews(profileUser.username);
+        setupNavbar();
+    });
+
+    function renderProfile(user) {
+        $('profileUsername').textContent = user.username;
+        $('profileBio').textContent = user.bio || 'No bio yet. Click "Edit Profile" to add one.';
+        $('profileMemberSince').textContent = 'Member since ' + new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+        if (user.avatar) {
+            $('profileAvatar').src = Security.sanitizeImageURL(user.avatar, 'assets/default-avatar.svg');
+        }
+
+        if (user.isVerifiedTranslator) {
+            $('profileBadge').textContent = '✓ Verified Translator';
+            $('profileBadge').className = 'badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+            $('profileBadge').classList.remove('hidden');
+        }
+
+        const stats = user.stats || {};
+        $('statUploads').textContent = stats.uploads || 0;
+        $('statDownloads').textContent = (stats.downloads || 0).toLocaleString();
+    }
+
+    function enableEditProfile() {
+        const area = $('profileEditArea');
+        area.innerHTML = `
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs text-neutral-400 mb-1">Bio</label>
+                    <textarea id="editBio" class="edit-input" rows="3" maxlength="500" placeholder="Tell us about yourself...">${Security.escapeHTML(profileUser.bio || '')}</textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-neutral-400 mb-1">Avatar URL</label>
+                    <input id="editAvatar" type="url" class="edit-input" value="${Security.escapeAttribute(profileUser.avatar || '')}" placeholder="https://example.com/avatar.jpg">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="saveProfile()" class="bg-white text-neutral-950 font-bold px-4 py-2 rounded-lg text-sm hover:bg-neutral-200 transition-colors">Save</button>
+                    <button onclick="cancelEdit()" class="border border-neutral-700 text-neutral-400 font-bold px-4 py-2 rounded-lg text-sm hover:text-white transition-colors">Cancel</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function cancelEdit() {
+        const area = $('profileEditArea');
+        area.innerHTML = `
+            <button onclick="enableEditProfile()" class="text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 px-4 py-2 rounded-xl">
+                <i class="fas fa-pen mr-1"></i> Edit Profile
+            </button>
+        `;
+    }
+
+    function saveProfile() {
+        try {
+            const bio = $('editBio').value.trim();
+            const avatar = $('editAvatar').value.trim();
+            Auth.updateProfile({ bio, avatar });
+            profileUser = Auth.getCurrentUser();
+            renderProfile(profileUser);
+            showToast('Profile updated!');
+        } catch (e) {
+            showToast(e.message || 'Failed to update profile', true);
+        }
+    }
+
+    function uploadAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            showToast('Image must be under 2MB', true);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                Auth.updateProfile({ avatar: e.target.result });
+                profileUser = Auth.getCurrentUser();
+                $('profileAvatar').src = e.target.result;
+                showToast('Avatar updated!');
+            } catch (err) {
+                showToast('Failed to upload avatar', true);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function loadUploads(username) {
+        const uploads = JSON.parse(localStorage.getItem('subtile_uploads_' + username) || '[]');
+        const container = $('tabUploads');
+        if (uploads.length === 0) {
+            container.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="fas fa-upload text-3xl mb-3 block"></i>No uploads yet</div>';
+            return;
+        }
+        container.innerHTML = uploads.map(sub => `
+            <a href="movie.html?id=${encodeURIComponent(sub.movieId)}&type=${encodeURIComponent(sub.type || 'movie')}" class="sub-item" style="text-decoration:none; color:inherit;">
+                <div class="flex-1">
+                    <div class="font-bold text-sm">${Security.escapeHTML(sub.release)}</div>
+                    <div class="text-xs text-neutral-500 mt-1">${Security.escapeHTML(sub.movieTitle || '')} · ${Security.escapeHTML(sub.date || '')}</div>
+                </div>
+                <span class="badge badge-srt">${Security.escapeHTML(sub.format || 'SRT')}</span>
+            </a>
+        `).join('');
+    }
+
+    function loadWatchlist(username) {
+        const watchlist = JSON.parse(localStorage.getItem('subtile_watchlist_' + username) || '[]');
+        const container = $('tabWatchlist');
+        $('statWatchlist').textContent = watchlist.length;
+        if (watchlist.length === 0) {
+            container.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="fas fa-bookmark text-3xl mb-3 block"></i>No watchlist items yet</div>';
+            return;
+        }
+        container.innerHTML = watchlist.map(item => `
+            <a href="movie.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(item.type || 'movie')}" class="sub-item" style="text-decoration:none; color:inherit;">
+                <img src="${Security.sanitizeImageURL(item.poster, 'https://images.metahub.space/poster/small/tt15239678/img')}" alt="" style="width:40px; height:60px; object-fit:cover; border-radius:6px;">
+                <div class="flex-1">
+                    <div class="font-bold text-sm">${Security.escapeHTML(item.title)}</div>
+                    <div class="text-xs text-neutral-500 mt-1">${Security.escapeHTML(String(item.year || ''))} · ${Security.escapeHTML(item.type || 'Movie')}</div>
+                </div>
+                <button onclick="event.preventDefault(); event.stopPropagation(); removeFromWatchlist('${Security.escapeAttribute(item.id)}')" class="text-neutral-500 hover:text-red-400 transition-colors px-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </a>
+        `).join('');
+    }
+
+    function loadReviews(username) {
+        const reviews = JSON.parse(localStorage.getItem('subtile_reviews_' + username) || '[]');
+        const container = $('tabReviews');
+        $('statReviews').textContent = reviews.length;
+        if (reviews.length === 0) {
+            container.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="fas fa-star text-3xl mb-3 block"></i>No reviews yet</div>';
+            return;
+        }
+        container.innerHTML = reviews.map(r => `
+            <a href="movie.html?id=${encodeURIComponent(r.movieId)}&type=${encodeURIComponent(r.type || 'movie')}" class="sub-item" style="text-decoration:none; color:inherit;">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-bold text-sm">${Security.escapeHTML(r.movieTitle || 'Movie')}</span>
+                        <span class="text-amber-400 text-xs">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</span>
+                    </div>
+                    <p class="text-xs text-neutral-400">${Security.escapeHTML(r.comment || '')}</p>
+                    <div class="text-xs text-neutral-600 mt-1">${Security.escapeHTML(r.date || '')}</div>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    function removeFromWatchlist(itemId) {
+        if (!profileUser) return;
+        let watchlist = JSON.parse(localStorage.getItem('subtile_watchlist_' + profileUser.username) || '[]');
+        watchlist = watchlist.filter(w => w.id !== itemId);
+        localStorage.setItem('subtile_watchlist_' + profileUser.username, JSON.stringify(watchlist));
+        loadWatchlist(profileUser.username);
+        showToast('Removed from watchlist');
+    }
+
+    function switchProfileTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        $('tabUploads').classList.toggle('hidden', tab !== 'uploads');
+        $('tabWatchlist').classList.toggle('hidden', tab !== 'watchlist');
+        $('tabReviews').classList.toggle('hidden', tab !== 'reviews');
+    }
+
+    function setupNavbar() {
+        const slot = $('navAuthSlot');
+        if (!slot) return;
+        const user = Auth.getCurrentUser();
+        if (user && user.username) {
+            slot.innerHTML = `
+                <a href="profile.html" class="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-2 rounded-full text-sm font-semibold text-white hover:border-neutral-600 transition-colors">
+                    <img src="${Security.sanitizeImageURL(user.avatar, 'assets/default-avatar.svg')}" class="w-6 h-6 rounded-full" alt="">
+                    ${Security.escapeHTML(user.username)}
+                </a>
+            `;
+        } else {
+            slot.innerHTML = `<a href="login.html" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all">Login</a>`;
+        }
+    }
+
+    function handleProfileLogout() {
+        Auth.logout();
+        window.location.href = 'index.html';
+    }
+
+    function toggleLang() {
+        if (typeof I18n === 'undefined') return;
+        const next = I18n.getLang() === 'en' ? 'ar' : 'en';
+        I18n.setLang(next);
+        I18n.translatePage();
+        const langBtn = document.getElementById('langToggleBtn');
+        if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
+        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+    }
+
+    function showToast(message, isError = false) {
+        const container = $('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const iconColor = isError ? '#ef4444' : '#34d399';
+        toast.style.cssText = 'background:rgba(15,15,18,0.95);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);padding:0.8rem 1.2rem;border-radius:12px;color:#fff;font-weight:600;font-size:0.85rem;display:flex;align-items:center;gap:0.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.6);opacity:1;transition:opacity 0.3s ease;';
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color:${iconColor}"></i> ${Security.escapeHTML(message)}`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+    </script>
+</body>
+</html>

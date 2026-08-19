@@ -181,8 +181,15 @@
 
     <!-- Scripts -->
     <script src="js/security.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/auth.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof ThemeToggle !== 'undefined') ThemeToggle.applyTheme();
+            if (typeof I18n !== 'undefined') I18n.translatePage();
+        });
+
         function switchAuthTab(tab) {
             const isLogin = tab === 'login';
             document.getElementById('tabLogin').classList.toggle('active', isLogin);

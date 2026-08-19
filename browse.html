@@ -87,28 +87,23 @@
             
             <div class="flex-1 max-w-xl mx-4 relative">
                 <div class="relative">
-                    <input type="text" id="catalogSearchInput" oninput="onCatalogSearch()" placeholder="Search movies, TV shows, anime..." autocomplete="off" class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-500">
+                    <input type="text" id="catalogSearchInput" oninput="onCatalogSearch()" placeholder="Search movies, TV shows, anime..." autocomplete="off" data-i18n="searchPlaceholder" class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-500 transition-colors text-neutral-200 placeholder:text-neutral-500">
                     <svg class="absolute end-3.5 top-3 w-4 h-4 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <div id="browseSearchDropdown" class="search-dropdown"></div>
             </div>
 
             <div class="flex items-center gap-4 flex-shrink-0">
+                <div id="themeToggleNav"></div>
+                <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.75rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
                 <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-neutral-400">
-                    <a href="index.html" class="hover:text-white transition-colors">Trending</a>
-                    <a href="browse.html" class="text-white border-b-2 border-white pb-0.5">Browse</a>
+                    <a href="index.html" class="hover:text-white transition-colors" data-i18n="trending">Trending</a>
+                    <a href="browse.html" class="text-white border-b-2 border-white pb-0.5" data-i18n="browse">Browse</a>
                 </nav>
-                <!-- CONNECTED: js/browse.js's setupAuthNavbar() already builds the
-                     logged-in user dropdown (avatar, Profile, Upload, Logout) and
-                     falls back to a login button — it just had no #navAuthSlot to
-                     render into on this page, so it always looked logged-out even
-                     when subhub_current_user was set. This div gives it a target;
-                     the static markup below is the no-JS fallback and is replaced
-                     on load. -->
                 <div id="navAuthSlot">
                     <a href="login.html" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
                         <i class="fas fa-user-circle text-sm"></i>
-                        <span>Login</span>
+                        <span data-i18n="login">Login</span>
                     </a>
                 </div>
             </div>
@@ -131,10 +126,10 @@
             </div>
             
             <div class="flex gap-2 flex-wrap items-center" id="browseCategoryFilters">
-                <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('all', this)">All Titles</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('movie', this)">Movies</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('tv', this)">TV Shows</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('anime', this)">Anime</button>
+                <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('all', this)" data-i18n="browseMovies">All Titles</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('movie', this)" data-i18n="browseMovies">Movies</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('tv', this)" data-i18n="browseSeries">TV Shows</button>
+                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-bold hover:bg-neutral-800 hover:text-white transition-all" onclick="filterCatalog('anime', this)" data-i18n="browseAnime">Anime</button>
                 <!-- CONNECTED: js/browse.js already implements onCatalogSort()/currentSort
                      fully (rating/year/title) but browse.html had no control to trigger it. -->
                 <select id="catalogSortSelect" onchange="onCatalogSort()" class="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm font-bold focus:outline-none focus:border-neutral-500 transition-colors">
@@ -150,8 +145,8 @@
 
         <div id="catalogEmpty" class="hidden text-center py-24">
             <p class="text-5xl mb-4">🎬</p>
-            <p class="text-neutral-300 font-bold text-xl mb-1">No titles found</p>
-            <p class="text-neutral-500 text-sm">Try searching for another movie, series or anime title</p>
+            <p class="text-neutral-300 font-bold text-xl mb-1" data-i18n="noTitleFound">No titles found</p>
+            <p class="text-neutral-500 text-sm" data-i18n="tryAnotherFilter">Try searching for another movie, series or anime title</p>
         </div>
 
         <!-- Infinite Loading Spinner -->
@@ -198,7 +193,26 @@
     </div>
 
     <script src="js/security.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/data.js"></script>
     <script src="js/browse.js"></script>
+    <script>
+    if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+    if (typeof I18n !== 'undefined') {
+        I18n.translatePage();
+        const langBtn = document.getElementById('langToggleBtn');
+        if (langBtn) langBtn.textContent = I18n.getLang() === 'ar' ? 'EN' : 'AR';
+    }
+    function toggleLang() {
+        if (typeof I18n === 'undefined') return;
+        const next = I18n.getLang() === 'en' ? 'ar' : 'en';
+        I18n.setLang(next);
+        I18n.translatePage();
+        const langBtn = document.getElementById('langToggleBtn');
+        if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
+        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+    }
+    </script>
 </body>
 </html>
