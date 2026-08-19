@@ -346,7 +346,7 @@ function renderCatalog() {
       <a href="${targetUrl}" class="movie-card" style="position: relative; text-decoration: none; color: inherit; display: block;">
         <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 1.5rem; filter: grayscale(20%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border-color);">
         ${ratingDisplay ? `
-          <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(8px); border: 1px solid var(--border-color); color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; z-index: 2; font-family: 'Inter', sans-serif;">
+          <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(10, 10, 12, 0.9); border: 1px solid var(--border-color); color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; z-index: 2; font-family: 'Inter', sans-serif;">
             <i class="fas fa-star" style="font-size: 0.65rem; margin-right: 0.2rem;"></i> ${ratingDisplay}
           </span>
         ` : ''}
@@ -532,12 +532,12 @@ function setupAuthNavbar() {
     const safeUsername = esc(user.username);
     slot.innerHTML = `
       <div style="position: relative; display: inline-block;">
-        <button onclick="toggleNavUserDropdown(event)" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(15, 15, 18, 0.55); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); padding: 0.5rem 1.2rem; border-radius: 50px; color: #fff; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <button onclick="toggleNavUserDropdown(event)" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(15, 15, 18, 0.85); border: 1px solid var(--border-color); padding: 0.5rem 1.2rem; border-radius: 50px; color: #fff; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
           <img src="assets/default-avatar.svg" alt="" style="width: 24px; height: 24px; border-radius: 50%;">
           <span>${safeUsername}</span>
           <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
         </button>
-        <div id="navUserDropdown" style="position: absolute; top: 110%; right: 0; background: rgba(15, 15, 18, 0.95); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--border-color); border-radius: 1rem; padding: 0.5rem; min-width: 200px; display: none; flex-direction: column; gap: 0.2rem; z-index: 100;">
+        <div id="navUserDropdown" style="position: absolute; top: 110%; right: 0; background: rgba(15, 15, 18, 0.95); border: 1px solid var(--border-color); border-radius: 1rem; padding: 0.5rem; min-width: 200px; display: none; flex-direction: column; gap: 0.2rem; z-index: 100;">
           <a href="profile.html?user=${encodeURIComponent(user.username)}" style="padding: 0.6rem 1rem; border-radius: 0.75rem; color: var(--text-faded); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
             <i class="fas fa-user-circle"></i> Profile
           </a>

@@ -26,8 +26,8 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); }
         
         .nav-blur {
-            backdrop-filter: blur(24px) saturate(160%);
-            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            backdrop-filter: blur(8px) saturate(160%);
+            -webkit-backdrop-filter: blur(8px) saturate(160%);
             background: var(--bg-glass);
             border-bottom: 1px solid var(--border-color);
         }
@@ -106,7 +106,6 @@
             display: inline-flex;
             align-items: center;
             gap: 0.6rem;
-            backdrop-filter: blur(16px);
         }
         .category-tab:hover {
             color: #ffffff;
@@ -145,8 +144,7 @@
             top: calc(100% + 8px);
             left: 0;
             right: 0;
-            background: rgba(18, 18, 24, 0.96);
-            backdrop-filter: blur(20px);
+            background: rgba(18, 18, 24, 0.98);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
             max-height: 380px;
@@ -1022,7 +1020,7 @@ function updateAuthNav() {
                     <span>${safeName}</span>
                     <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
                 </button>
-                <div id="navUserDropdown" style="position:absolute; top:110%; right:0; background:rgba(15,15,18,0.95); backdrop-filter:blur(30px); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.4rem; min-width:180px; display:none; flex-direction:column; gap:2px; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
+                <div id="navUserDropdown" style="position:absolute; top:110%; right:0; background:rgba(15,15,18,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.4rem; min-width:180px; display:none; flex-direction:column; gap:2px; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
                     <a href="profile.html" style="padding:0.6rem 1rem; border-radius:8px; color:#9ca3af; text-decoration:none; font-size:0.85rem; transition:all 0.2s; display:flex; align-items:center; gap:0.5rem;">
                         <i class="fas fa-user-circle"></i> Profile
                     </a>

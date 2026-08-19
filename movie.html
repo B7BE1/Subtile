@@ -80,9 +80,9 @@
 
     /* Left Side: Movie Hero Info */
     .left-panel {
-      background: linear-gradient(to right, rgba(6, 6, 8, 0.8) 0%, rgba(6, 6, 8, 0.5) 85%, transparent 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(to right, rgba(6, 6, 8, 0.9) 0%, rgba(6, 6, 8, 0.7) 85%, transparent 100%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       width: 44%;
       padding: 6.5rem 3.5rem 4rem 4rem;
       display: flex;
@@ -135,7 +135,6 @@
     }
     .tag {
       background: rgba(255, 255, 255, 0.07);
-      backdrop-filter: blur(10px);
       padding: 0.4rem 1rem;
       border-radius: 50px;
       font-size: 0.85rem;
@@ -207,8 +206,6 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 1.4rem 1.8rem;
       background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
       border-radius: var(--radius-md);
       transition: var(--transition);
       border: 1px solid var(--border-color);
@@ -270,7 +267,6 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 1.2rem 1.6rem;
       background: var(--bg-card);
-      backdrop-filter: blur(20px);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       cursor: pointer; transition: var(--transition);
@@ -289,7 +285,7 @@
     .nav-header {
       position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
       padding: 1rem clamp(1rem, 4vw, 3rem); display: flex; justify-content: space-between; align-items: center;
-      background: rgba(6, 6, 8, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(6, 6, 8, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border-color);
     }
     .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #fff; font-weight: 900; font-size: 1.2rem; }
@@ -302,7 +298,7 @@
       .movie-nav-hamburger { display: flex; align-items: center; justify-content: center; }
     }
     #movieMobileNav {
-      display: none; position: fixed; inset: 0; background: rgba(5,5,7,0.98); backdrop-filter: blur(20px);
+      display: none; position: fixed; inset: 0; background: rgba(5,5,7,0.99);
       z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
     }
     #movieMobileNav.active { display: flex; }
@@ -314,7 +310,7 @@
     
     /* Toast */
     #toastContainer { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.8rem; }
-    .toast { background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--border-hover); padding: 1rem 1.5rem; border-radius: 12px; color: #fff; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 0.6rem; }
+    .toast { background: rgba(14, 14, 18, 0.98); border: 1px solid var(--border-hover); padding: 1rem 1.5rem; border-radius: 12px; color: #fff; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 0.6rem; }
 
     /* Global Loader */
     #globalLoader {
@@ -458,7 +454,7 @@
   <div id="toastContainer"></div>
 
   <!-- Upload Modal -->
-  <div id="uploadModal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)closeUploadModal()">
+  <div id="uploadModal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)closeUploadModal()">
     <div style="background:#12151b; border:1px solid #23262e; border-radius:16px; max-width:500px; width:100%; padding:2rem; box-shadow:0 16px 40px rgba(0,0,0,0.8); position:relative;">
       <button onclick="closeUploadModal()" style="position:absolute; top:1rem; left:1rem; background:none; border:none; color:#6b7280; cursor:pointer; font-size:1.1rem;"><i class="fas fa-times"></i></button>
       <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:1.5rem;"><i class="fas fa-upload" style="margin-right:0.5rem;"></i> Upload Subtitle</h3>

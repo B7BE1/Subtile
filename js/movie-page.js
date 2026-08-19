@@ -120,7 +120,7 @@ function setupAuthNavbar() {
           <span>${safe(user.username)}</span>
           <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
         </button>
-        <div id="movieUserDD" style="position:absolute;top:110%;right:0;background:rgba(15,15,18,0.95);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0.5rem;min-width:180px;display:none;flex-direction:column;gap:2px;z-index:100;">
+        <div id="movieUserDD" style="position:absolute;top:110%;right:0;background:rgba(15,15,18,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0.5rem;min-width:180px;display:none;flex-direction:column;gap:2px;z-index:100;">
           <a href="profile.html?user=${encodeURIComponent(user.username)}" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:#d1d5db;text-decoration:none;font-size:0.85rem;"><i class="fas fa-user-circle"></i> Profile</a>
           <a href="browse.html" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:#d1d5db;text-decoration:none;font-size:0.85rem;"><i class="fas fa-compass"></i> Browse</a>
           <div style="height:1px;background:rgba(255,255,255,0.08);margin:4px 0;"></div>
