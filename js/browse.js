@@ -621,6 +621,36 @@ async function handleAuthLogin(e) {
   }
 }
 
+async function handleAuthRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('authRegUsername').value.trim();
+  const email = document.getElementById('authRegEmail').value.trim();
+  const password = document.getElementById('authRegPassword').value;
+  try {
+    if (typeof Auth !== 'undefined') {
+      await Auth.register({ username, email, password });
+      closeAuthModal();
+      setupAuthNavbar();
+      showToast('Account created! Welcome, ' + username);
+    }
+  } catch (err) {
+    showToast(err.message || 'Registration failed', true);
+  }
+}
+
+function switchBrowseModalTab(tab) {
+  const isLogin = tab === 'login';
+  const tabLogin = document.getElementById('browseModalTabLogin');
+  const tabRegister = document.getElementById('browseModalTabRegister');
+  const loginForm = document.getElementById('authLoginForm');
+  const registerForm = document.getElementById('authRegisterForm');
+
+  if (tabLogin) tabLogin.style.cssText = isLogin ? 'flex:1; padding:8px; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; background:#fff; color:#050507; cursor:pointer; text-align:center; transition:all 0.2s;' : 'flex:1; padding:8px; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; background:transparent; color:#6b7280; cursor:pointer; text-align:center; transition:all 0.2s;';
+  if (tabRegister) tabRegister.style.cssText = !isLogin ? 'flex:1; padding:8px; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; background:#fff; color:#050507; cursor:pointer; text-align:center; transition:all 0.2s;' : 'flex:1; padding:8px; border:none; border-radius:8px; font-size:0.85rem; font-weight:700; background:transparent; color:#6b7280; cursor:pointer; text-align:center; transition:all 0.2s;';
+  if (loginForm) loginForm.style.display = isLogin ? '' : 'none';
+  if (registerForm) registerForm.style.display = !isLogin ? '' : 'none';
+}
+
 function showToast(message) {
   const container = document.getElementById('toastContainer');
   if (!container) return;

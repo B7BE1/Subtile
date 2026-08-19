@@ -334,6 +334,36 @@ async function handleAuthLogin(e) {
   }
 }
 
+async function handleAuthRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('authRegUsername').value.trim();
+  const email = document.getElementById('authRegEmail').value.trim();
+  const password = document.getElementById('authRegPassword').value;
+  try {
+    if (typeof Auth !== 'undefined') {
+      await Auth.register({ username, email, password });
+      closeAuthModal();
+      setupAuthNavbar();
+      showToast('Account created! Welcome, ' + username);
+    }
+  } catch (err) {
+    showToast(err.message || 'Registration failed', true);
+  }
+}
+
+function switchModalAuthTab(tab) {
+  const isLogin = tab === 'login';
+  const tabLogin = document.getElementById('modalTabLogin');
+  const tabRegister = document.getElementById('modalTabRegister');
+  const loginForm = document.getElementById('modalLoginForm');
+  const registerForm = document.getElementById('modalRegisterForm');
+
+  if (tabLogin) { tabLogin.className = isLogin ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-white text-neutral-950 text-center transition-all' : 'flex-1 py-2 rounded-lg text-sm font-bold text-neutral-400 text-center transition-all'; }
+  if (tabRegister) { tabRegister.className = !isLogin ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-white text-neutral-950 text-center transition-all' : 'flex-1 py-2 rounded-lg text-sm font-bold text-neutral-400 text-center transition-all'; }
+  if (loginForm) loginForm.classList.toggle('hidden', !isLogin);
+  if (registerForm) registerForm.classList.toggle('hidden', isLogin);
+}
+
 function showToast(message) {
   const container = document.getElementById('toastContainer');
   if (!container) return;

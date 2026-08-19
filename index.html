@@ -307,23 +307,84 @@
 
     <!-- Auth Modal -->
     <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm" onclick="if(event.target===this)closeAuthModal()">
-        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Sign In / Create Account</h3>
-                <button onclick="closeAuthModal()" class="text-neutral-500 hover:text-white transition-colors"><i class="fas fa-times text-lg"></i></button>
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 left-4 text-neutral-500 hover:text-white transition-colors"><i class="fas fa-times text-lg"></i></button>
+
+            <!-- Tabs -->
+            <div class="flex bg-neutral-950/80 border border-neutral-800 p-1 rounded-xl mb-6">
+                <button id="modalTabLogin" onclick="switchModalAuthTab('login')" class="flex-1 py-2 rounded-lg text-sm font-bold bg-white text-neutral-950 text-center transition-all">Sign In</button>
+                <button id="modalTabRegister" onclick="switchModalAuthTab('register')" class="flex-1 py-2 rounded-lg text-sm font-bold text-neutral-400 text-center transition-all">Create Account</button>
             </div>
-            <form id="authLoginForm" onsubmit="handleAuthLogin(event)" class="space-y-4">
+
+            <!-- Modal Login Form -->
+            <form id="modalLoginForm" onsubmit="handleAuthLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-neutral-300 mb-1.5">Username or Email</label>
-                    <input type="text" id="authLoginIdentifier" required class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600" placeholder="Enter username or email">
+                    <div class="relative">
+                        <input type="text" id="authLoginIdentifier" required placeholder="Enter your username or email" class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-user absolute right-3 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-neutral-300 mb-1.5">Password</label>
-                    <input type="password" id="authLoginPassword" required class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600" placeholder="Enter password">
+                    <div class="relative">
+                        <input type="password" id="authLoginPassword" required placeholder="••••••••" class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-lock absolute right-3 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-white text-neutral-950 hover:bg-neutral-200 font-black py-3 rounded-xl transition-all shadow-lg text-sm">Sign In</button>
+                <button type="submit" class="w-full bg-white text-neutral-950 hover:bg-neutral-200 font-black py-3 rounded-xl transition-all shadow-lg text-sm flex items-center justify-center gap-2">
+                    <span>Sign In</span> <i class="fas fa-arrow-right"></i>
+                </button>
             </form>
-            <p class="text-center text-xs text-neutral-500 mt-4">Don't have an account? <a href="login.html" class="text-blue-400 hover:underline">Create one</a></p>
+
+            <!-- Modal Register Form -->
+            <form id="modalRegisterForm" onsubmit="handleAuthRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5">Username</label>
+                    <div class="relative">
+                        <input type="text" id="authRegUsername" required placeholder="Choose a username" class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-user-tag absolute right-3 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5">Email</label>
+                    <div class="relative">
+                        <input type="email" id="authRegEmail" required placeholder="name@example.com" class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-envelope absolute right-3 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-neutral-300 mb-1.5">Password</label>
+                    <div class="relative">
+                        <input type="password" id="authRegPassword" required placeholder="At least 8 characters" class="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 ps-4 pe-10 text-sm focus:outline-none focus:border-neutral-400 transition-colors text-white placeholder:text-neutral-600">
+                        <i class="fas fa-lock absolute right-3 top-3.5 text-neutral-500 text-sm"></i>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-white text-neutral-950 hover:bg-neutral-200 font-black py-3 rounded-xl transition-all shadow-lg text-sm flex items-center justify-center gap-2">
+                    <span>Create Account</span> <i class="fas fa-user-plus"></i>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="relative my-5 text-center">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-neutral-800"></div></div>
+                <span class="relative bg-neutral-900 px-3 text-[11px] font-bold text-neutral-500 uppercase tracking-widest">Or continue with</span>
+            </div>
+
+            <!-- Social -->
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="showToast('Google Sign-In integration ready')" class="bg-neutral-950/80 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 text-neutral-400 hover:text-white">
+                    <i class="fab fa-google text-amber-500"></i> Google
+                </button>
+                <button onclick="showToast('Discord Sign-In integration ready')" class="bg-neutral-950/80 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 text-neutral-400 hover:text-white">
+                    <i class="fab fa-discord text-indigo-400"></i> Discord
+                </button>
+                <button onclick="showToast('GitHub Sign-In integration ready')" class="bg-neutral-950/80 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 text-neutral-400 hover:text-white">
+                    <i class="fab fa-github"></i> GitHub
+                </button>
+            </div>
+
+            <p class="text-center text-xs text-neutral-500 mt-4">Need full features? <a href="login.html" class="text-blue-400 hover:underline">Go to Login Page</a></p>
         </div>
     </div>
 
