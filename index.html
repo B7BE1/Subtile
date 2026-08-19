@@ -1002,7 +1002,7 @@ function renderGrid(customList) {
     const list = customList || (CATEGORY_DATA[CURRENT_CATEGORY] || []).slice(1);
     
     $("grid").innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
-    $("emptyState").classList.toggle("hidden", list.length === 0);
+    $("emptyState").classList.toggle("hidden", list.length > 0);
     observeReveals();
 }
 
