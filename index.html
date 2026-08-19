@@ -976,25 +976,41 @@ function renderGrid(customList) {
 function updateAuthNav() {
     const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
     const btn = $("navAuthBtn");
-    const txt = $("navAuthText");
-    if (!btn || !txt) return;
+    if (!btn) return;
 
     if (user && user.username) {
-        txt.textContent = user.username;
-        btn.href = "#";
-        btn.onclick = (e) => {
-            e.preventDefault();
-            if (confirm('Do you want to log out?')) {
-                Auth.logout();
-                updateAuthNav();
-            }
-        };
+        const safeName = user.username.replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]));
+        btn.outerHTML = `
+            <div id="navAuthBtn" style="position:relative; display:inline-block;">
+                <button onclick="toggleNavDropdown(event)" style="display:flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); padding:0.4rem 1rem; border-radius:50px; color:#fff; cursor:pointer; font-weight:600; font-size:0.8rem; font-family:Inter,sans-serif; transition:all 0.3s;">
+                    <img src="assets/default-avatar.svg" style="width:24px; height:24px; border-radius:50%;" alt="">
+                    <span>${safeName}</span>
+                    <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
+                </button>
+                <div id="navUserDropdown" style="position:absolute; top:110%; right:0; background:rgba(15,15,18,0.95); backdrop-filter:blur(30px); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.4rem; min-width:180px; display:none; flex-direction:column; gap:2px; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
+                    <a href="profile.html" style="padding:0.6rem 1rem; border-radius:8px; color:#9ca3af; text-decoration:none; font-size:0.85rem; transition:all 0.2s; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-user-circle"></i> Profile
+                    </a>
+                    <div style="height:1px; background:rgba(255,255,255,0.08); margin:2px 0;"></div>
+                    <button onclick="Auth.logout(); updateAuthNav();" style="padding:0.6rem 1rem; border-radius:8px; color:#9ca3af; background:transparent; border:none; cursor:pointer; text-align:left; font-size:0.85rem; font-family:Inter,sans-serif; transition:all 0.2s; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>`;
     } else {
-        txt.textContent = "Login";
-        btn.href = "login.html";
-        btn.onclick = null;
+        btn.outerHTML = `<a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"><i class="fas fa-user-circle text-sm"></i><span id="navAuthText">Login</span></a>`;
     }
 }
+
+function toggleNavDropdown(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('navUserDropdown');
+    if (dd) dd.style.display = dd.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', () => {
+    const dd = document.getElementById('navUserDropdown');
+    if (dd) dd.style.display = 'none';
+});
 
 const io = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); } });
@@ -1024,12 +1040,17 @@ window.addEventListener("scroll", () => {
 toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 $("year").textContent = new Date().getFullYear();
-updateAuthNav();
 document.querySelectorAll(".category-tab").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.cat === CURRENT_CATEGORY);
 });
 renderActiveCategory();
 fetchLiveTrending();
+
+// Auth: subscribe to changes so navbar updates after login/logout/redirect
+if (typeof Auth !== 'undefined') {
+    Auth.onChange(() => updateAuthNav());
+}
+updateAuthNav();
 
 // Theme & i18n
 if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
