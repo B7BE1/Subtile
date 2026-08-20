@@ -178,6 +178,9 @@
 </head>
 <body class="overflow-x-hidden min-h-screen">
 
+    <!-- Animated Background Blobs -->
+    <div class="animated-bg"></div>
+
     <!-- Navbar -->
     <header class="fixed top-0 w-full z-50 nav-blur" style="transition: all 0.3s ease;">
         <div class="container mx-auto px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
@@ -244,14 +247,14 @@
 
             <div class="max-w-2xl mt-4 md:mt-0 fade-in-up">
                 <div class="flex items-center gap-4 mb-4">
-                    <span class="text-white font-black text-7xl md:text-8xl leading-none" style="text-shadow: 0 4px 30px rgba(255,255,255,0.1);">01</span>
+                    <span class="shimmer-text font-black typo-hero leading-none">01</span>
                     <div class="border-s-2 border-white/20 ps-4">
                         <p id="featuredCategoryLabel" class="text-neutral-300 text-sm font-bold tracking-widest uppercase">Current #1 Movie</p>
                         <p class="text-neutral-500 text-xs mt-0.5 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full pulse-glow"></span> Live Real-Time Trending</p>
                     </div>
                 </div>
 
-                <h1 id="featuredTitle" class="text-4xl md:text-6xl font-black text-white mb-3 tracking-tight leading-tight" style="text-shadow: 0 4px 30px rgba(0,0,0,0.5);"></h1>
+                <h1 id="featuredTitle" class="typo-hero font-black text-white mb-3" style="text-shadow: 0 4px 30px rgba(0,0,0,0.5);"></h1>
                 <div id="featuredMeta" class="flex items-center flex-wrap gap-x-4 gap-y-2 mb-6 text-neutral-400 text-sm font-medium"></div>
                 <p id="featuredDesc" class="text-neutral-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl"></p>
 
@@ -273,12 +276,12 @@
         <div class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-neutral-800/80 pb-6">
             <div>
                 <p id="gridSubtitle" class="text-neutral-500 font-bold mb-2 tracking-[0.2em] text-xs uppercase">Top 10 Movies Chart</p>
-                <h2 id="gridTitle" class="text-3xl md:text-4xl font-black text-neutral-50 tracking-tight">Top Ranked #02 — #10</h2>
+                <h2 id="gridTitle" class="typo-h1 font-black text-neutral-50">Top Ranked #02 — #10</h2>
             </div>
             
             <div class="flex flex-wrap items-center gap-3 sm:gap-6">
                 <!-- Category Tabs Switcher -->
-                <div class="flex gap-2 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-full backdrop-blur-xl shadow-lg overflow-x-auto">
+                <div class="flex gap-2 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-full backdrop-blur-xl shadow-lg overflow-x-auto gradient-border">
                     <button data-cat="movie" class="category-tab active">
                         <i class="fas fa-film"></i> Movies
                     </button>

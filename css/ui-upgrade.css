@@ -120,6 +120,190 @@ html { scroll-behavior: smooth; }
     border-radius: 16px;
 }
 
+/* ===== Enhanced Glassmorphism ===== */
+.glass-enhanced {
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-enhanced:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow:
+        0 12px 48px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+/* ===== Gradient Borders ===== */
+.gradient-border {
+    position: relative;
+    border: none;
+    background: transparent;
+}
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05), rgba(139,92,246,0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    opacity: 0.6;
+}
+.gradient-border:hover::before {
+    opacity: 1;
+    background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1), rgba(139,92,246,0.5));
+}
+
+/* ===== Gradient Button ===== */
+.btn-gradient {
+    background: linear-gradient(135deg, #fff 0%, #e5e7eb 100%);
+    color: #000;
+    font-weight: 800;
+    border: none;
+    border-radius: 14px;
+    padding: 0.75rem 1.8rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 16px rgba(255,255,255,0.15);
+}
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(255,255,255,0.25);
+}
+.btn-gradient:active {
+    transform: translateY(0) scale(0.98);
+}
+.btn-gradient-dark {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.btn-gradient-dark:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.06) 100%);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+}
+
+/* ===== Animated Background ===== */
+.animated-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+.animated-bg::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
+    top: -200px;
+    right: -200px;
+    animation: floatBlob1 20s ease-in-out infinite;
+}
+.animated-bg::after {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+    bottom: -150px;
+    left: -150px;
+    animation: floatBlob2 25s ease-in-out infinite;
+}
+@keyframes floatBlob1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(80px, 60px) scale(1.1); }
+    66% { transform: translate(-40px, 30px) scale(0.95); }
+}
+@keyframes floatBlob2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-60px, -40px) scale(1.05); }
+    66% { transform: translate(50px, -20px) scale(0.9); }
+}
+
+/* ===== Typography Scale ===== */
+.typo-hero { font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1.05; letter-spacing: -0.03em; }
+.typo-h1 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.1; letter-spacing: -0.02em; }
+.typo-h2 { font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.15; letter-spacing: -0.015em; }
+.typo-h3 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.2; }
+.typo-body { font-size: clamp(0.9rem, 1.5vw, 1rem); line-height: 1.6; }
+.typo-small { font-size: clamp(0.75rem, 1.2vw, 0.85rem); line-height: 1.5; }
+.typo-caption { font-size: clamp(0.65rem, 1vw, 0.75rem); line-height: 1.4; letter-spacing: 0.02em; }
+
+/* ===== Shimmer Text ===== */
+@keyframes shimmerText {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+.shimmer-text {
+    background: linear-gradient(90deg, #fff 0%, #a78bfa 25%, #fff 50%, #a78bfa 75%, #fff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerText 4s linear infinite;
+}
+
+/* ===== Glow Effects ===== */
+.glow-purple { box-shadow: 0 0 20px rgba(139,92,246,0.3), 0 0 60px rgba(139,92,246,0.1); }
+.glow-blue { box-shadow: 0 0 20px rgba(59,130,246,0.3), 0 0 60px rgba(59,130,246,0.1); }
+.glow-green { box-shadow: 0 0 20px rgba(16,185,129,0.3), 0 0 60px rgba(16,185,129,0.1); }
+.glow-amber { box-shadow: 0 0 20px rgba(245,158,11,0.3), 0 0 60px rgba(245,158,11,0.1); }
+
+/* ===== Divider ===== */
+.divider-gradient {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    border: none;
+}
+
+/* ===== Badge Variants ===== */
+.badge-premium {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+    font-weight: 800;
+    padding: 0.2rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-new {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #000;
+    font-weight: 800;
+    padding: 0.2rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-hot {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    color: #fff;
+    font-weight: 800;
+    padding: 0.2rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 /* ===== Input Focus Glow ===== */
 .input-glow:focus {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
