@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(r) {
+        if (r && r.length) {
+          r.forEach(function(s) { s.unregister(); });
+          if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
+          setTimeout(function() { location.reload(); }, 100);
+        }
+      });
+    }
+    </script>
     <meta name="description" content="Browse and discover subtitles for movies, TV series, and anime.">
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#0a0a0c">
@@ -278,9 +289,9 @@
     </script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (const r of registrations) r.unregister();
+    });
 }
 </script>
 </body>

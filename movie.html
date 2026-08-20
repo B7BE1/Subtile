@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(r) {
+      if (r && r.length) {
+        r.forEach(function(s) { s.unregister(); });
+        if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
+        setTimeout(function() { location.reload(); }, 100);
+      }
+    });
+  }
+  </script>
   <meta name="description" content="Download subtitles for movies, series, and anime.">
   <meta name="referrer" content="no-referrer">
-  <meta name="theme-color" content="#0a0a0c">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json">
   <title>Subtitles Archive — Subtile</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -557,8 +564,8 @@
   <script src="js/movie-page.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const r of registrations) r.unregister();
   });
 }
 </script>
