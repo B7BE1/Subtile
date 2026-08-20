@@ -304,16 +304,25 @@ async function triggerLiveTrending(type, page = 1) {
     }
 
     if (type === 'all' || type === 'tv') {
+      // TVmaze: fetch multiple pages, sort by rating, take top 50
+      const tvmazePages = [page * 3, page * 3 + 1, page * 3 + 2];
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top.json?skip=${skip}`, { signal })
-          .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
-            id: m.imdb_id || m.id,
-            title: m.name,
+        Promise.all(tvmazePages.map(p =>
+          safeFetchJson(`https://api.tvmaze.com/shows?page=${p}`, { signal })
+            .then(d => Array.isArray(d) ? d : [])
+            .catch(() => [])
+        )).then(pages => {
+          const all = pages.flat();
+          all.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
+          return all.slice(0, 50).map(s => ({
+            id: `tv-${s.id}`,
+            title: s.name,
             type: 'tv',
-            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
-            rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || ''
-          })))
+            year: s.premiered ? s.premiered.substring(0, 4) : 'N/A',
+            rating: s.rating?.average || 0,
+            poster: s.image?.original || s.image?.medium || ''
+          }));
+        })
       );
     }
 
@@ -533,15 +542,11 @@ function onCatalogSearch() {
 let catalogSearchAbortController = null;
 let catalogSearchRequestToken = 0;
 
-// Search via /api/search — same endpoint and ranked/deduped results as the
-// hero search in js/app.js, so search behavior never drifts between the two
-// entry points.
+// Search via /api/search + TVmaze for TV shows.
 async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequestToken) {
-  // Abort here (not just in onCatalogSearch) so every caller — including
-  // filterCatalog() re-searching on a type-tab switch — gets the same
-  // in-flight-request cancellation for free instead of having to remember it.
   if (catalogSearchAbortController) catalogSearchAbortController.abort();
   catalogSearchAbortController = new AbortController();
+  const { signal } = catalogSearchAbortController;
   try {
     const apiType = currentTypeFilter === 'all' ? 'all'
       : currentTypeFilter === 'tv' ? 'tv'
@@ -550,23 +555,38 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
       : 'all';
 
     const fetchFn = window.cachedFetch || fetch;
-    const res = await fetchFn(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`, {
-      signal: catalogSearchAbortController.signal,
-    });
+    const searchPromises = [];
 
-    // The user has since typed something else — this response is stale,
-    // drop it rather than overwrite the (correct) in-progress results.
+    // Existing /api/search for movies/anime
+    if (apiType !== 'tv') {
+      searchPromises.push(
+        fetchFn(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`, { signal })
+          .then(r => r.ok ? r.json() : { results: [] })
+          .then(data => (data.results || []).map(r => ({ ...r, year: r.year || 'N/A' })))
+          .catch(() => [])
+      );
+    }
+
+    // TVmaze search for TV shows
+    if (apiType === 'tv' || apiType === 'all') {
+      searchPromises.push(
+        fetchFn(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(q)}`, { signal })
+          .then(r => r.ok ? r.json() : [])
+          .then(results => results.slice(0, 20).map(r => ({
+            id: `tv-${r.show.id}`,
+            title: r.show.name,
+            type: 'tv',
+            year: r.show.premiered ? r.show.premiered.substring(0, 4) : 'N/A',
+            rating: r.show.rating?.average || 0,
+            poster: r.show.image?.original || r.show.image?.medium || ''
+          })))
+          .catch(() => [])
+      );
+    }
+
+    const settled = await Promise.all(searchPromises);
     if (requestToken !== catalogSearchRequestToken) return;
-
-    const data = res.ok ? await res.json() : { results: [] };
-
-    // /api/search's normalized shape already carries id/type/title/year/
-    // rating/poster — renderCatalog needs no further mapping, just a
-    // fallback for the 'N/A' year placeholder the old client-side path used.
-    const apiResults = (data.results || []).map(r => ({
-      ...r,
-      year: r.year || 'N/A',
-    }));
+    const apiResults = settled.flat();
 
     const lowerQ = q.toLowerCase();
     const localMatches = MOVIES_DATABASE.filter(m =>
@@ -576,13 +596,13 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
     const existingIds = new Set(apiResults.map(r => r.id));
     localMatches.forEach(m => {
       if (!existingIds.has(m.id) && !existingIds.has(m.imdbId)) {
-        apiResults.unshift(m); // Push local database matches to the top
+        apiResults.unshift(m);
       }
     });
 
     liveSearchResults = apiResults;
   } catch (err) {
-    if (err.name === 'AbortError') return; // superseded by a newer query — not an error
+    if (err.name === 'AbortError') return;
     console.error('Catalog search error:', err);
     if (requestToken === catalogSearchRequestToken) liveSearchResults = [];
   }

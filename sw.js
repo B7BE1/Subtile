@@ -35,7 +35,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  if (url.pathname.startsWith('/api/') || url.hostname === 'api.jikan.moe' || url.hostname === 'graphql.anilist.co' || url.hostname === 'v3-cinemeta.strem.io') {
+  if (url.pathname.startsWith('/api/') || url.hostname === 'api.jikan.moe' || url.hostname === 'graphql.anilist.co' || url.hostname === 'v3-cinemeta.strem.io' || url.hostname === 'api.tvmaze.com') {
     e.respondWith(
       fetch(e.request).then((res) => {
         if (res.ok && e.request.method === 'GET') {
