@@ -7,38 +7,486 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/ui-upgrade.css">
     <style>
         :root {
-            --bg-main: #050507;
-            --bg-glass: rgba(15, 15, 18, 0.75);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(255, 255, 255, 0.25);
-            --text-main: #ffffff;
+            --bg: #07070a;
+            --surface: #0d0d12;
+            --surface-2: #14141b;
+            --border: rgba(255, 255, 255, 0.07);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: #f5f5f7;
             --text-faded: #8a8a92;
+            --text-dim: #5a5a62;
+            --accent: #d4ff3a;
+            --accent-soft: rgba(212, 255, 58, 0.12);
+            --accent-glow: rgba(212, 255, 58, 0.35);
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); }
-        .nav-blur { backdrop-filter: blur(8px) saturate(160%); background: var(--bg-glass); border-bottom: 1px solid var(--border-color); }
-        .profile-card { background: rgba(15, 15, 18, 0.8); border: 1px solid var(--border-color); border-radius: 1.25rem; box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05); transition: all 0.4s ease; }
-        .profile-card:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 12px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
-        .stat-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1.2rem; text-align: center; transition: all 0.3s ease; }
-        .stat-card:hover { border-color: var(--border-hover); background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); }
-        .sub-item { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1rem 1.2rem; transition: all 0.3s ease; display: flex; align-items: center; gap: 1rem; }
-        .sub-item:hover { border-color: var(--border-hover); background: rgba(255, 255, 255, 0.06); }
-        .tab-btn { padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; border: 1px solid var(--border-color); background: transparent; color: var(--text-faded); }
-        .tab-btn.active { background: #ffffff; color: #050507; border-color: #ffffff; }
-        .tab-btn:hover:not(.active) { border-color: var(--border-hover); color: #fff; }
-        .badge { padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-        .badge-ar { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .badge-en { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
-        .badge-srt { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
-        .edit-input { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.5rem 0.8rem; color: #fff; font-size: 0.9rem; width: 100%; outline: none; transition: border-color 0.2s; }
-        .edit-input:focus { border-color: rgba(255, 255, 255, 0.3); }
+        * { box-sizing: border-box; }
+        html, body { background: var(--bg); }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+        .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* Navbar */
+        .nav-blur {
+            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(7, 7, 10, 0.72);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ============ PROFILE HERO ============ */
+        .profile-hero {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .cover-mesh {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 200px;
+            background:
+                radial-gradient(ellipse 50% 80% at 15% 100%, rgba(212,255,58,0.22), transparent 60%),
+                radial-gradient(ellipse 60% 70% at 85% 100%, rgba(120,80,255,0.22), transparent 60%),
+                radial-gradient(ellipse 40% 60% at 50% 0%, rgba(255,90,160,0.14), transparent 70%),
+                linear-gradient(180deg, #16161e 0%, #0a0a0f 100%);
+            overflow: hidden;
+        }
+        .cover-grid {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 200px;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+            background-size: 44px 44px;
+            -webkit-mask-image: linear-gradient(180deg, transparent, black 40%, transparent);
+            mask-image: linear-gradient(180deg, transparent, black 40%, transparent);
+            pointer-events: none;
+        }
+        .cover-orb {
+            position: absolute;
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0.5;
+            animation: orbFloat 14s ease-in-out infinite;
+        }
+        .cover-orb.a { top: -60px; left: 10%; background: var(--accent); }
+        .cover-orb.b { top: -40px; right: 15%; background: #7850ff; animation-delay: -7s; }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(30px, 20px) scale(1.15); }
+        }
+
+        .hero-content {
+            position: relative;
+            padding: 0 1.5rem 1.5rem;
+            margin-top: 120px;
+        }
+        @media (min-width: 768px) {
+            .hero-content { padding: 0 2.5rem 2.5rem; margin-top: 140px; }
+        }
+
+        /* Avatar */
+        .avatar-wrap {
+            position: relative;
+            width: 112px; height: 112px;
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+            .avatar-wrap { width: 140px; height: 140px; }
+        }
+        .avatar-ring {
+            position: relative;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            padding: 4px;
+            background: conic-gradient(from 220deg, var(--accent), rgba(120,80,255,0.8), rgba(255,90,160,0.7), var(--accent));
+            box-shadow: 0 0 40px var(--accent-glow), 0 20px 40px -10px rgba(0,0,0,0.6);
+        }
+        .avatar-ring img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--bg);
+            background: #1a1a22;
+        }
+        .avatar-upload {
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.25s ease;
+        }
+        .avatar-wrap:hover .avatar-upload { opacity: 1; }
+        .status-dot {
+            position: absolute;
+            bottom: 6px; right: 6px;
+            width: 18px; height: 18px;
+            background: var(--accent);
+            border: 3px solid var(--bg);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        /* Username display */
+        .username-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem 0.8rem;
+        }
+        .username-display {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(180deg, #fff 0%, #b8b8c0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ============ STAT TILES ============ */
+        .stat-tile {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.4rem 1.2rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .stat-tile::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 20%; right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+        }
+        .stat-tile::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 100%, var(--accent-soft), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .stat-tile:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-4px);
+            background: var(--surface-2);
+        }
+        .stat-tile:hover::after { opacity: 1; }
+        .stat-icon {
+            width: 38px; height: 38px;
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text-faded);
+            font-size: 0.95rem;
+            margin-bottom: 0.9rem;
+        }
+        .stat-tile:hover .stat-icon { color: var(--accent); border-color: rgba(212,255,58,0.3); }
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 0.4rem;
+        }
+
+        /* ============ ACTIVITY CARD ============ */
+        .activity-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(26, 1fr);
+            gap: 4px;
+            margin-top: 1rem;
+        }
+        .heat-cell {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: transform 0.2s ease;
+        }
+        .heat-cell:hover { transform: scale(1.4); z-index: 2; }
+        .heat-cell.l1 { background: rgba(212,255,58,0.18); border-color: rgba(212,255,58,0.2); }
+        .heat-cell.l2 { background: rgba(212,255,58,0.38); border-color: rgba(212,255,58,0.3); }
+        .heat-cell.l3 { background: rgba(212,255,58,0.65); border-color: rgba(212,255,58,0.4); }
+        .heat-cell.l4 { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+
+        /* ============ SEGMENTED TABS ============ */
+        .seg-control {
+            display: inline-flex;
+            gap: 2px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 4px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.83rem;
+            color: var(--text-faded);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+        .tab-btn:hover:not(.active) {
+            color: var(--text);
+            background: rgba(255,255,255,0.03);
+        }
+        .tab-btn.active {
+            background: var(--text);
+            color: #07070a;
+            box-shadow: 0 4px 14px rgba(255,255,255,0.08);
+        }
+
+        /* ============ LIST ITEMS ============ */
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .list-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%) scaleY(0);
+            width: 3px;
+            height: 60%;
+            background: var(--accent);
+            border-radius: 0 3px 3px 0;
+            transition: transform 0.3s ease;
+        }
+        .list-item:hover {
+            border-color: var(--border-strong);
+            background: var(--surface-2);
+            transform: translateX(4px);
+        }
+        .list-item:hover::before { transform: translateY(-50%) scaleY(1); }
+
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .badge-ar { background: rgba(16, 185, 129, 0.13); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+        .badge-en { background: rgba(59, 130, 246, 0.13); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); }
+        .badge-srt { background: rgba(168, 85, 247, 0.13); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35); }
+        .badge-verified {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid rgba(212,255,58,0.3);
+        }
+
+        /* Inputs */
+        .edit-input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 0.95rem;
+            color: var(--text);
+            font-size: 0.9rem;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .edit-input:focus {
+            border-color: var(--accent);
+            background: rgba(212,255,58,0.04);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--accent);
+            color: #07070a;
+            font-weight: 700;
+            padding: 0.7rem 1.3rem;
+            border-radius: 11px;
+            font-size: 0.83rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 28px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-faded);
+            font-weight: 600;
+            padding: 0.65rem 1.1rem;
+            border-radius: 11px;
+            font-size: 0.83rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-ghost:hover {
+            color: var(--text);
+            border-color: var(--border-strong);
+            background: rgba(255,255,255,0.03);
+        }
+        .btn-ghost.danger:hover {
+            color: #ff6b6b;
+            border-color: rgba(255,107,107,0.3);
+            background: rgba(255,107,107,0.05);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3.5rem 1.5rem;
+            background: var(--surface);
+            border: 1px dashed var(--border-strong);
+            border-radius: 20px;
+        }
+        .empty-icon-wrap {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Section heading */
+        .section-eyebrow {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-eyebrow::before {
+            content: '';
+            width: 14px; height: 1px;
+            background: var(--accent);
+        }
+
+        /* Reveal animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Star rating */
+        .star-row { color: var(--accent); letter-spacing: 1px; font-size: 0.75rem; }
+        .star-row .empty { color: var(--text-dim); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
     </style>
 </head>
-<body class="overflow-x-hidden min-h-screen">
+<body class="overflow-x-hidden min-h-screen relative">
 
     <!-- Animated Background Blobs -->
     <div class="animated-bg"></div>
@@ -50,7 +498,7 @@
                 <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center transition-all group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-white/10">
                     <svg class="w-5 h-5 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </div>
-                <span class="text-lg font-black tracking-tight text-white hidden sm:block">SUBTILE</span>
+                <span class="text-lg font-black tracking-tight text-white hidden sm:block font-display">SUBTILE</span>
             </a>
             <div class="flex items-center gap-3 flex-shrink-0">
                 <div id="themeToggleNav"></div>
@@ -78,97 +526,145 @@
     <div class="pt-24"></div>
 
     <!-- Profile Content -->
-    <main class="container mx-auto px-4 sm:px-8 py-8">
-        <div class="max-w-4xl mx-auto">
+    <main class="container mx-auto px-4 sm:px-8 py-6 sm:py-10 relative" style="z-index:2;">
+        <div class="max-w-5xl mx-auto">
 
-            <!-- Profile Header -->
-            <div class="profile-card p-4 sm:p-8 mb-8">
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8">
-                    <!-- Avatar -->
-                    <div class="relative group">
-                        <div class="w-20 h-20 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-neutral-700 bg-neutral-800 flex items-center justify-center">
-                            <img id="profileAvatar" src="assets/default-avatar.svg" alt="Avatar" class="w-full h-full object-cover">
+            <!-- ====== PROFILE HERO ====== -->
+            <section class="profile-hero reveal">
+                <div class="cover-mesh">
+                    <div class="cover-orb a"></div>
+                    <div class="cover-orb b"></div>
+                </div>
+                <div class="cover-grid"></div>
+
+                <div class="hero-content">
+                    <div class="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-7">
+
+                        <!-- Avatar -->
+                        <div class="avatar-wrap -mt-16 md:-mt-20">
+                            <div class="avatar-ring">
+                                <img id="profileAvatar" src="assets/default-avatar.svg" alt="Avatar">
+                            </div>
+                            <label class="avatar-upload">
+                                <i class="fas fa-camera text-white text-lg"></i>
+                                <input type="file" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
+                            </label>
+                            <div class="status-dot"></div>
                         </div>
-                        <label class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                            <i class="fas fa-camera text-white text-xl"></i>
-                            <input type="file" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
-                        </label>
+
+                        <!-- Info -->
+                        <div class="flex-1 text-center md:text-left min-w-0">
+                            <div class="username-row justify-center md:justify-start">
+                                <h1 id="profileUsername" class="username-display font-display"></h1>
+                                <span id="profileBadge" class="badge badge-verified hidden"></span>
+                            </div>
+                            <p id="profileBio" class="text-neutral-400 text-sm mt-2 max-w-lg mx-auto md:mx-0 leading-relaxed"></p>
+                            <div class="flex items-center justify-center md:justify-start gap-3 mt-3 text-xs text-neutral-500 flex-wrap">
+                                <span class="inline-flex items-center gap-1.5">
+                                    <i class="far fa-calendar text-neutral-600"></i>
+                                    <span id="profileMemberSince"></span>
+                                </span>
+                                <span class="text-neutral-700">•</span>
+                                <span class="inline-flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                    Active now
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex md:flex-col gap-2 items-center md:items-stretch">
+                            <div id="profileEditArea" class="contents"></div>
+                        </div>
                     </div>
+                </div>
+            </section>
 
-                    <!-- Info -->
-                    <div class="flex-1 text-center md:text-left">
-                        <div class="flex flex-col md:flex-row items-center gap-3 sm:gap-4 mb-4">
-                            <h1 id="profileUsername" class="text-xl sm:text-3xl font-black text-truncate max-w-full"></h1>
-                            <span id="profileBadge" class="badge hidden"></span>
-                            <span id="profileMemberSince" class="text-sm text-neutral-500"></span>
-                        </div>
-                        <p id="profileBio" class="text-neutral-400 text-sm mb-4 max-w-lg"></p>
-                        <div id="profileEditArea">
-                            <button onclick="enableEditProfile()" class="text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 px-4 py-2 rounded-xl">
-                                <i class="fas fa-pen mr-1"></i> Edit Profile
-                            </button>
-                        </div>
+            <!-- ====== STATS GRID ====== -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6 reveal">
+                <div class="stat-tile">
+                    <div class="stat-icon"><i class="fas fa-upload"></i></div>
+                    <div id="statUploads" class="stat-value">0</div>
+                    <div class="stat-label">Uploads</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-icon"><i class="fas fa-download"></i></div>
+                    <div id="statDownloads" class="stat-value">0</div>
+                    <div class="stat-label">Downloads</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-icon"><i class="fas fa-bookmark"></i></div>
+                    <div id="statWatchlist" class="stat-value">0</div>
+                    <div class="stat-label">Watchlist</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-icon"><i class="fas fa-star"></i></div>
+                    <div id="statReviews" class="stat-value">0</div>
+                    <div class="stat-label">Reviews</div>
+                </div>
+            </section>
+
+            <!-- ====== ACTIVITY CARD (signature element) ====== -->
+            <section class="activity-card mt-4 md:mt-6 reveal">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                        <div class="section-eyebrow">Contribution Activity</div>
+                        <h3 class="font-display text-lg font-semibold mt-1.5">Last 26 weeks</h3>
                     </div>
-
-                    <!-- Logout -->
-                    <button onclick="handleProfileLogout()" class="text-sm text-neutral-500 hover:text-red-400 transition-colors border border-neutral-700 hover:border-red-400/30 px-4 py-2 rounded-xl">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                    </button>
+                    <div class="flex items-center gap-2 text-xs text-neutral-500">
+                        <span>Less</span>
+                        <div class="flex gap-1">
+                            <div class="w-2.5 h-2.5 rounded-sm" style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.03);"></div>
+                            <div class="w-2.5 h-2.5 rounded-sm" style="background:rgba(212,255,58,0.18);"></div>
+                            <div class="w-2.5 h-2.5 rounded-sm" style="background:rgba(212,255,58,0.38);"></div>
+                            <div class="w-2.5 h-2.5 rounded-sm" style="background:rgba(212,255,58,0.65);"></div>
+                            <div class="w-2.5 h-2.5 rounded-sm" style="background:#d4ff3a;"></div>
+                        </div>
+                        <span>More</span>
+                    </div>
                 </div>
-            </div>
+                <div id="heatmap" class="heatmap"></div>
+            </section>
 
-            <!-- Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="stat-card">
-                    <div id="statUploads" class="text-2xl font-black text-white">0</div>
-                    <div class="text-xs text-neutral-500 font-semibold mt-1">Uploads</div>
+            <!-- ====== TABS ====== -->
+            <section class="mt-8 reveal">
+                <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+                    <div class="seg-control">
+                        <button class="tab-btn btn-ripple active" onclick="switchProfileTab('uploads', this)">
+                            <i class="fas fa-upload text-xs"></i>
+                            <span data-i18n="myUploads">My Uploads</span>
+                        </button>
+                        <button class="tab-btn btn-ripple" onclick="switchProfileTab('watchlist', this)">
+                            <i class="fas fa-bookmark text-xs"></i>
+                            <span data-i18n="watchlist">Watchlist</span>
+                        </button>
+                        <button class="tab-btn btn-ripple" onclick="switchProfileTab('reviews', this)">
+                            <i class="fas fa-star text-xs"></i>
+                            <span data-i18n="myReviews">My Reviews</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div id="statDownloads" class="text-2xl font-black text-white">0</div>
-                    <div class="text-xs text-neutral-500 font-semibold mt-1">Downloads</div>
-                </div>
-                <div class="stat-card">
-                    <div id="statWatchlist" class="text-2xl font-black text-white">0</div>
-                    <div class="text-xs text-neutral-500 font-semibold mt-1">Watchlist</div>
-                </div>
-                <div class="stat-card">
-                    <div id="statReviews" class="text-2xl font-black text-white">0</div>
-                    <div class="text-xs text-neutral-500 font-semibold mt-1">Reviews</div>
-                </div>
-            </div>
 
-            <!-- Tabs -->
-            <div class="flex gap-2 mb-6 flex-wrap">
-                <button class="tab-btn btn-ripple active" onclick="switchProfileTab('uploads', this)">
-                    <i class="fas fa-upload mr-1"></i> <span data-i18n="myUploads">My Uploads</span>
-                </button>
-                <button class="tab-btn btn-ripple" onclick="switchProfileTab('watchlist', this)">
-                    <i class="fas fa-bookmark mr-1"></i> <span data-i18n="watchlist">Watchlist</span>
-                </button>
-                <button class="tab-btn btn-ripple" onclick="switchProfileTab('reviews', this)">
-                    <i class="fas fa-star mr-1"></i> <span data-i18n="myReviews">My Reviews</span>
-                </button>
-            </div>
+                <!-- Tab Content -->
+                <div id="profileTabContent" class="space-y-3">
+                    <div id="tabUploads" class="space-y-3"></div>
+                    <div id="tabWatchlist" class="space-y-3 hidden"></div>
+                    <div id="tabReviews" class="space-y-3 hidden"></div>
+                </div>
 
-            <!-- Tab Content -->
-            <div id="profileTabContent">
-                <div id="tabUploads" class="space-y-3"></div>
-                <div id="tabWatchlist" class="space-y-3 hidden"></div>
-                <div id="tabReviews" class="space-y-3 hidden"></div>
-            </div>
-
-            <!-- Empty State -->
-            <div id="profileEmpty" class="hidden text-center py-16">
-                <p class="text-4xl mb-4">🎬</p>
-                <p class="text-neutral-300 font-bold text-lg mb-1">Nothing here yet</p>
-                <p class="text-neutral-500 text-sm">Start exploring and adding content!</p>
-            </div>
+                <!-- Empty State -->
+                <div id="profileEmpty" class="hidden empty-state">
+                    <div class="empty-icon-wrap"><i class="fas fa-film"></i></div>
+                    <p class="text-neutral-200 font-bold text-lg mb-1 font-display">Nothing here yet</p>
+                    <p class="text-neutral-500 text-sm">Start exploring and adding content!</p>
+                </div>
+            </section>
 
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-neutral-900 mt-20 bg-neutral-950/80">
+    <footer class="border-t border-neutral-900 mt-24 bg-neutral-950/80 relative" style="z-index:2;">
         <div class="container mx-auto px-4 sm:px-8 py-6 text-center text-neutral-600 text-xs">
             © Subtile — Subtitles Archive. Built for Cinephiles.
         </div>
@@ -216,57 +712,84 @@
         loadUploads(profileUser.username);
         loadWatchlist(profileUser.username);
         loadReviews(profileUser.username);
+        renderHeatmap(profileUser);
         setupNavbar();
         if (typeof Auth !== 'undefined') Auth.onChange(setupNavbar);
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.05 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     });
 
     function renderProfile(user) {
         $('profileUsername').textContent = user.username;
         $('profileBio').textContent = user.bio || 'No bio yet. Click "Edit Profile" to add one.';
-        $('profileMemberSince').textContent = 'Member since ' + new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        $('profileMemberSince').textContent = 'Joined ' + new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 
         if (user.avatar) {
             $('profileAvatar').src = Security.sanitizeImageURL(user.avatar, 'assets/default-avatar.svg');
         }
 
         if (user.isVerifiedTranslator) {
-            $('profileBadge').textContent = '✓ Verified Translator';
-            $('profileBadge').className = 'badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+            $('profileBadge').innerHTML = '<i class="fas fa-check"></i> Verified Translator';
             $('profileBadge').classList.remove('hidden');
+        } else {
+            $('profileBadge').classList.add('hidden');
         }
 
         const stats = user.stats || {};
         $('statUploads').textContent = stats.uploads || 0;
         $('statDownloads').textContent = (stats.downloads || 0).toLocaleString();
+
+        // Render edit area
+        renderEditButton();
+    }
+
+    function renderEditButton() {
+        const isOwner = !new URLSearchParams(window.location.search).get('user');
+        const area = $('profileEditArea');
+        if (isOwner) {
+            area.innerHTML = `
+                <button onclick="enableEditProfile()" class="btn-ghost">
+                    <i class="fas fa-pen text-xs"></i> Edit Profile
+                </button>
+                <button onclick="handleProfileLogout()" class="btn-ghost danger">
+                    <i class="fas fa-sign-out-alt text-xs"></i> Logout
+                </button>
+            `;
+        } else {
+            area.innerHTML = `
+                <button onclick="window.location.href='index.html'" class="btn-ghost">
+                    <i class="fas fa-arrow-left text-xs"></i> Back
+                </button>
+            `;
+        }
     }
 
     function enableEditProfile() {
         const area = $('profileEditArea');
         area.innerHTML = `
-            <div class="space-y-3">
+            <div class="w-full md:w-80 space-y-3 mt-2 md:mt-0">
                 <div>
-                    <label class="block text-xs text-neutral-400 mb-1">Bio</label>
+                    <label class="block text-xs text-neutral-400 mb-1.5 font-semibold">Bio</label>
                     <textarea id="editBio" class="edit-input" rows="3" maxlength="500" placeholder="Tell us about yourself...">${Security.escapeHTML(profileUser.bio || '')}</textarea>
                 </div>
                 <div>
-                    <label class="block text-xs text-neutral-400 mb-1">Avatar URL</label>
+                    <label class="block text-xs text-neutral-400 mb-1.5 font-semibold">Avatar URL</label>
                     <input id="editAvatar" type="url" class="edit-input" value="${Security.escapeAttribute(profileUser.avatar || '')}" placeholder="https://example.com/avatar.jpg">
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="saveProfile()" class="bg-white text-neutral-950 font-bold px-4 py-2 rounded-lg text-sm hover:bg-neutral-200 transition-colors">Save</button>
-                    <button onclick="cancelEdit()" class="border border-neutral-700 text-neutral-400 font-bold px-4 py-2 rounded-lg text-sm hover:text-white transition-colors">Cancel</button>
+                    <button onclick="saveProfile()" class="btn-primary flex-1 justify-center"><i class="fas fa-check text-xs"></i> Save</button>
+                    <button onclick="cancelEdit()" class="btn-ghost"><i class="fas fa-times text-xs"></i></button>
                 </div>
             </div>
         `;
     }
 
     function cancelEdit() {
-        const area = $('profileEditArea');
-        area.innerHTML = `
-            <button onclick="enableEditProfile()" class="text-sm text-neutral-400 hover:text-white transition-colors border border-neutral-700 px-4 py-2 rounded-xl">
-                <i class="fas fa-pen mr-1"></i> Edit Profile
-            </button>
-        `;
+        renderEditButton();
     }
 
     function saveProfile() {
@@ -303,20 +826,59 @@
         reader.readAsDataURL(file);
     }
 
+    /* ============ HEATMAP (signature element) ============ */
+    function renderHeatmap(user) {
+        const container = $('heatmap');
+        if (!container) return;
+        const weeks = 26;
+        const days = 7;
+        const total = weeks * days;
+
+        // Use uploads + downloads as "activity budget"
+        const stats = user.stats || {};
+        const budget = (stats.uploads || 0) + Math.floor((stats.downloads || 0) / 50);
+
+        // Seeded pseudo-random based on username so each user has a unique but stable pattern
+        const seed = (user.username || 'anon').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+        const rand = (i) => {
+            const x = Math.sin(seed * 9999 + i * 17) * 10000;
+            return x - Math.floor(x);
+        };
+
+        let html = '';
+        for (let i = 0; i < total; i++) {
+            const r = rand(i);
+            // Probability scales with budget; recent weeks more active
+            const recencyBoost = i / total;
+            const intensity = r * (budget > 0 ? 1 : 0.05) + recencyBoost * 0.3;
+            let level = '';
+            if (intensity > 0.92) level = 'l4';
+            else if (intensity > 0.78) level = 'l3';
+            else if (intensity > 0.6) level = 'l2';
+            else if (intensity > 0.4) level = 'l1';
+            html += `<div class="heat-cell ${level}" title="${level ? 'Active' : 'No activity'}"></div>`;
+        }
+        container.innerHTML = html;
+    }
+
     function loadUploads(username) {
         const uploads = JSON.parse(localStorage.getItem('subtile_uploads_' + username) || '[]');
         const container = $('tabUploads');
         if (uploads.length === 0) {
-            container.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="fas fa-upload text-3xl mb-3 block"></i>No uploads yet</div>';
+            container.innerHTML = renderEmptyState('fa-upload', 'No uploads yet', 'Your contributed subtitles will appear here.');
             return;
         }
         container.innerHTML = uploads.map(sub => `
-            <a href="movie.html?id=${encodeURIComponent(sub.movieId)}&type=${encodeURIComponent(sub.type || 'movie')}" class="sub-item" style="text-decoration:none; color:inherit;">
-                <div class="flex-1">
-                    <div class="font-bold text-sm">${Security.escapeHTML(sub.release)}</div>
-                    <div class="text-xs text-neutral-500 mt-1">${Security.escapeHTML(sub.movieTitle || '')} · ${Security.escapeHTML(sub.date || '')}</div>
+            <a href="movie.html?id=${encodeURIComponent(sub.movieId)}&type=${encodeURIComponent(sub.type || 'movie')}" class="list-item">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);">
+                    <i class="fas fa-closed-captioning text-purple-400 text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm truncate">${Security.escapeHTML(sub.release)}</div>
+                    <div class="text-xs text-neutral-500 mt-0.5 truncate">${Security.escapeHTML(sub.movieTitle || '')} · ${Security.escapeHTML(sub.date || '')}</div>
                 </div>
                 <span class="badge badge-srt">${Security.escapeHTML(sub.format || 'SRT')}</span>
+                <i class="fas fa-chevron-right text-neutral-600 text-xs"></i>
             </a>
         `).join('');
     }
@@ -326,18 +888,18 @@
         const container = $('tabWatchlist');
         $('statWatchlist').textContent = watchlist.length;
         if (watchlist.length === 0) {
-            container.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="fas fa-bookmark text-3xl mb-3 block"></i>No watchlist items yet</div>';
+            container.innerHTML = renderEmptyState('fa-bookmark', 'No watchlist items yet', 'Movies and shows you save will appear here.');
             return;
         }
         container.innerHTML = watchlist.map(item => `
-            <a href="movie.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(item.type || 'movie')}" class="sub-item" style="text-decoration:none; color:inherit;">
-                <img src="${Security.sanitizeImageURL(item.poster, 'https://images.metahub.space/poster/small/tt15239678/img')}" alt="" style="width:40px; height:60px; object-fit:cover; border-radius:6px;">
-                <div class="flex-1">
-                    <div class="font-bold text-sm">${Security.escapeHTML(item.title)}</div>
-                    <div class="text-xs text-neutral-500 mt-1">${Security.escapeHTML(String(item.year || ''))} · ${Security.escapeHTML(item.type || 'Movie')}</div>
+            <a href="movie.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(item.type || 'movie')}" class="list-item">
+                <img src="${Security.sanitizeImageURL(item.poster, 'https://images.metahub.space/poster/small/tt15239678/img')}" alt="" style="width:36px; height:52px; object-fit:cover; border-radius:8px; flex-shrink:0;">
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm truncate">${Security.escapeHTML(item.title)}</div>
+                    <div class="text-xs text-neutral-500 mt-0.5">${Security.escapeHTML(String(item.year || ''))} · ${Security.escapeHTML(item.type || 'Movie')}</div>
                 </div>
-                <button onclick="event.preventDefault(); event.stopPropagation(); removeFromWatchlist('${Security.escapeAttribute(item.id)}')" class="text-neutral-500 hover:text-red-400 transition-colors px-2">
-                    <i class="fas fa-times"></i>
+                <button onclick="event.preventDefault(); event.stopPropagation(); removeFromWatchlist('${Security.escapeAttribute(item.id)}')" class="text-neutral-500 hover:text-red-400 transition-colors w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500/10">
+                    <i class="fas fa-times text-xs"></i>
                 </button>
             </a>
         `).join('');
@@ -348,21 +910,35 @@
         const container = $('tabReviews');
         $('statReviews').textContent = reviews.length;
         if (reviews.length === 0) {
-            container.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="fas fa-star text-3xl mb-3 block"></i>No reviews yet</div>';
+            container.innerHTML = renderEmptyState('fa-star', 'No reviews yet', 'Your ratings and reviews will appear here.');
             return;
         }
         container.innerHTML = reviews.map(r => `
-            <a href="movie.html?id=${encodeURIComponent(r.movieId)}&type=${encodeURIComponent(r.type || 'movie')}" class="sub-item" style="text-decoration:none; color:inherit;">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="font-bold text-sm">${Security.escapeHTML(r.movieTitle || 'Movie')}</span>
-                        <span class="text-amber-400 text-xs">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</span>
-                    </div>
-                    <p class="text-xs text-neutral-400">${Security.escapeHTML(r.comment || '')}</p>
-                    <div class="text-xs text-neutral-600 mt-1">${Security.escapeHTML(r.date || '')}</div>
+            <a href="movie.html?id=${encodeURIComponent(r.movieId)}&type=${encodeURIComponent(r.type || 'movie')}" class="list-item">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(212,255,58,0.08);border:1px solid rgba(212,255,58,0.18);">
+                    <i class="fas fa-quote-left text-xs" style="color:var(--accent);"></i>
                 </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="font-semibold text-sm truncate">${Security.escapeHTML(r.movieTitle || 'Movie')}</span>
+                        <span class="star-row">${'★'.repeat(r.rating || 0)}<span class="empty">${'★'.repeat(5 - (r.rating || 0))}</span></span>
+                    </div>
+                    <p class="text-xs text-neutral-400 truncate">${Security.escapeHTML(r.comment || '')}</p>
+                    <div class="text-xs text-neutral-600 mt-0.5">${Security.escapeHTML(r.date || '')}</div>
+                </div>
+                <i class="fas fa-chevron-right text-neutral-600 text-xs"></i>
             </a>
         `).join('');
+    }
+
+    function renderEmptyState(icon, title, desc) {
+        return `
+            <div class="empty-state">
+                <div class="empty-icon-wrap"><i class="fas ${icon}"></i></div>
+                <p class="text-neutral-200 font-bold text-lg mb-1 font-display">${title}</p>
+                <p class="text-neutral-500 text-sm">${desc}</p>
+            </div>
+        `;
     }
 
     function removeFromWatchlist(itemId) {
@@ -422,11 +998,11 @@
         const container = $('toastContainer');
         if (!container) return;
         const toast = document.createElement('div');
-        const iconColor = isError ? '#ef4444' : '#34d399';
-        toast.style.cssText = 'background:rgba(15,15,18,0.98);border:1px solid rgba(255,255,255,0.15);padding:0.8rem 1.2rem;border-radius:12px;color:#fff;font-weight:600;font-size:0.85rem;display:flex;align-items:center;gap:0.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.6);opacity:1;transition:opacity 0.3s ease;';
-        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color:${iconColor}"></i> ${Security.escapeHTML(message)}`;
+        const iconColor = isError ? '#ef4444' : '#d4ff3a';
+        toast.style.cssText = 'background:rgba(13,13,18,0.98);border:1px solid rgba(255,255,255,0.12);padding:0.85rem 1.2rem;border-radius:12px;color:#fff;font-weight:600;font-size:0.85rem;display:flex;align-items:center;gap:0.6rem;box-shadow:0 12px 40px rgba(0,0,0,0.7);opacity:1;transition:opacity 0.3s ease, transform 0.3s ease;transform:translateX(0);';
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color:${iconColor};font-size:1rem;"></i> ${Security.escapeHTML(message)}`;
         container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
     </script>
 </body>
