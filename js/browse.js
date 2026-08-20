@@ -51,6 +51,30 @@ function getRecentSearches() {
   catch { return []; }
 }
 
+function renderSkeletonCards(count = 12) {
+  const grid = document.getElementById('catalogGrid');
+  if (!grid) return;
+  grid.innerHTML = Array.from({ length: count }, () => `
+    <div class="skeleton-card">
+      <div class="skeleton-poster"></div>
+      <div class="skeleton-text"></div>
+      <div class="skeleton-text-sm"></div>
+    </div>
+  `).join('');
+  grid.classList.remove('hidden');
+}
+
+function hideSkeletonCards() {
+  const grid = document.getElementById('catalogGrid');
+  if (!grid) return;
+  const skeletons = grid.querySelectorAll('.skeleton-card');
+  if (skeletons.length === 0) return;
+  skeletons.forEach(s => s.classList.add('skeleton-exit'));
+  setTimeout(() => {
+    skeletons.forEach(s => s.remove());
+  }, 300);
+}
+
 function saveSearch(query) {
   if (!query.trim()) return;
   let recent = getRecentSearches().filter(q => q.toLowerCase() !== query.toLowerCase());
@@ -98,8 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
     currentSearchQuery = q;
     const searchInput = document.getElementById('catalogSearchInput');
     if (searchInput) searchInput.value = q;
+    renderSkeletonCards(8);
     triggerLiveCatalogSearch(q);
   } else {
+    renderSkeletonCards(12);
     triggerLiveTrending(currentTypeFilter, currentPage);
   }
   setupAuthNavbar();
@@ -153,6 +179,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.search-suggestions') && e.target !== searchInput) {
         dropdown.classList.remove('active');
+      }
+    });
+
+    // Ctrl+K → focus search
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
       }
     });
   }
@@ -225,7 +260,8 @@ async function triggerLiveTrending(type, page = 1) {
 
   // A promise that resolves to [] on normal failure but *rejects* on abort,
   // so an aborted request doesn't quietly masquerade as "zero results".
-  const safeFetchJson = (url, opts) => fetch(url, opts)
+  const fetchFn = window.cachedFetch || fetch;
+  const safeFetchJson = (url, opts) => fetchFn(url, opts)
     .then(r => r.ok ? r.json() : null)
     .catch(e => { if (e.name === 'AbortError') throw e; return null; });
 
@@ -362,6 +398,8 @@ function renderCatalog() {
 
   if (!grid || !empty) return;
 
+  hideSkeletonCards();
+
   const results = liveSearchResults.filter(item => {
     if (currentTypeFilter !== 'all' && item.type !== currentTypeFilter) return false;
     return true;
@@ -492,7 +530,8 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
       : currentTypeFilter === 'anime' ? 'anime'
       : 'all';
 
-    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`, {
+    const fetchFn = window.cachedFetch || fetch;
+    const res = await fetchFn(`/api/search?q=${encodeURIComponent(q)}&type=${apiType}&limit=45`, {
       signal: catalogSearchAbortController.signal,
     });
 
@@ -707,9 +746,10 @@ function showToast(message, isError = false) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toast = document.createElement('div');
-  toast.className = 'toast-upgraded';
-  const icon = isError ? 'fa-exclamation-circle' : 'fa-check-circle';
-  const color = isError ? '#ef4444' : '#34d399';
+  const type = isError ? 'error' : 'success';
+  toast.className = 'toast-upgraded toast-' + type;
+  const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
+  const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
   toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${esc(message)}</span>`;
   container.appendChild(toast);
 

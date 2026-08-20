@@ -194,7 +194,8 @@
             <div class="flex-1 max-w-xl hidden sm:block">
                 <div class="relative search-wrapper">
                     <input id="searchInput" type="search" placeholder="Search movies, TV shows, anime..." autocomplete="off" data-i18n="searchPlaceholder"
-                        class="w-full bg-white/[0.06] border border-white/[0.08] rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-white/25 focus:bg-white/[0.09] transition-all text-neutral-200 placeholder:text-neutral-500">
+                        class="w-full bg-white/[0.06] border border-white/[0.08] rounded-xl py-2.5 ps-4 pe-16 text-sm focus:outline-none focus:border-white/25 focus:bg-white/[0.09] transition-all text-neutral-200 placeholder:text-neutral-500">
+                    <kbd style="position:absolute; right:2.5rem; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:5px; padding:0.1rem 0.4rem; font-size:0.7rem; color:#6b7280; font-family:monospace; pointer-events:none;">Ctrl+K</kbd>
                     <svg class="absolute end-3.5 top-3 w-4 h-4 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     <div id="searchResultsDropdown" class="search-results-dropdown"></div>
                 </div>
@@ -1109,5 +1110,6 @@ function toggleMobileNav() {
     if (nav) nav.classList.toggle('active');
 }
 </script>
+<div id="toastContainer" style="position:fixed; bottom:2rem; right:2rem; z-index:999; display:flex; flex-direction:column; gap:0.8rem;"></div>
 </body>
 </html>

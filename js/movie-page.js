@@ -422,12 +422,15 @@ async function fetchRealSubtitles(movie) {
 function showSubtitlesLoading() {
   const container = document.getElementById('subtitlesList');
   if (!container) return;
-  container.innerHTML = `
-    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2.5rem; text-align: center; color: var(--text-muted);">
-      <i class="fas fa-spinner fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--brand-yellow); display: block;"></i>
-      <div style="font-size: 0.95rem; font-weight: 600; color: #f1f3f6;">Fetching real subtitles from SubDL...</div>
+  container.innerHTML = Array.from({ length: 4 }, () => `
+    <div class="skeleton-sub">
+      <div style="flex:1;">
+        <div class="skeleton-line skeleton-line-medium" style="margin-bottom:0.5rem;"></div>
+        <div class="skeleton-line skeleton-line-short"></div>
+      </div>
+      <div class="skeleton-circle"></div>
     </div>
-  `;
+  `).join('');
 }
 
 function generateFallbackSubtitles(movie) {
@@ -662,7 +665,10 @@ function renderSubtitlesList() {
             ${quality ? `<span><i class="fas fa-video"></i> ${quality}</span>` : ''}
           </div>
         </div>
-        <a href="#" class="download-btn" tabindex="0" role="button" aria-label="Download ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <button class="preview-btn" tabindex="0" role="button" aria-label="Preview ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}" onclick="previewSubtitle(this)"><i class="fas fa-eye"></i></button>
+          <a href="#" class="download-btn" tabindex="0" role="button" aria-label="Download ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
+        </div>
       </div>
     `;
   }).join('');
@@ -716,6 +722,91 @@ function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '
   showToast(`Downloaded subtitle: ${fileName}`);
 }
 
+// ========== Subtitle Preview ==========
+window.previewSubtitle = function(btn) {
+  const url = btn.dataset.downloadUrl;
+  const release = btn.dataset.release;
+  const format = btn.dataset.format;
+  const modal = document.getElementById('previewModal');
+  const body = document.getElementById('previewBody');
+  const title = document.getElementById('previewTitle');
+  if (!modal || !body) return;
+
+  title.textContent = `Preview — ${release}`;
+  body.innerHTML = '<div class="preview-loading"><i class="fas fa-spinner fa-spin" style="margin-right:0.5rem;"></i> Loading preview...</div>';
+  modal.classList.add('active');
+
+  if (!url || url === '#' || url.includes('sample')) {
+    const ext = (format || 'srt').toLowerCase();
+    let sample = '1\n00:00:05,000 --> 00:00:09,000\nSynced Subtitle: ' + release + '\n\n2\n00:00:10,000 --> 00:00:15,000\nEnjoy your movie with Subtile!\n\n3\n00:00:16,000 --> 00:00:20,000\nThis is a sample preview.\n';
+    if (ext === 'ass') sample = '[Script Info]\nTitle: ' + release + '\nScriptType: v4.00+\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour\nStyle: Default,Arial,20,&H00FFFFFF\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,' + release + '\nDialogue: 0,0:00:05.50,0:00:09.00,Default,,0,0,0,,Enjoy the show with Subtile!\n';
+    else if (ext === 'vtt') sample = 'WEBVTT\n\n00:00:01.000 --> 00:00:05.000\n' + release + '\n\n00:00:05.500 --> 00:00:09.000\nEnjoy the show with Subtile!\n';
+    body.innerHTML = formatPreviewText(sample, ext);
+    return;
+  }
+
+  fetch(url).then(r => r.text()).then(text => {
+    body.innerHTML = formatPreviewText(text, (format || 'srt').toLowerCase());
+  }).catch(() => {
+    body.innerHTML = '<div style="color:#ef4444; text-align:center; padding:2rem;">Failed to load preview</div>';
+  });
+};
+
+function formatPreviewText(text, ext) {
+  const lines = text.split('\n');
+  let html = '';
+  let inEvents = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (ext === 'ass') {
+      if (trimmed.startsWith('Dialogue:')) {
+        const parts = trimmed.split(',');
+        const dialogue = parts.slice(9).join(',').replace(/\{[^}]*\}/g, '');
+        const time = parts[1] + ' → ' + parts[2];
+        html += `<div class="sub-line"><span class="sub-timestamp">${time}</span> ${escapeHtml(dialogue)}</div>`;
+        inEvents = true;
+      } else if (!inEvents) {
+        html += `<div style="color:#6b7280; font-size:0.75rem;">${escapeHtml(trimmed)}</div>`;
+      }
+    } else if (ext === 'vtt') {
+      if (trimmed.includes('-->')) {
+        html += `<div class="sub-line"><span class="sub-timestamp">${escapeHtml(trimmed)}</span></div>`;
+      } else if (!trimmed.startsWith('WEBVTT')) {
+        html += `<div>${escapeHtml(trimmed)}</div>`;
+      }
+    } else {
+      if (trimmed.includes('-->')) {
+        html += `<div class="sub-line"><span class="sub-timestamp">${escapeHtml(trimmed)}</span></div>`;
+      } else if (!/^\d+$/.test(trimmed)) {
+        html += `<div>${escapeHtml(trimmed)}</div>`;
+      }
+    }
+  }
+  return html || '<div style="color:#6b7280;">No readable content</div>';
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+window.closePreview = function() {
+  const modal = document.getElementById('previewModal');
+  if (modal) modal.classList.remove('active');
+};
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('previewModal');
+    if (modal && modal.classList.contains('active')) {
+      e.preventDefault();
+      window.closePreview();
+    }
+  }
+});
+
 function openUploadModal() {
   const modal = document.getElementById('uploadModal');
   if (modal) modal.classList.add('show');
@@ -737,15 +828,17 @@ function showToast(message, isError = false) {
   if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  const iconColor = isError ? '#ef4444' : 'var(--brand-yellow)';
-  toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="color: ${iconColor};"></i> <span>${escapeHtml(message)}</span>`;
+  const type = isError ? 'error' : 'success';
+  toast.className = 'toast-upgraded toast-' + type;
+  const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
+  const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
+  toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.style.opacity = '0';
+    toast.classList.add('toast-exit');
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, 3500);
 }
 
 // ========== Watchlist System ==========

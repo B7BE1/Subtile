@@ -3,6 +3,27 @@
  * Connected to Live Cinemeta (Movies/Series) & Jikan (Anime) Metadata
  */
 
+// Cached fetch — stores responses in sessionStorage for 10 minutes
+const API_CACHE_TTL = 10 * 60 * 1000;
+window.cachedFetch = async function(url, opts = {}) {
+  if (opts.method && opts.method !== 'GET') return fetch(url, opts);
+  const key = 'api_cache_' + url;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(key));
+    if (cached && Date.now() - cached.ts < API_CACHE_TTL) {
+      return new Response(JSON.stringify(cached.data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+  } catch {}
+  const res = await fetch(url, opts);
+  if (res.ok) {
+    const data = await res.clone().json().catch(() => null);
+    if (data) {
+      try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+    }
+  }
+  return res;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   renderMostDownloaded();
   setupLiveSearch();
@@ -20,6 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.style.setProperty('--ripple-y', y + '%');
     btn.classList.add('ripple-active');
     setTimeout(() => btn.classList.remove('ripple-active'), 500);
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Ctrl+K or Cmd+K → focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      const searchInput = document.getElementById('searchInput') || document.getElementById('catalogSearchInput');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      } else {
+        window.location.href = 'browse.html';
+      }
+    }
+    // Escape → close modals
+    if (e.key === 'Escape') {
+      const preview = document.getElementById('previewModal');
+      if (preview && preview.classList.contains('active')) {
+        preview.classList.remove('active');
+        return;
+      }
+    }
   });
 });
 
@@ -389,9 +433,10 @@ function showToast(message, isError = false) {
   if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = 'toast-upgraded';
-  const icon = isError ? 'fa-exclamation-circle' : 'fa-check-circle';
-  const color = isError ? '#ef4444' : '#34d399';
+  const type = isError ? 'error' : 'success';
+  toast.className = 'toast-upgraded toast-' + type;
+  const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
+  const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
   toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${escapeText(message)}</span>`;
   container.appendChild(toast);
 
