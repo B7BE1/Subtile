@@ -186,5 +186,3 @@ const I18n = (() => {
 
   return { t, setLang, getLang, applyDirection, translatePage };
 })();
-
-if (typeof module !== 'undefined') module.exports = I18n;

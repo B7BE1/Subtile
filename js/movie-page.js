@@ -792,12 +792,6 @@ function formatPreviewText(text, ext) {
   return html || '<div style="color:#6b7280;">No readable content</div>';
 }
 
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s || '';
-  return d.innerHTML;
-}
-
 window.closePreview = function() {
   const modal = document.getElementById('previewModal');
   if (modal) modal.classList.remove('active');

@@ -62,5 +62,3 @@ const ThemeToggle = (() => {
 
   return { getTheme, setTheme, toggle, applyTheme, renderToggle };
 })();
-
-if (typeof module !== 'undefined') module.exports = ThemeToggle;

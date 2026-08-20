@@ -97,8 +97,8 @@ function renderRecentSearches(dropdown) {
         <button onclick="event.preventDefault(); event.stopPropagation(); clearRecentSearches(); this.closest('.search-suggestions').innerHTML = '';">Clear</button>
       </div>
       ${recent.map(q => `
-        <div class="search-recent-item" onclick="event.preventDefault(); document.getElementById('catalogSearchInput').value='${q.replace(/'/g, "\\'")}'; onCatalogSearch();">
-          <i class="fas fa-history"></i> ${q}
+        <div class="search-recent-item" data-search-q="${esc(q)}">
+          <i class="fas fa-history"></i> ${esc(q)}
         </div>
       `).join('')}
     </div>`;
@@ -179,6 +179,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.search-suggestions') && e.target !== searchInput) {
         dropdown.classList.remove('active');
+      }
+    });
+
+    dropdown.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-search-q]');
+      if (item) {
+        e.preventDefault();
+        searchInput.value = item.dataset.searchQ;
+        onCatalogSearch();
       }
     });
 

@@ -25,7 +25,6 @@ window.cachedFetch = async function(url, opts = {}) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderMostDownloaded();
   setupLiveSearch();
   setupAuthNavbar();
   if (typeof Auth !== 'undefined') Auth.onChange(setupAuthNavbar);
@@ -67,43 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Render Most Downloaded Grid
-function renderMostDownloaded() {
-  const grid = document.getElementById('mostDownloadedGrid');
-  if (!grid) return;
-
-  const sorted = [...MOVIES_DATABASE].sort((a, b) => {
-    const aDl = a.subtitles ? a.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) : 0;
-    const bDl = b.subtitles ? b.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) : 0;
-    return bDl - aDl;
-  });
-
-  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : escapeText;
-
-  grid.innerHTML = sorted.map((movie, index) => {
-    const mainLang = (movie.subtitles && movie.subtitles[0]) ? movie.subtitles[0].langName : 'Arabic';
-    const totalDl = movie.subtitles 
-      ? movie.subtitles.reduce((acc, s) => acc + (s.downloads || 0), 0) 
-      : 14250;
-
-    return `
-      <a href="movie.html?id=${encodeURIComponent(movie.id)}&type=${encodeURIComponent(movie.type || 'movie')}" class="movie-card most-downloaded">
-        <div class="movie-card-poster-wrap">
-          <img src="${esc(movie.poster)}" alt="${esc(movie.title)}" class="movie-card-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-          <span class="rank-badge">#${index + 1}</span>
-        </div>
-        <div class="movie-card-info">
-          <div class="movie-card-title" title="${esc(movie.title)}">${esc(movie.title)} (${esc(movie.year)})</div>
-          <div class="movie-card-meta-row">
-            <span class="movie-card-lang-pill">${movie.type === 'anime' ? 'Anime' : esc(mainLang)}</span>
-            <span class="movie-card-downloads"><i class="fas fa-arrow-down"></i> ${totalDl.toLocaleString()}</span>
-          </div>
-        </div>
-      </a>
-    `;
-  }).join('');
-}
-
 // Live Search with Cinemeta + Jikan Integration (via /api/search — same
 // ranked, deduped results as js/browse.js's catalog search, so the two
 // entry points never disagree for the same query).
@@ -141,8 +103,8 @@ function renderRecentSearches(dropdown) {
         <button onclick="clearRecentSearches(); document.getElementById('searchResultsDropdown').innerHTML = renderRecentSearches(document.getElementById('searchResultsDropdown')); " >Clear</button>
       </div>
       ${recent.map(q => `
-        <div class="search-recent-item" onclick="document.getElementById('searchInput').value='${q.replace(/'/g, "\\'")}'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
-          <i class="fas fa-history"></i> ${q}
+        <div class="search-recent-item" data-search-q="${esc(q)}">
+          <i class="fas fa-history"></i> ${esc(q)}
         </div>
       `).join('')}
     </div>`;
@@ -159,6 +121,15 @@ function setupLiveSearch() {
     if (!query) {
       dropdown.innerHTML = renderRecentSearches(dropdown);
       if (dropdown.querySelector('.search-recent')) dropdown.classList.add('active');
+    }
+  });
+
+  dropdown.addEventListener('click', (e) => {
+    const item = e.target.closest('[data-search-q]');
+    if (item) {
+      e.preventDefault();
+      searchInput.value = item.dataset.searchQ;
+      searchInput.dispatchEvent(new Event('input'));
     }
   });
 
