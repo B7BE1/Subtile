@@ -381,8 +381,14 @@ async function fetchRealSubtitles(movie) {
 
   try {
     let url = `/api/subtitles?languages=AR,EN&type=${type}`;
-    if (imdbId) url += `&imdb_id=${encodeURIComponent(imdbId)}`;
-    else if (title) url += `&film_name=${encodeURIComponent(title)}`;
+    if (imdbId && imdbId.startsWith('tt')) {
+      url += `&imdb_id=${encodeURIComponent(imdbId)}`;
+    }
+    if (title) {
+      url += `&film_name=${encodeURIComponent(title)}`;
+    } else if (imdbId && !imdbId.startsWith('tt')) {
+      url += `&film_name=${encodeURIComponent(imdbId.replace(/^anime-/, '').replace(/[-_]/g, ' '))}`;
+    }
 
     if (type === 'tv' && currentSeason) {
       url += `&season=${currentSeason}`;

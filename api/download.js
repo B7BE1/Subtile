@@ -17,10 +17,16 @@ export default async function handler(req, res) {
       'subdl.com',
       'dl.subdl.com',
       'api.subdl.com',
+      'kitsunekko.net',
+      'animetosho.org',
+      'storage.animetosho.org',
       'opensubtitles.com',
       'api.opensubtitles.com',
       'dl.opensubtitles.org',
-      'raw.githubusercontent.com'
+      'subscene.com',
+      'subscene.best',
+      'raw.githubusercontent.com',
+      'github.com'
     ];
 
     const isAllowed = allowedHosts.some(host => targetUrl.hostname === host || targetUrl.hostname.endsWith('.' + host));
