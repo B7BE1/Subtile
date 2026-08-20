@@ -256,11 +256,11 @@
                 <p id="featuredDesc" class="text-neutral-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl"></p>
 
                 <div class="flex items-center gap-4 flex-wrap">
-                    <a id="featuredDownload" href="#" class="btn-pill btn-primary btn-upgraded">
+                    <a id="featuredDownload" href="#" class="btn-pill btn-primary btn-upgraded btn-ripple">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span>Download Subtitles</span>
                     </a>
-                    <a id="featuredInfo" href="#" class="btn-pill btn-secondary btn-upgraded">
+                    <a id="featuredInfo" href="#" class="btn-pill btn-secondary btn-upgraded btn-ripple">
                         More Details
                     </a>
                 </div>
@@ -969,7 +969,7 @@ function cardHTML(item, rank) {
     const movieUrl = `movie.html?id=${item.id}&type=${item.type}`;
 
     return `
-    <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block" data-id="${item.id}" aria-label="${item.title}">
+    <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block card-hover" data-id="${item.id}" aria-label="${item.title}">
         <div class="relative">
             <div class="poster-container">
                 <img src="${item.poster}" alt="${item.title}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"

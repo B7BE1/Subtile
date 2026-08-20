@@ -8,6 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setupLiveSearch();
   setupAuthNavbar();
   if (typeof Auth !== 'undefined') Auth.onChange(setupAuthNavbar);
+
+  // Micro-interaction: button ripple effect
+  document.addEventListener('pointerdown', (e) => {
+    const btn = e.target.closest('.btn-ripple');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width * 100);
+    const y = ((e.clientY - rect.top) / rect.height * 100);
+    btn.style.setProperty('--ripple-x', x + '%');
+    btn.style.setProperty('--ripple-y', y + '%');
+    btn.classList.add('ripple-active');
+    setTimeout(() => btn.classList.remove('ripple-active'), 500);
+  });
 });
 
 // Render Most Downloaded Grid
@@ -51,8 +64,45 @@ function renderMostDownloaded() {
 // ranked, deduped results as js/browse.js's catalog search, so the two
 // entry points never disagree for the same query).
 let searchDebounceTimer = null;
-let searchAbortController = null; // cancels an in-flight /api/search fetch
-let searchRequestToken = 0; // guards against a stale response rendering after a newer one
+let searchAbortController = null;
+let searchRequestToken = 0;
+
+const SEARCH_HISTORY_KEY = 'subtile_search_history';
+const MAX_RECENT = 6;
+
+function getRecentSearches() {
+  try { return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveSearch(query) {
+  if (!query.trim()) return;
+  let recent = getRecentSearches().filter(q => q.toLowerCase() !== query.toLowerCase());
+  recent.unshift(query.trim());
+  if (recent.length > MAX_RECENT) recent = recent.slice(0, MAX_RECENT);
+  try { localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(recent)); } catch {}
+}
+
+function clearRecentSearches() {
+  try { localStorage.removeItem(SEARCH_HISTORY_KEY); } catch {}
+}
+
+function renderRecentSearches(dropdown) {
+  const recent = getRecentSearches();
+  if (recent.length === 0) return '';
+  return `
+    <div class="search-recent">
+      <div class="search-recent-header">
+        <span><i class="fas fa-clock"></i> Recent</span>
+        <button onclick="clearRecentSearches(); document.getElementById('searchResultsDropdown').innerHTML = renderRecentSearches(document.getElementById('searchResultsDropdown')); " >Clear</button>
+      </div>
+      ${recent.map(q => `
+        <div class="search-recent-item" onclick="document.getElementById('searchInput').value='${q.replace(/'/g, "\\'")}'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
+          <i class="fas fa-history"></i> ${q}
+        </div>
+      `).join('')}
+    </div>`;
+}
 
 function setupLiveSearch() {
   const searchInput = document.getElementById('searchInput');
@@ -60,28 +110,35 @@ function setupLiveSearch() {
 
   if (!searchInput || !dropdown) return;
 
+  searchInput.addEventListener('focus', () => {
+    const query = searchInput.value.trim();
+    if (!query) {
+      dropdown.innerHTML = renderRecentSearches(dropdown);
+      if (dropdown.querySelector('.search-recent')) dropdown.classList.add('active');
+    }
+  });
+
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
 
-    // A fresh keystroke invalidates anything still in flight — both the
-    // pending debounce timer and any request already sent to the server.
     clearTimeout(searchDebounceTimer);
     if (searchAbortController) searchAbortController.abort();
 
     if (!query) {
-      dropdown.classList.remove('active');
+      dropdown.innerHTML = renderRecentSearches(dropdown);
+      if (dropdown.querySelector('.search-recent')) dropdown.classList.add('active');
+      else dropdown.classList.remove('active');
       return;
     }
 
     const thisRequest = ++searchRequestToken;
 
     searchDebounceTimer = setTimeout(async () => {
-      // First show local instant matches - no network round trip needed.
       const tokens = query.toLowerCase().split(/\s+/).filter(t => t);
       const localMatches = MOVIES_DATABASE.filter(item => {
         const eng = item.title.toLowerCase();
         const ar = item.arabicTitle ? item.arabicTitle.toLowerCase() : '';
-        const id = item.imdbId ? item.imdbId.toLowerCase() : (item.id ? item.id.toLowerCase() : '');
+        const id = item.imdbId ? item.imdbId.toLowerCase() : (item.id ? item.id.id : '');
         return tokens.every(token => eng.includes(token) || ar.includes(token) || id.includes(token));
       });
 
@@ -89,13 +146,11 @@ function setupLiveSearch() {
         renderSearchResults(localMatches, dropdown, true);
       }
 
-      // Fetch live matches from Cinemeta & Jikan (via /api/search).
       searchAbortController = new AbortController();
       try {
         let apiQuery = query;
         const isArabic = /[\u0600-\u06FF]/.test(query);
         if (isArabic && localMatches.length > 0) {
-          // Translate Arabic to English using local DB to get broader API results
           apiQuery = localMatches[0].title.split(' ')[0];
         }
 
@@ -103,14 +158,11 @@ function setupLiveSearch() {
           signal: searchAbortController.signal,
         });
 
-        // Query changed (or was cleared) while this request was in
-        // flight — its result is stale, drop it silently.
         if (thisRequest !== searchRequestToken) return;
 
         if (res.ok) {
           const data = await res.json();
           if (data.results && data.results.length > 0) {
-            // Merge and deduplicate against the local instant matches.
             const combined = [...localMatches];
             data.results.forEach(r => {
               if (!combined.some(c => (c.imdbId && c.imdbId === r.id) || (c.id === r.id) || (c.title.toLowerCase() === r.title.toLowerCase()))) {
@@ -129,6 +181,14 @@ function setupLiveSearch() {
   });
 
   searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const query = searchInput.value.trim();
+      if (query) {
+        saveSearch(query);
+        dropdown.classList.remove('active');
+        window.location.href = `browse.html?q=${encodeURIComponent(query)}`;
+      }
+    }
     if (e.key === 'Escape') dropdown.classList.remove('active');
   });
 
@@ -142,43 +202,42 @@ function setupLiveSearch() {
 function renderSearchResults(items, dropdown, isLocalOnly) {
   if (items.length === 0) {
     dropdown.innerHTML = `
-      <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
-        No matches found
+      <div class="search-no-results">
+        <i class="fas fa-search"></i>
+        <p>No matches found</p>
       </div>
     `;
     dropdown.classList.add('active');
     return;
   }
 
-  // Titles/genres below come from external APIs (Cinemeta/Jikan) as well
-  // as local data — per js/security.js's own policy ("search terms" and
-  // any user/external-controlled text MUST go through this module before
-  // reaching innerHTML), everything interpolated here is escaped.
   const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
   const safeImg = (typeof Security !== 'undefined')
     ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
-    : (url) => url || 'https://images.metahub.space/poster/small/tt15239678/img';
+    : (url) => url || 'https://images.metahub.space/poster/small/tt15398776/img';
 
-  dropdown.innerHTML = items.slice(0, 10).map(movie => {
-    const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
-    const targetId = encodeURIComponent(movie.id || movie.imdb_id);
-    const targetType = encodeURIComponent(movie.type || 'movie');
-    const targetUrl = `movie.html?id=${targetId}&type=${targetType}`;
+  const recentHtml = !isLocalOnly ? '' : renderRecentSearches(dropdown);
 
-    return `
-      <div class="search-result-item" onclick="window.location.href='${targetUrl}'">
-        <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';">
-        <div style="flex: 1;">
-          <div style="font-weight: 600; font-size: 0.88rem; color: #f1f3f6;">${esc(movie.title)} <span style="color: #6b7280; font-size: 0.8rem;">(${esc(movie.year || movie.releaseInfo || 'N/A')})</span></div>
-          <div class="search-result-meta">
-            <span style="color: #5b9df5;">${typeLabel}</span>
-            ${movie.rating ? `<span class="search-result-rating"><i class="fas fa-star"></i> ${esc(movie.rating)}</span>` : ''}
-            ${movie.genres && movie.genres.length ? `<span>&bull; ${esc(movie.genres.slice(0, 2).join(', '))}</span>` : ''}
+  dropdown.innerHTML = `
+    ${!isLocalOnly ? '' : recentHtml}
+    ${items.slice(0, 8).map(movie => {
+      const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
+      const targetId = encodeURIComponent(movie.id || movie.imdb_id);
+      const targetType = encodeURIComponent(movie.type || 'movie');
+      const targetUrl = `movie.html?id=${targetId}&type=${targetType}`;
+      const icon = movie.type === 'anime' ? 'fa-dragon' : (movie.type === 'tv' ? 'fa-tv' : 'fa-film');
+
+      return `
+        <div class="search-suggestion-item" onclick="saveSearch('${esc(movie.title).replace(/'/g, "\\'")}'); window.location.href='${targetUrl}'">
+          <img class="suggestion-icon" src="${safeImg(movie.poster)}" alt="" onerror="this.style.display='none'">
+          <div class="suggestion-info">
+            <div class="suggestion-title">${esc(movie.title)}</div>
+            <div class="suggestion-meta"><i class="fas ${icon}" style="margin-right:4px;"></i> ${typeLabel} &bull; ${esc(movie.year || movie.releaseInfo || 'N/A')} ${movie.rating ? '&bull; ★ ' + esc(movie.rating) : ''}</div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('')}
+  `;
 
   dropdown.classList.add('active');
 }
