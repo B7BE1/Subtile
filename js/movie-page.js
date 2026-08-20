@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await fetchRealSubtitles(currentMovie);
     }
   } catch (err) {
-    showToast('Error loading page: ' + (err.message || err), true);
+    showToast(`Error loading page: ${  err.message || err}`, true);
     const loader = document.getElementById('globalLoader');
     if (loader) loader.style.display = 'none';
   }
@@ -540,8 +540,8 @@ function renderSeasonsList(movie) {
 
   let html = '';
   seasons.forEach(s => {
-    let sTitle = s === 0 ? 'Specials' : `Season ${s}`;
-    let sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
+    const sTitle = s === 0 ? 'Specials' : `Season ${s}`;
+    const sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
     html += `
       <div class="season-card card-hover" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
         <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb" loading="lazy">
@@ -738,9 +738,9 @@ window.previewSubtitle = function(btn) {
 
   if (!url || url === '#' || url.includes('sample')) {
     const ext = (format || 'srt').toLowerCase();
-    let sample = '1\n00:00:05,000 --> 00:00:09,000\nSynced Subtitle: ' + release + '\n\n2\n00:00:10,000 --> 00:00:15,000\nEnjoy your movie with Subtile!\n\n3\n00:00:16,000 --> 00:00:20,000\nThis is a sample preview.\n';
-    if (ext === 'ass') sample = '[Script Info]\nTitle: ' + release + '\nScriptType: v4.00+\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour\nStyle: Default,Arial,20,&H00FFFFFF\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,' + release + '\nDialogue: 0,0:00:05.50,0:00:09.00,Default,,0,0,0,,Enjoy the show with Subtile!\n';
-    else if (ext === 'vtt') sample = 'WEBVTT\n\n00:00:01.000 --> 00:00:05.000\n' + release + '\n\n00:00:05.500 --> 00:00:09.000\nEnjoy the show with Subtile!\n';
+    let sample = `1\n00:00:05,000 --> 00:00:09,000\nSynced Subtitle: ${  release  }\n\n2\n00:00:10,000 --> 00:00:15,000\nEnjoy your movie with Subtile!\n\n3\n00:00:16,000 --> 00:00:20,000\nThis is a sample preview.\n`;
+    if (ext === 'ass') sample = `[Script Info]\nTitle: ${  release  }\nScriptType: v4.00+\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour\nStyle: Default,Arial,20,&H00FFFFFF\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,${  release  }\nDialogue: 0,0:00:05.50,0:00:09.00,Default,,0,0,0,,Enjoy the show with Subtile!\n`;
+    else if (ext === 'vtt') sample = `WEBVTT\n\n00:00:01.000 --> 00:00:05.000\n${  release  }\n\n00:00:05.500 --> 00:00:09.000\nEnjoy the show with Subtile!\n`;
     body.innerHTML = formatPreviewText(sample, ext);
     return;
   }
@@ -763,7 +763,7 @@ function formatPreviewText(text, ext) {
       if (trimmed.startsWith('Dialogue:')) {
         const parts = trimmed.split(',');
         const dialogue = parts.slice(9).join(',').replace(/\{[^}]*\}/g, '');
-        const time = parts[1] + ' → ' + parts[2];
+        const time = `${parts[1]  } → ${  parts[2]}`;
         html += `<div class="sub-line"><span class="sub-timestamp">${time}</span> ${escapeHtml(dialogue)}</div>`;
         inEvents = true;
       } else if (!inEvents) {
@@ -829,7 +829,7 @@ function showToast(message, isError = false) {
 
   const toast = document.createElement('div');
   const type = isError ? 'error' : 'success';
-  toast.className = 'toast-upgraded toast-' + type;
+  toast.className = `toast-upgraded toast-${  type}`;
   const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
   const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
   toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${escapeHtml(message)}</span>`;
@@ -849,8 +849,8 @@ function toggleWatchlist() {
     return;
   }
   if (!currentMovie) return;
-  const key = 'subtile_watchlist_' + user.username;
-  let list = JSON.parse(localStorage.getItem(key) || '[]');
+  const key = `subtile_watchlist_${  user.username}`;
+  const list = JSON.parse(localStorage.getItem(key) || '[]');
   const idx = list.findIndex(w => w.id === currentMovie.id);
   if (idx >= 0) {
     list.splice(idx, 1);
@@ -889,7 +889,7 @@ function updateWatchlistButton(inWatchlist) {
 function checkWatchlistStatus() {
   const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
   if (!user || !user.username || !currentMovie) return;
-  const key = 'subtile_watchlist_' + user.username;
+  const key = `subtile_watchlist_${  user.username}`;
   const list = JSON.parse(localStorage.getItem(key) || '[]');
   const inWatchlist = list.some(w => w.id === currentMovie.id);
   updateWatchlistButton(inWatchlist);
@@ -900,7 +900,7 @@ let selectedRating = 0;
 
 function getMovieReviews() {
   if (!currentMovie) return [];
-  const key = 'subtile_reviews_' + currentMovie.id;
+  const key = `subtile_reviews_${  currentMovie.id}`;
   return JSON.parse(localStorage.getItem(key) || '[]');
 }
 
@@ -908,7 +908,7 @@ function renderReviews() {
   const reviews = getMovieReviews();
   const container = document.getElementById('reviewsList');
   const countEl = document.getElementById('reviewCount');
-  if (countEl) countEl.textContent = reviews.length + ' review' + (reviews.length !== 1 ? 's' : '');
+  if (countEl) countEl.textContent = `${reviews.length  } review${  reviews.length !== 1 ? 's' : ''}`;
   if (!container) return;
 
   if (reviews.length === 0) {
@@ -971,10 +971,10 @@ function submitReview() {
   } else {
     reviews.push(review);
   }
-  localStorage.setItem('subtile_reviews_' + currentMovie.id, JSON.stringify(reviews));
+  localStorage.setItem(`subtile_reviews_${  currentMovie.id}`, JSON.stringify(reviews));
 
   // Store in user's reviews too
-  const userReviewsKey = 'subtile_reviews_' + user.username;
+  const userReviewsKey = `subtile_reviews_${  user.username}`;
   const userReviews = JSON.parse(localStorage.getItem(userReviewsKey) || '[]');
   const uidx = userReviews.findIndex(r => r.movieId === currentMovie.id);
   const userReview = { movieId: currentMovie.id, movieTitle: currentMovie.title, type: currentMovie.type, rating: selectedRating, comment: comment.trim(), date: review.date };

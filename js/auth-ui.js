@@ -63,14 +63,14 @@
 
   function showFieldError(inputId, message) {
     const input = document.getElementById(inputId);
-    const err = document.getElementById(inputId + 'Error');
+    const err = document.getElementById(`${inputId  }Error`);
     if (input) input.classList.add('is-invalid');
     if (err) { err.textContent = message; err.classList.add('show'); }
   }
 
   function markValid(inputId) {
     const input = document.getElementById(inputId);
-    const err = document.getElementById(inputId + 'Error');
+    const err = document.getElementById(`${inputId  }Error`);
     if (input) { input.classList.remove('is-invalid'); input.classList.add('is-valid'); }
     if (err) { err.textContent = ''; err.classList.remove('show'); }
   }
@@ -118,7 +118,7 @@
 
   function clearFieldState(inputId) {
     const input = document.getElementById(inputId);
-    const err = document.getElementById(inputId + 'Error');
+    const err = document.getElementById(`${inputId  }Error`);
     if (input) input.classList.remove('is-invalid', 'is-valid');
     if (err) { err.textContent = ''; err.classList.remove('show'); }
   }

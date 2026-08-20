@@ -7,7 +7,7 @@
 const API_CACHE_TTL = 10 * 60 * 1000;
 window.cachedFetch = async function(url, opts = {}) {
   if (opts.method && opts.method !== 'GET') return fetch(url, opts);
-  const key = 'api_cache_' + url;
+  const key = `api_cache_${  url}`;
   try {
     const cached = JSON.parse(sessionStorage.getItem(key));
     if (cached && Date.now() - cached.ts < API_CACHE_TTL) {
@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const rect = btn.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width * 100);
     const y = ((e.clientY - rect.top) / rect.height * 100);
-    btn.style.setProperty('--ripple-x', x + '%');
-    btn.style.setProperty('--ripple-y', y + '%');
+    btn.style.setProperty('--ripple-x', `${x  }%`);
+    btn.style.setProperty('--ripple-y', `${y  }%`);
     btn.classList.add('ripple-active');
     setTimeout(() => btn.classList.remove('ripple-active'), 500);
   });
@@ -276,7 +276,7 @@ function renderSearchResults(items, dropdown, isLocalOnly) {
           <img class="suggestion-icon" src="${safeImg(movie.poster)}" alt="" onerror="this.style.display='none'">
           <div class="suggestion-info">
             <div class="suggestion-title">${esc(movie.title)}</div>
-            <div class="suggestion-meta"><i class="fas ${icon}" style="margin-right:4px;"></i> ${typeLabel} &bull; ${esc(movie.year || movie.releaseInfo || 'N/A')} ${movie.rating ? '&bull; ★ ' + esc(movie.rating) : ''}</div>
+            <div class="suggestion-meta"><i class="fas ${icon}" style="margin-right:4px;"></i> ${typeLabel} &bull; ${esc(movie.year || movie.releaseInfo || 'N/A')} ${movie.rating ? `&bull; ★ ${  esc(movie.rating)}` : ''}</div>
           </div>
         </div>
       `;
@@ -408,7 +408,7 @@ async function handleAuthRegister(e) {
       await Auth.register({ username, email, password });
       closeAuthModal();
       setupAuthNavbar();
-      showToast('Account created! Welcome, ' + username);
+      showToast(`Account created! Welcome, ${  username}`);
     }
   } catch (err) {
     showToast(err.message || 'Registration failed', true);
@@ -434,7 +434,7 @@ function showToast(message, isError = false) {
 
   const toast = document.createElement('div');
   const type = isError ? 'error' : 'success';
-  toast.className = 'toast-upgraded toast-' + type;
+  toast.className = `toast-upgraded toast-${  type}`;
   const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
   const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
   toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${escapeText(message)}</span>`;

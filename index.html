@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Subtile — Premium Cinematic Subtitles Archive for Movies, TV Shows, and Anime.">
     <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#0a0a0c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>Subtile — Trending Top 10</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -425,6 +429,7 @@
         </div>
     </div>
 
+<script src="js/error-boundary.js" defer></script>
 <script src="js/security.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/theme.js"></script>
@@ -1111,5 +1116,12 @@ function toggleMobileNav() {
 }
 </script>
 <div id="toastContainer" style="position:fixed; bottom:2rem; right:2rem; z-index:999; display:flex; flex-direction:column; gap:0.8rem;"></div>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>

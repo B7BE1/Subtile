@@ -405,7 +405,7 @@ function renderCatalog() {
     return true;
   });
 
-  let list = [...results];
+  const list = [...results];
 
   if (currentSort === 'rating') {
     list.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
@@ -544,7 +544,7 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
     // /api/search's normalized shape already carries id/type/title/year/
     // rating/poster — renderCatalog needs no further mapping, just a
     // fallback for the 'N/A' year placeholder the old client-side path used.
-    let apiResults = (data.results || []).map(r => ({
+    const apiResults = (data.results || []).map(r => ({
       ...r,
       year: r.year || 'N/A',
     }));
@@ -601,7 +601,7 @@ function renderBrowseDropdown(items, dropdown) {
         <img class="suggestion-icon" src="${safeImg(movie.poster || movie.backdrop)}" alt="" onerror="this.style.display='none'">
         <div class="suggestion-info">
           <div class="suggestion-title">${esc(movie.title)}</div>
-          <div class="suggestion-meta"><i class="fas ${icon(movie.type)}" style="margin-right:4px;"></i> ${typeLabel(movie.type)} &bull; ${esc(movie.year || 'N/A')} ${movie.rating ? '&bull; ★ ' + esc(movie.rating) : ''}</div>
+          <div class="suggestion-meta"><i class="fas ${icon(movie.type)}" style="margin-right:4px;"></i> ${typeLabel(movie.type)} &bull; ${esc(movie.year || 'N/A')} ${movie.rating ? `&bull; ★ ${  esc(movie.rating)}` : ''}</div>
         </div>
       </div>
     `;
@@ -722,7 +722,7 @@ async function handleAuthRegister(e) {
       await Auth.register({ username, email, password });
       closeAuthModal();
       setupAuthNavbar();
-      showToast('Account created! Welcome, ' + username);
+      showToast(`Account created! Welcome, ${  username}`);
     }
   } catch (err) {
     showToast(err.message || 'Registration failed', true);
@@ -747,7 +747,7 @@ function showToast(message, isError = false) {
   if (!container) return;
   const toast = document.createElement('div');
   const type = isError ? 'error' : 'success';
-  toast.className = 'toast-upgraded toast-' + type;
+  toast.className = `toast-upgraded toast-${  type}`;
   const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
   const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
   toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${esc(message)}</span>`;

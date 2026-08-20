@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>Subtile — Cinema Account Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -235,6 +239,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/error-boundary.js" defer></script>
     <script src="js/security.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/i18n.js"></script>
@@ -448,5 +453,12 @@
         setTimeout(() => toast.classList.remove('show'), 3500);
     }
     </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>

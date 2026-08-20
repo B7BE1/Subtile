@@ -48,7 +48,7 @@ const Auth = (() => {
 
   async function hashPassword(password, salt) {
     const encoder = new TextEncoder();
-    const data = encoder.encode(salt + ':' + password);
+    const data = encoder.encode(`${salt  }:${  password}`);
     const digest = await crypto.subtle.digest('SHA-256', data);
     return bufferToHex(digest);
   }
@@ -137,7 +137,7 @@ const Auth = (() => {
     const passwordHash = await hashPassword(password, salt);
 
     const newUser = {
-      id: 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      id: `u_${  Date.now().toString(36)  }${Math.random().toString(36).slice(2, 8)}`,
       username,
       email,
       salt,
