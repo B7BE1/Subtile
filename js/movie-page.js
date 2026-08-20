@@ -540,7 +540,7 @@ function renderSeasonsList(movie) {
     let sTitle = s === 0 ? 'Specials' : `Season ${s}`;
     let sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
     html += `
-      <div class="season-card" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
+      <div class="season-card card-hover" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
         <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb" loading="lazy">
         <div class="season-card-content">
           <div class="season-card-title">${escapeHtml(sTitle)}</div>
@@ -620,7 +620,7 @@ function renderSubtitlesList() {
         <i class="fas fa-closed-captioning" style="font-size: 2rem; margin-bottom: 0.8rem; display: block;"></i>
         <h3>No subtitles found</h3>
         <p style="margin-top: 0.4rem; font-size: 0.85rem;">Try another filter or upload one.</p>
-        <button class="btn btn-outline" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload</button>
+        <button class="btn btn-outline btn-ripple" style="margin-top: 1rem;" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload</button>
       </div>
     `;
     return;

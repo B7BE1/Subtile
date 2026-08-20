@@ -23,46 +23,6 @@
         .movie-card:hover .overlay-content { opacity: 1; }
         .overlay-content { opacity: 0; transition: opacity 0.3s ease; }
 
-        .search-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            right: 0;
-            background: rgba(18, 18, 24, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 14px;
-            max-height: 380px;
-            overflow-y: auto;
-            display: none;
-            z-index: 100;
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
-        }
-        .search-dropdown.active { display: block; }
-        .search-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-            transition: background 0.2s ease;
-            text-decoration: none;
-            color: #fff;
-        }
-        .search-item:last-child { border-bottom: none; }
-        .search-item:hover { background: rgba(255, 255, 255, 0.08); }
-        .search-item img {
-            width: 36px;
-            height: 52px;
-            object-fit: cover;
-            border-radius: 6px;
-            flex-shrink: 0;
-        }
-
-        /* BUG FIX: this rule used to target ".filter-btn.active", but the
-           buttons below use class "filter-tab-btn" — the two names never
-           matched, so the active category tab never got its highlighted
-           style. Selector corrected to actually match the markup. */
         .filter-tab-btn.active {
             background: #ffffff;
             color: #050507;
@@ -93,7 +53,7 @@
                     <input type="text" id="catalogSearchInput" oninput="onCatalogSearch()" placeholder="Search movies, TV shows, anime..." autocomplete="off" data-i18n="searchPlaceholder" class="w-full bg-white/[0.06] border border-white/[0.08] rounded-xl py-2.5 ps-4 pe-10 text-sm focus:outline-none focus:border-white/25 focus:bg-white/[0.09] transition-all text-neutral-200 placeholder:text-neutral-500">
                     <svg class="absolute end-3.5 top-3 w-4 h-4 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <div id="browseSearchDropdown" class="search-dropdown"></div>
+                <div id="browseSearchDropdown" class="search-suggestions"></div>
             </div>
 
             <div class="flex items-center gap-3 flex-shrink-0">
@@ -141,10 +101,10 @@
             </div>
             
             <div class="flex gap-2 flex-wrap items-center" id="browseCategoryFilters">
-                <button class="filter-tab-btn active px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('all', this)" data-i18n="browseMovies">All Titles</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('movie', this)" data-i18n="browseMovies">Movies</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('tv', this)" data-i18n="browseSeries">TV Shows</button>
-                <button class="filter-tab-btn px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('anime', this)" data-i18n="browseAnime">Anime</button>
+                <button class="filter-tab-btn btn-ripple active px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('all', this)" data-i18n="browseMovies">All Titles</button>
+                <button class="filter-tab-btn btn-ripple px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('movie', this)" data-i18n="browseMovies">Movies</button>
+                <button class="filter-tab-btn btn-ripple px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('tv', this)" data-i18n="browseSeries">TV Shows</button>
+                <button class="filter-tab-btn btn-ripple px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('anime', this)" data-i18n="browseAnime">Anime</button>
                 <!-- CONNECTED: js/browse.js already implements onCatalogSort()/currentSort
                      fully (rating/year/title) but browse.html had no control to trigger it. -->
                 <select id="catalogSortSelect" onchange="onCatalogSort()" class="px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-300 text-sm font-bold focus:outline-none focus:border-white/25 transition-all cursor-pointer">

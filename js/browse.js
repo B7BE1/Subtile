@@ -43,6 +43,43 @@ let currentSort = 'rating';
 let liveSearchResults = [];
 let browseDebounceTimer = null;
 
+const SEARCH_HISTORY_KEY = 'subtile_search_history';
+const MAX_RECENT = 6;
+
+function getRecentSearches() {
+  try { return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveSearch(query) {
+  if (!query.trim()) return;
+  let recent = getRecentSearches().filter(q => q.toLowerCase() !== query.toLowerCase());
+  recent.unshift(query.trim());
+  if (recent.length > MAX_RECENT) recent = recent.slice(0, MAX_RECENT);
+  try { localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(recent)); } catch {}
+}
+
+function clearRecentSearches() {
+  try { localStorage.removeItem(SEARCH_HISTORY_KEY); } catch {}
+}
+
+function renderRecentSearches(dropdown) {
+  const recent = getRecentSearches();
+  if (recent.length === 0) return '';
+  return `
+    <div class="search-recent">
+      <div class="search-recent-header">
+        <span><i class="fas fa-clock"></i> Recent</span>
+        <button onclick="event.preventDefault(); event.stopPropagation(); clearRecentSearches(); this.closest('.search-suggestions').innerHTML = '';">Clear</button>
+      </div>
+      ${recent.map(q => `
+        <div class="search-recent-item" onclick="event.preventDefault(); document.getElementById('catalogSearchInput').value='${q.replace(/'/g, "\\'")}'; onCatalogSearch();">
+          <i class="fas fa-history"></i> ${q}
+        </div>
+      `).join('')}
+    </div>`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const q = urlParams.get('q');
@@ -71,12 +108,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('catalogSearchInput');
   const dropdown = document.getElementById('browseSearchDropdown');
   if (searchInput && dropdown) {
+    searchInput.addEventListener('focus', () => {
+      const query = searchInput.value.trim();
+      if (!query) {
+        const recentHtml = renderRecentSearches(dropdown);
+        if (recentHtml) {
+          dropdown.innerHTML = recentHtml;
+          dropdown.classList.add('active');
+        }
+      }
+    });
+
     searchInput.addEventListener('keydown', (e) => {
-      const items = Array.from(dropdown.querySelectorAll('.search-item'));
+      const items = Array.from(dropdown.querySelectorAll('.search-suggestion-item, .search-recent-item'));
       const activeIdx = items.findIndex(i => i.classList.contains('is-active'));
 
       if (e.key === 'Escape') {
         dropdown.classList.remove('active');
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = searchInput.value.trim();
+        if (query) {
+          saveSearch(query);
+          dropdown.classList.remove('active');
+          window.location.href = `browse.html?q=${encodeURIComponent(query)}`;
+        }
         return;
       }
       if (!dropdown.classList.contains('active') || items.length === 0) return;
@@ -90,13 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
         items.forEach(i => i.classList.remove('is-active'));
         items[nextIdx].classList.add('is-active');
         items[nextIdx].scrollIntoView({ block: 'nearest' });
-      } else if (e.key === 'Enter' && activeIdx !== -1) {
-        e.preventDefault();
-        items[activeIdx].click();
       }
     });
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.search-dropdown') && e.target !== searchInput) {
+      if (!e.target.closest('.search-suggestions') && e.target !== searchInput) {
         dropdown.classList.remove('active');
       }
     });
@@ -343,7 +398,7 @@ function renderCatalog() {
     const ratingDisplay = formatRating(movie.rating);
 
     return `
-      <a href="${targetUrl}" class="movie-card" style="position: relative; text-decoration: none; color: inherit; display: block;">
+      <a href="${targetUrl}" class="movie-card card-hover" style="position: relative; text-decoration: none; color: inherit; display: block;">
         <img src="${safeImg(movie.poster)}" alt="${esc(movie.title)}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/small/tt15239678/img';" style="width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 1.5rem; filter: grayscale(20%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border-color);">
         ${ratingDisplay ? `
           <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(10, 10, 12, 0.9); border: 1px solid var(--border-color); color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; z-index: 2; font-family: 'Inter', sans-serif;">
@@ -485,31 +540,31 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
 function renderBrowseDropdown(items, dropdown) {
   if (items.length === 0) {
     dropdown.innerHTML = `
-      <div style="padding: 0.9rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
-        No matches found
+      <div class="search-no-results">
+        <i class="fas fa-search"></i>
+        <p>No matches found</p>
       </div>
     `;
     dropdown.classList.add('active');
     return;
   }
 
-  // Reuses the module-level esc()/safeImg() — do NOT redeclare local
-  // versions here (a previous version did, with an unescaped fallback,
-  // which reopened the XSS gap those helpers exist to close).
-  dropdown.innerHTML = items.slice(0, 10).map(movie => {
-    const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
+  const icon = (type) => type === 'anime' ? 'fa-dragon' : (type === 'tv' ? 'fa-tv' : 'fa-film');
+  const typeLabel = (type) => type === 'anime' ? 'Anime' : (type === 'tv' ? 'TV Show' : 'Movie');
+
+  dropdown.innerHTML = items.slice(0, 8).map(movie => {
     const targetId = encodeURIComponent(movie.id || movie.imdb_id);
     const targetType = encodeURIComponent(movie.type || 'movie');
     const targetUrl = `movie.html?id=${targetId}&type=${targetType}`;
 
     return `
-      <a href="${targetUrl}" class="search-item">
-        <img src="${safeImg(movie.poster || movie.backdrop)}" alt="">
-        <div>
-          <div style="font-weight: 600; font-size: 0.9rem;">${esc(movie.title)}</div>
-          <div style="font-size: 0.75rem; color: #8a8a92;">${esc(movie.year || 'N/A')} • ${typeLabel}</div>
+      <div class="search-suggestion-item" onclick="saveSearch('${esc(movie.title).replace(/'/g, "\\'")}'); window.location.href='${targetUrl}'">
+        <img class="suggestion-icon" src="${safeImg(movie.poster || movie.backdrop)}" alt="" onerror="this.style.display='none'">
+        <div class="suggestion-info">
+          <div class="suggestion-title">${esc(movie.title)}</div>
+          <div class="suggestion-meta"><i class="fas ${icon(movie.type)}" style="margin-right:4px;"></i> ${typeLabel(movie.type)} &bull; ${esc(movie.year || 'N/A')} ${movie.rating ? '&bull; ★ ' + esc(movie.rating) : ''}</div>
         </div>
-      </a>
+      </div>
     `;
   }).join('');
   dropdown.classList.add('active');
