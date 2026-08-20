@@ -269,10 +269,20 @@ async function triggerLiveTrending(type, page = 1) {
 
   // A promise that resolves to [] on normal failure but *rejects* on abort,
   // so an aborted request doesn't quietly masquerade as "zero results".
+  // Retries once on network failure to handle transient errors.
   const fetchFn = window.cachedFetch || fetch;
-  const safeFetchJson = (url, opts) => fetchFn(url, opts)
+  const safeFetchJson = (url, opts, retries = 1) => fetchFn(url, opts)
     .then(r => r.ok ? r.json() : null)
-    .catch(e => { if (e.name === 'AbortError') throw e; return null; });
+    .catch(e => {
+      if (e.name === 'AbortError') throw e;
+      if (retries > 0) {
+        return new Promise(resolve => {
+          setTimeout(() => resolve(safeFetchJson(url, opts, retries - 1)), 800);
+        });
+      }
+      console.warn('[browse] API failed after retry:', url);
+      return null;
+    });
 
   try {
     const promises = [];
@@ -281,7 +291,7 @@ async function triggerLiveTrending(type, page = 1) {
 
     if (type === 'all' || type === 'movie') {
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/movie/top.json`, { signal })
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/movie/top.json?skip=${skip}`, { signal })
           .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
@@ -295,7 +305,7 @@ async function triggerLiveTrending(type, page = 1) {
 
     if (type === 'all' || type === 'tv') {
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top.json`, { signal })
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top.json?skip=${skip}`, { signal })
           .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
