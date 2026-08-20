@@ -3,6 +3,9 @@
   "name": "subtitles-app",
   "cleanUrls": true,
   "trailingSlash": false,
+  "installCommand": "echo skipping install",
+  "buildCommand": "echo skipping build",
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*)",
