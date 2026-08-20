@@ -250,7 +250,7 @@ const Security = (() => {
   // 5. File upload validation (subtitle files)
   // ---------------------------------------------------------------
 
-  const ALLOWED_SUBTITLE_EXT = ['.srt', '.vtt', '.zip'];
+  const ALLOWED_SUBTITLE_EXT = ['.srt', '.ass', '.vtt', '.zip'];
   const ALLOWED_SUBTITLE_MIME = [
     'text/plain',
     'text/vtt',

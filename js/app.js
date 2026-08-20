@@ -339,12 +339,12 @@ function closeAuthModal() {
 
 function openUploadModal() {
   const modal = document.getElementById('uploadModal');
-  if (modal) modal.classList.add('show');
+  if (modal) modal.style.display = 'flex';
 }
 
 function closeUploadModal() {
   const modal = document.getElementById('uploadModal');
-  if (modal) modal.classList.remove('show');
+  if (modal) modal.style.display = 'none';
 }
 
 function handleUploadSubtitle(event) {

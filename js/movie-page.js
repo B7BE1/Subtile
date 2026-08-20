@@ -373,8 +373,9 @@ async function fetchRealSubtitles(movie) {
     subtitlesAbortController.abort();
   }
   subtitlesAbortController = new AbortController();
-  const { signal } = subtitlesAbortController;
-  const timeoutId = setTimeout(() => subtitlesAbortController.abort(), 8000);
+  const controller = subtitlesAbortController;
+  const { signal } = controller;
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   const imdbId = movie.imdb_id || movie.imdbId;
   const title = movie.title;
@@ -809,12 +810,12 @@ document.addEventListener('keydown', (e) => {
 
 function openUploadModal() {
   const modal = document.getElementById('uploadModal');
-  if (modal) modal.classList.add('show');
+  if (modal) modal.style.display = 'flex';
 }
 
 function closeUploadModal() {
   const modal = document.getElementById('uploadModal');
-  if (modal) modal.classList.remove('show');
+  if (modal) modal.style.display = 'none';
 }
 
 function handleUploadSubtitle(event) {

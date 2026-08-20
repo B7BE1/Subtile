@@ -1018,12 +1018,5 @@
         setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
     </script>
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (const r of registrations) r.unregister();
-    });
-}
-</script>
 </body>
 </html>

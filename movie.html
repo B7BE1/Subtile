@@ -562,12 +562,5 @@
   <script src="js/i18n.js"></script>
   <script src="js/data.js"></script>
   <script src="js/movie-page.js"></script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(registrations => {
-    for (const r of registrations) r.unregister();
-  });
-}
-</script>
 </body>
 </html>
