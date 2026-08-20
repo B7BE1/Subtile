@@ -49,36 +49,6 @@
         }
         .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            height: 100vh;
-            background: rgba(5, 5, 7, 0.98);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1.5rem;
-            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mobile-nav.active {
-            right: 0;
-        }
-        .mobile-nav a {
-            color: #fff;
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
         /* Grain overlay */
         body::before {
             content: '';
@@ -738,7 +708,7 @@
         const username = params.get('user');
 
         if (!username) {
-            profileUser = Auth.getCurrentUser();
+            profileUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
             if (!profileUser) {
                 window.location.href = 'login.html?redirect=' + encodeURIComponent('profile.html');
                 return;
@@ -840,7 +810,7 @@
             const bio = $('editBio').value.trim();
             const avatar = $('editAvatar').value.trim();
             Auth.updateProfile({ bio, avatar });
-            profileUser = Auth.getCurrentUser();
+            profileUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
             renderProfile(profileUser);
             showToast('Profile updated!');
         } catch (e) {
@@ -859,7 +829,7 @@
         reader.onload = (e) => {
             try {
                 Auth.updateProfile({ avatar: e.target.result });
-                profileUser = Auth.getCurrentUser();
+                profileUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
                 $('profileAvatar').src = e.target.result;
                 showToast('Avatar updated!');
             } catch (err) {
@@ -1004,7 +974,7 @@
     function setupNavbar() {
         const slot = $('navAuthSlot');
         if (!slot) return;
-        const user = Auth.getCurrentUser();
+        const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
         if (user && user.username) {
             slot.innerHTML = `
                 <a href="profile.html" class="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-2 rounded-full text-sm font-semibold text-white hover:border-neutral-600 transition-colors">
