@@ -443,6 +443,7 @@
         <a href="#subtitlesListView" id="heroDownloadBtn" style="margin-top: 1.5rem; width: 100%; padding: 0.85rem 1.5rem; background: #ffffff; color: #050507; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.6rem; transition: all 0.2s ease; box-shadow: 0 4px 20px rgba(255,255,255,0.15);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
           <i class="fas fa-arrow-down"></i> Select & Download Subtitles
         </a>
+        <div id="favBtnSlot" style="margin-top: 0.75rem; width: 100%;"></div>
       </div>
     </div>
 
@@ -452,6 +453,7 @@
       <div class="panel-header">
         <h2 id="viewTitle" class="panel-title"><i class="fas fa-closed-captioning"></i> <span data-i18n="subtitlesArchive">Subtitles Archive</span></h2>
         <div style="display:flex; gap:0.5rem; align-items:center;">
+          <button id="batchDownloadBtn" class="back-btn btn-ripple" style="display:none;" onclick="batchDownloadAll()"><i class="fas fa-file-archive"></i> Download All</button>
           <button id="watchlistBtn" class="back-btn btn-ripple" onclick="toggleWatchlist()"><i class="far fa-bookmark"></i> <span id="watchlistBtnText" data-i18n="addToWatchlist">Add to Watchlist</span></button>
           <button id="backToSeasonsBtn" class="back-btn btn-ripple" style="display: none;"><i class="fas fa-arrow-left"></i> <span data-i18n="backToSeasons">Back to Seasons</span></button>
         </div>
@@ -562,5 +564,9 @@
   <script src="js/i18n.js"></script>
   <script src="js/data.js"></script>
   <script src="js/movie-page.js"></script>
+  <script src="js/features.js"></script>
+  <script>
+  if (typeof KeyboardShortcuts !== 'undefined') KeyboardShortcuts.init();
+  </script>
 </body>
 </html>

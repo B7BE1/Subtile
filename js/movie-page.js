@@ -518,6 +518,13 @@ function renderMovieDetails(movie) {
   if (overview) {
     overview.textContent = movie.overview || 'No synopsis available.';
   }
+
+  if (typeof Favorites !== 'undefined') {
+    var favSlot = document.getElementById('favBtnSlot');
+    if (favSlot) {
+      Favorites.renderButton('favBtnSlot', { id: movie.id, title: movie.title, type: movie.type || 'movie', poster: movie.poster || '' });
+    }
+  }
 }
 
 function renderSeasonsList(movie) {
@@ -683,6 +690,25 @@ function renderSubtitlesList() {
   if (typeof window.attachFadeIn === 'function') {
     window.attachFadeIn(container.querySelectorAll('.subtitle-item'));
   }
+
+  var batchBtn = document.getElementById('batchDownloadBtn');
+  if (batchBtn) {
+    if (subs.length > 1) {
+      batchBtn.style.display = '';
+      batchBtn.innerHTML = '<i class="fas fa-file-archive"></i> Download All (' + subs.length + ')';
+    } else {
+      batchBtn.style.display = 'none';
+    }
+  }
+}
+
+function batchDownloadAll() {
+  if (!currentMovie || !loadedSubtitles.length) return;
+  if (typeof BatchDownload !== 'undefined') {
+    var subsWithUrl = loadedSubtitles.filter(function(s) { return s.download_url && s.download_url !== '#'; });
+    if (subsWithUrl.length === 0) { showToast('No downloadable subtitles found'); return; }
+    BatchDownload.downloadAll(subsWithUrl, currentMovie.title);
+  }
 }
 
 function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '') {
@@ -705,6 +731,10 @@ function downloadSubtitle(subId, releaseName, format = 'SRT', rawDownloadUrl = '
     setTimeout(() => {
       showToast(`Downloaded: ${fileName}`);
     }, 1200);
+
+    if (typeof DownloadHistory !== 'undefined' && currentMovie) {
+      DownloadHistory.add({ id: currentMovie.id, title: currentMovie.title, type: currentMovie.type || 'movie', poster: currentMovie.poster || '', format: ext.toUpperCase() });
+    }
     return;
   }
 

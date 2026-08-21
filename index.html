@@ -315,6 +315,26 @@
         </div>
     </main>
 
+    <!-- Favorites & History Section -->
+    <section id="userSection" class="container mx-auto px-4 sm:px-8 py-10 hidden" style="border-top:1px solid rgba(255,255,255,0.06);">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-neutral-200"><i class="fas fa-heart" style="color:#ef4444; margin-right:0.5rem;"></i> Favorites</h3>
+                    <button onclick="Favorites.clear();Favorites.render('favList');showToast('Favorites cleared');" style="background:none;border:none;color:#6b7280;font-size:0.75rem;cursor:pointer;">Clear all</button>
+                </div>
+                <div id="favList"></div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-neutral-200"><i class="fas fa-clock" style="color:#3b82f6; margin-right:0.5rem;"></i> Recent Downloads</h3>
+                    <button onclick="DownloadHistory.clear();DownloadHistory.render('historyList');showToast('History cleared');" style="background:none;border:none;color:#6b7280;font-size:0.75rem;cursor:pointer;">Clear all</button>
+                </div>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer-upgraded relative z-30">
         <div class="container mx-auto px-4 sm:px-8">
@@ -438,6 +458,7 @@
 <script src="js/i18n.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
+<script src="js/features.js"></script>
 <script>
 "use strict";
 
@@ -1116,6 +1137,17 @@ function toggleMobileNav() {
     const nav = document.getElementById('mobileNav');
     if (nav) nav.classList.toggle('active');
 }
+// Features init
+(function() {
+    var favList = document.getElementById('favList');
+    var histList = document.getElementById('historyList');
+    var userSection = document.getElementById('userSection');
+    var hasData = false;
+    if (typeof Favorites !== 'undefined' && Favorites.getAll().length > 0) { Favorites.render('favList', 8); hasData = true; }
+    if (typeof DownloadHistory !== 'undefined' && DownloadHistory.getAll().length > 0) { DownloadHistory.render('historyList', 8); hasData = true; }
+    if (userSection && hasData) userSection.classList.remove('hidden');
+    if (typeof KeyboardShortcuts !== 'undefined') KeyboardShortcuts.init();
+})();
 </script>
 <div id="toastContainer" style="position:fixed; bottom:2rem; right:2rem; z-index:999; display:flex; flex-direction:column; gap:0.8rem;"></div>
 </body>
