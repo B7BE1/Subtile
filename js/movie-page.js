@@ -43,6 +43,15 @@ window.attachFadeIn = function(elements) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof CustomSelect !== 'undefined') CustomSelect.initAll();
+
+  // Safety: hide loader after 10s no matter what
+  const safetyLoader = document.getElementById('globalLoader');
+  const safetyTimer = setTimeout(() => {
+    if (safetyLoader) safetyLoader.style.display = 'none';
+    const c = document.querySelector('.split-container');
+    if (c) c.classList.add('loaded');
+  }, 10000);
+
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id') || 'dune-2';
@@ -87,6 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAuthNavbar();
 
     // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
+    clearTimeout(safetyTimer);
     const loader = document.getElementById('globalLoader');
     const container = document.querySelector('.split-container');
     if (loader) loader.style.opacity = '0';
@@ -114,7 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       await fetchRealSubtitles(currentMovie);
     }
   } catch (err) {
-    showToast(`Error loading page: ${  err.message || err}`, true);
+    console.error('Movie page error:', err);
+    if (typeof showToast === 'function') showToast(`Error loading page: ${  err.message || err}`, true);
     const loader = document.getElementById('globalLoader');
     if (loader) loader.style.display = 'none';
   }

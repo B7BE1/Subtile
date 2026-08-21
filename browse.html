@@ -274,14 +274,11 @@
         I18n.translatePage();
         const langBtn = document.getElementById('langToggleBtn');
         if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
-        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
     }
     function toggleMobileNav() {
         var nav = document.getElementById('mobileNav');
         if (nav) nav.classList.toggle('active');
     }
-    if (typeof LanguageFilter !== 'undefined') LanguageFilter.renderDropdown('langFilterSlot');
-    if (typeof ViewToggle !== 'undefined') ViewToggle.renderToggle('viewToggleSlot');
     if (typeof KeyboardShortcuts !== 'undefined') KeyboardShortcuts.init();
     </script>
 </body>
