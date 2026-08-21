@@ -153,7 +153,7 @@ var LanguageFilter = (function() {
     var options = LANGUAGES.map(function(l) {
       return '<option value="' + l.code + '"' + (l.code === current ? ' selected' : '') + '>' + l.flag + ' ' + l.label + '</option>';
     }).join('');
-    container.innerHTML = '<select id="langFilterSelect" onchange="LanguageFilter.set(this.value);if(typeof onLanguageFilterChange===\'function\')onLanguageFilterChange();" style="padding:0.4rem 0.6rem;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;font-size:0.8rem;font-weight:600;cursor:pointer;outline:none;">' + options + '</select>';
+    container.innerHTML = '<select id="langFilterSelect" onchange="LanguageFilter.set(this.value);if(typeof onLanguageFilterChange===\'function\')onLanguageFilterChange();" class="filter-select">' + options + '</select>';
   }
   return { get: get, set: set, matchesFilter: matchesFilter, renderDropdown: renderDropdown, LANGUAGES: LANGUAGES };
 })();
@@ -204,4 +204,121 @@ var KeyboardShortcuts = (function() {
     });
   }
   return { init: init };
+})();
+
+/* ===== 8. Subtitle Comments ===== */
+var SubComments = (function() {
+  var KEY = 'subtile_comments';
+  function getAll() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { return {}; } }
+  function get(subId) { return getAll()[subId] || []; }
+  function add(subId, text, author) {
+    author = author || 'Anonymous';
+    var all = getAll();
+    if (!all[subId]) all[subId] = [];
+    all[subId].unshift({ text: text, author: author, timestamp: Date.now() });
+    if (all[subId].length > 50) all[subId].length = 50;
+    try { localStorage.setItem(KEY, JSON.stringify(all)); } catch(e) {}
+  }
+  function remove(subId, index) {
+    var all = getAll();
+    if (all[subId]) { all[subId].splice(index, 1); try { localStorage.setItem(KEY, JSON.stringify(all)); } catch(e) {} }
+  }
+  function render(subId, containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var comments = get(subId);
+    var html = '<div style="margin-top:0.5rem;">';
+    if (comments.length === 0) {
+      html += '<p style="font-size:0.75rem; color:#6b7280;">No comments yet</p>';
+    } else {
+      comments.forEach(function(c, i) {
+        html += '<div style="display:flex; gap:0.5rem; padding:0.4rem 0; border-bottom:1px solid rgba(255,255,255,0.04);">' +
+          '<div style="width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:#9ca3af; flex-shrink:0;">' + escapeText(c.author.charAt(0).toUpperCase()) + '</div>' +
+          '<div style="flex:1; min-width:0;">' +
+            '<div style="font-size:0.7rem; font-weight:600; color:#d1d5db;">' + escapeText(c.author) + ' <span style="color:#6b7280; font-weight:400;">' + timeAgo(c.timestamp) + '</span></div>' +
+            '<div style="font-size:0.75rem; color:#9ca3af; margin-top:0.15rem;">' + escapeText(c.text) + '</div>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    html += '<div style="display:flex; gap:0.4rem; margin-top:0.5rem;">' +
+      '<input id="commentInput-' + subId + '" type="text" placeholder="Add a comment..." style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:0.4rem 0.6rem; color:#fff; font-size:0.75rem; outline:none;">' +
+      '<button onclick="SubComments.submit(\'' + escapeAttr(subId) + '\',\'' + containerId + '\')" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:0.4rem 0.8rem; color:#9ca3af; font-size:0.75rem; cursor:pointer; font-weight:600;">Post</button>' +
+    '</div></div>';
+    container.innerHTML = html;
+  }
+  function submit(subId, containerId) {
+    var input = document.getElementById('commentInput-' + subId);
+    if (!input || !input.value.trim()) return;
+    add(subId, input.value.trim());
+    render(subId, containerId);
+  }
+  return { getAll: getAll, get: get, add: add, remove: remove, render: render, submit: submit };
+})();
+
+/* ===== 9. Report ===== */
+var SubReport = (function() {
+  var KEY = 'subtile_reports';
+  function getAll() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; } }
+  function report(subId, reason) {
+    var list = getAll();
+    list.push({ subId: subId, reason: reason, timestamp: Date.now() });
+    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch(e) {}
+  }
+  function isReported(subId) {
+    return getAll().some(function(r) { return r.subId === subId; });
+  }
+  function renderButton(subId, containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var reported = isReported(subId);
+    if (reported) {
+      container.innerHTML = '<span style="font-size:0.7rem; color:#ef4444;"><i class="fas fa-flag"></i> Reported</span>';
+    } else {
+      container.innerHTML = '<button onclick="SubReport.openModal(\'' + escapeAttr(subId) + '\')" style="background:none; border:none; color:#6b7280; cursor:pointer; font-size:0.7rem; padding:0.2rem 0.4rem; transition:color 0.2s;" onmouseenter="this.style.color=\'#ef4444\'" onmouseleave="this.style.color=\'#6b7280\'" title="Report issue"><i class="fas fa-flag"></i></button>';
+    }
+  }
+  function openModal(subId) {
+    var reasons = ['Wrong language', 'Desynced / bad timing', 'Poor translation', 'Encoding issues', 'Contains spam', 'Other'];
+    var html = '<div style="position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)this.remove()">' +
+      '<div style="background:#12151b; border:1px solid #23262e; border-radius:16px; padding:1.5rem; max-width:380px; width:100%;">' +
+        '<h3 style="font-size:0.95rem; font-weight:700; color:#fff; margin-bottom:1rem;"><i class="fas fa-flag" style="color:#ef4444; margin-right:0.5rem;"></i> Report Subtitle</h3>' +
+        reasons.map(function(r) {
+          return '<button onclick="SubReport.submit(\'' + escapeAttr(subId) + '\',\'' + r + '\');this.closest(\'div[style*=\"position:fixed\"]\').remove();" style="display:block; width:100%; text-align:left; padding:0.6rem 0.8rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#d1d5db; font-size:0.8rem; cursor:pointer; margin-bottom:0.4rem; transition:all 0.15s;" onmouseenter="this.style.background=\'rgba(239,68,68,0.1)\'" onmouseleave="this.style.background=\'rgba(255,255,255,0.04)\'">' + r + '</button>';
+        }).join('') +
+        '<button onclick="this.closest(\'div[style*=\"position:fixed\"]\').remove();" style="display:block; width:100%; padding:0.5rem; background:none; border:none; color:#6b7280; font-size:0.8rem; cursor:pointer; margin-top:0.5rem;">Cancel</button>' +
+      '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+  function submit(subId, reason) {
+    report(subId, reason);
+    if (typeof showToast === 'function') showToast('Report submitted. Thank you!');
+  }
+  return { getAll: getAll, report: report, isReported: isReported, renderButton: renderButton, openModal: openModal, submit: submit };
+})();
+
+/* ===== 10. Share Link ===== */
+var ShareLink = (function() {
+  function copy(movieId, type) {
+    var url = window.location.origin + '/movie.html?id=' + encodeURIComponent(movieId) + '&type=' + encodeURIComponent(type || 'movie');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function() {
+        if (typeof showToast === 'function') showToast('Link copied to clipboard!');
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (typeof showToast === 'function') showToast('Link copied!');
+    }
+  }
+  function renderButton(movieId, type, containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '<button onclick="ShareLink.copy(\'' + escapeAttr(movieId) + '\',\'' + escapeAttr(type || 'movie') + '\')" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#9ca3af; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.2s;" onmouseenter="this.style.borderColor=\'rgba(255,255,255,0.25)\';this.style.color=\'#fff\'" onmouseleave="this.style.borderColor=\'rgba(255,255,255,0.1)\';this.style.color=\'#9ca3af\'"><i class="fas fa-share-alt"></i> Share</button>';
+  }
+  return { copy: copy, renderButton: renderButton };
 })();

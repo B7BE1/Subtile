@@ -28,6 +28,19 @@ let loadedSubtitles = [];
 const subtitlesCache = new Map(); // key: `${type}:${season}:${episode}` -> subtitles[]
 let subtitlesAbortController = null;
 
+window.attachFadeIn = function(elements) {
+  if (!elements || !elements.length) return;
+  elements.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(12px)';
+    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, i * 60);
+  });
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -525,6 +538,12 @@ function renderMovieDetails(movie) {
       Favorites.renderButton('favBtnSlot', { id: movie.id, title: movie.title, type: movie.type || 'movie', poster: movie.poster || '' });
     }
   }
+  if (typeof ShareLink !== 'undefined') {
+    var shareSlot = document.getElementById('shareBtnSlot');
+    if (shareSlot) {
+      ShareLink.renderButton(movie.id, movie.type || 'movie', 'shareBtnSlot');
+    }
+  }
 }
 
 function renderSeasonsList(movie) {
@@ -684,13 +703,22 @@ function renderSubtitlesList() {
           <button class="scan-btn" tabindex="0" role="button" aria-label="Scan ${release}" data-url="${downloadUrl}" data-sub-id="${subId}" onclick="scanSubtitle(this)" title="Scan with VirusTotal" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.25s ease; flex-shrink:0;"><i class="fas fa-shield-alt"></i></button>
           <button class="preview-btn" tabindex="0" role="button" aria-label="Preview ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}" onclick="previewSubtitle(this)"><i class="fas fa-eye"></i></button>
           <a href="#" class="download-btn" tabindex="0" role="button" aria-label="Download ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
+          <span id="reportSlot-${subId}"></span>
+          <button onclick="var el=document.getElementById('comments-${subId}');el.style.display=el.style.display==='none'?'block':'none';SubComments.render('${subId}','comments-${subId}');" style="background:none; border:none; color:#6b7280; cursor:pointer; font-size:0.7rem; padding:0.2rem 0.4rem;" title="Comments"><i class="fas fa-comment"></i></button>
         </div>
+        <div id="comments-${subId}" style="display:none; padding:0.5rem 0;"></div>
       </div>
     `;
   }).join('');
 
   if (typeof window.attachFadeIn === 'function') {
     window.attachFadeIn(container.querySelectorAll('.subtitle-item'));
+  }
+
+  if (typeof SubReport !== 'undefined') {
+    subs.forEach(function(sub) {
+      SubReport.renderButton(sub.id || sub.release, 'reportSlot-' + (sub.id || sub.release));
+    });
   }
 
   var batchBtn = document.getElementById('batchDownloadBtn');

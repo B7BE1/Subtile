@@ -3,6 +3,11 @@
  * Connected to Live Cinemeta (Movies/Series) & Jikan (Anime) Metadata
  */
 
+const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
+const safeImg = (typeof Security !== 'undefined')
+  ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
+  : (url) => url || 'https://images.metahub.space/poster/small/tt15398776/img';
+
 // Cached fetch — stores responses in sessionStorage for 10 minutes
 const API_CACHE_TTL = 10 * 60 * 1000;
 window.cachedFetch = async function(url, opts = {}) {
@@ -225,11 +230,6 @@ function renderSearchResults(items, dropdown, isLocalOnly) {
     dropdown.classList.add('active');
     return;
   }
-
-  const esc = (typeof Security !== 'undefined') ? Security.escapeHTML : (s) => String(s ?? '');
-  const safeImg = (typeof Security !== 'undefined')
-    ? (url) => Security.sanitizeImageURL(url, 'https://images.metahub.space/poster/small/tt15239678/img')
-    : (url) => url || 'https://images.metahub.space/poster/small/tt15398776/img';
 
   const recentHtml = !isLocalOnly ? '' : renderRecentSearches(dropdown);
 

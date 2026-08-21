@@ -4,7 +4,7 @@
  * Requires VIRUSTOTAL_API_KEY env var (free: https://www.virustotal.com/gui/my-apikey)
  */
 
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 const VT_API = 'https://www.virustotal.com/api/v3';
 
@@ -53,35 +53,16 @@ export default async function handler(req, res) {
 
     const hash = crypto.createHash('sha256').update(Buffer.from(buffer)).digest('hex');
 
-    const vtResponse = await fetch(${VT_API}/files/, {
+    const vtResponse = await fetch(`${VT_API}/files/${hash}`, {
       headers: { 'x-apikey': apiKey, 'Accept': 'application/json' }
     });
 
     if (vtResponse.status === 404) {
-      const analysisRes = await fetch(${VT_API}/files, {
-        method: 'POST',
-        headers: { 'x-apikey': apiKey },
-        body: (() => {
-          const fd = new FormData();
-          fd.append('file', new Blob([buffer]), 'subtitle.srt');
-          return fd;
-        })()
-      });
-
-      if (analysisRes.ok) {
-        const analysisData = await analysisRes.json();
-        return res.status(200).json({
-          status: 'analyzing',
-          hash: hash,
-          vtId: analysisData.data?.id || null,
-          message: 'File submitted for analysis'
-        });
-      }
-
       return res.status(200).json({
         status: 'unknown',
         hash: hash,
-        message: 'File not found in VirusTotal database'
+        message: 'File not found in VirusTotal database',
+        link: `https://www.virustotal.com/gui/file/${hash}`
       });
     }
 
@@ -103,7 +84,7 @@ export default async function handler(req, res) {
       suspicious: suspicious,
       undetected: undetected,
       total: total,
-      link: https://www.virustotal.com/gui/file/
+      link: `https://www.virustotal.com/gui/file/${hash}`
     });
 
   } catch (error) {

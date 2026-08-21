@@ -254,12 +254,12 @@
     /* Filters */
     .filter-pills { display: flex; gap: 0.6rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .pill {
-      background: rgba(255, 255, 255, 0.05); color: #9ca3af;
+      background: var(--surface); color: var(--text-muted);
       padding: 0.55rem 1.1rem; border-radius: 50px; font-size: 0.82rem; font-weight: 700;
       border: 1px solid var(--border-color); cursor: pointer; transition: var(--transition);
     }
-    .pill:hover { border-color: var(--border-hover); color: white; background: rgba(255,255,255,0.1); }
-    .pill.active { background: #ffffff; color: #050507; border-color: #ffffff; box-shadow: 0 4px 16px rgba(255,255,255,0.25); }
+    .pill:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface-hover); }
+    .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.25); }
 
     /* Subtitles List */
     .subtitles-list { display: grid; gap: 1rem; }
@@ -447,6 +447,7 @@
           <i class="fas fa-arrow-down"></i> Select & Download Subtitles
         </a>
         <div id="favBtnSlot" style="margin-top: 0.75rem; width: 100%;"></div>
+        <div id="shareBtnSlot" style="margin-top: 0.5rem; width: 100%;"></div>
       </div>
     </div>
 
@@ -545,7 +546,7 @@
         </div>
         <div>
           <label style="display:block; font-size:0.8rem; font-weight:700; color:#9ca3af; margin-bottom:6px;">Language</label>
-          <select style="width:100%; background:rgba(5,5,7,0.8); border:1px solid #27272a; border-radius:12px; padding:12px; color:#fff; font-size:0.875rem; outline:none; box-sizing:border-box;">
+          <select style="width:100%; background:var(--surface); border:1px solid var(--border-color); border-radius:12px; padding:12px; color:var(--text); font-size:0.875rem; outline:none; box-sizing:border-box;">
             <option value="ar">Arabic</option>
             <option value="en">English</option>
             <option value="fr">French</option>
