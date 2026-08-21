@@ -117,12 +117,22 @@
                 <button class="filter-tab-btn btn-ripple px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('movie', this)" data-i18n="browseMovies">Movies</button>
                 <button class="filter-tab-btn btn-ripple px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('tv', this)" data-i18n="browseSeries">TV Shows</button>
                 <button class="filter-tab-btn btn-ripple px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-neutral-400 text-sm font-bold hover:bg-white/[0.12] hover:text-white transition-all" onclick="filterCatalog('anime', this)" data-i18n="browseAnime">Anime</button>
-                <div id="langFilterSlot"></div>
-                <select id="catalogSortSelect" onchange="onCatalogSort()" data-custom class="px-3 py-2 rounded-xl text-sm font-bold focus:outline-none transition-all cursor-pointer">
-                    <option value="rating" selected>Sort: Rating</option>
-                    <option value="year">Sort: Year</option>
-                    <option value="title">Sort: Title</option>
-                </select>
+                <div class="cs-wrap" id="sortSelectWrap" style="position:relative;display:inline-block;">
+                    <button type="button" class="cs-trigger" id="sortSelectTrigger" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 2rem 0.45rem 0.75rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#d1d5db;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.2s ease;font-family:inherit;text-align:left;">
+                        <span id="sortLabel">Sort: Rating</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0;margin-left:2px;"><path d="M2 4L5 7L8 4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="cs-panel" id="sortPanel" style="position:absolute;top:calc(100% + 6px);left:0;min-width:100%;background:#12151b;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:6px;box-shadow:0 16px 48px rgba(0,0,0,0.5);z-index:1000;display:none;max-height:280px;overflow-y:auto;">
+                        <button type="button" data-val="rating" class="cs-opt cs-opt-active" style="display:flex;align-items:center;gap:0.5rem;width:100%;padding:0.55rem 0.75rem;border:none;border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:0.8rem;font-weight:700;text-align:left;cursor:pointer;transition:all 0.12s ease;font-family:inherit;">Sort: Rating</button>
+                        <button type="button" data-val="year" class="cs-opt" style="display:flex;align-items:center;gap:0.5rem;width:100%;padding:0.55rem 0.75rem;border:none;border-radius:8px;background:transparent;color:#9ca3af;font-size:0.8rem;font-weight:500;text-align:left;cursor:pointer;transition:all 0.12s ease;font-family:inherit;">Sort: Year</button>
+                        <button type="button" data-val="title" class="cs-opt" style="display:flex;align-items:center;gap:0.5rem;width:100%;padding:0.55rem 0.75rem;border:none;border-radius:8px;background:transparent;color:#9ca3af;font-size:0.8rem;font-weight:500;text-align:left;cursor:pointer;transition:all 0.12s ease;font-family:inherit;">Sort: Title</button>
+                    </div>
+                    <select id="catalogSortSelect" data-custom style="display:none;">
+                        <option value="rating" selected>Sort: Rating</option>
+                        <option value="year">Sort: Year</option>
+                        <option value="title">Sort: Title</option>
+                    </select>
+                </div>
                 <div id="viewToggleSlot"></div>
             </div>
         </div>

@@ -150,14 +150,73 @@ var LanguageFilter = (function() {
     if (!container) return;
     var current = get();
     var currentLang = LANGUAGES.find(function(l) { return l.code === current; }) || LANGUAGES[0];
-    var options = LANGUAGES.map(function(l) {
-      return '<option value="' + l.code + '"' + (l.code === current ? ' selected' : '') + '>' + l.flag + ' ' + l.label + '</option>';
+    var optsHtml = LANGUAGES.map(function(l) {
+      var active = l.code === current;
+      return '<button type="button" data-val="' + l.code + '" class="cs-opt' + (active ? ' cs-opt-active' : '') + '" style="display:flex;align-items:center;gap:0.5rem;width:100%;padding:0.55rem 0.75rem;border:none;border-radius:8px;background:' + (active ? 'rgba(255,255,255,0.08)' : 'transparent') + ';color:' + (active ? '#fff' : '#9ca3af') + ';font-size:0.8rem;font-weight:' + (active ? '700' : '500') + ';text-align:left;cursor:pointer;transition:all 0.12s ease;font-family:inherit;">' + l.flag + ' ' + l.label + '</button>';
     }).join('');
-    container.innerHTML = '<select id="langFilterSelect" data-custom onchange="LanguageFilter.set(this.value);if(typeof onLanguageFilterChange===\'function\')onLanguageFilterChange();">' + options + '</select>';
-    if (typeof CustomSelect !== 'undefined') {
-      var sel = document.getElementById('langFilterSelect');
-      if (sel) CustomSelect.create(sel);
-    }
+    container.innerHTML =
+      '<div class="cs-wrap" style="position:relative;display:inline-block;">' +
+        '<button type="button" class="cs-trigger" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 2rem 0.45rem 0.75rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#d1d5db;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.2s ease;font-family:inherit;text-align:left;">' +
+          '<span class="cs-label">' + currentLang.flag + ' ' + currentLang.label + '</span>' +
+          '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0;margin-left:2px;"><path d="M2 4L5 7L8 4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</button>' +
+        '<div class="cs-panel" style="position:absolute;top:calc(100% + 6px);left:0;min-width:100%;background:#12151b;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:6px;box-shadow:0 16px 48px rgba(0,0,0,0.5);z-index:1000;display:none;max-height:280px;overflow-y:auto;">' +
+          optsHtml +
+        '</div>' +
+      '</div>';
+
+    var wrap = container.querySelector('.cs-wrap');
+    var trigger = container.querySelector('.cs-trigger');
+    var panel = container.querySelector('.cs-panel');
+    var label = container.querySelector('.cs-label');
+
+    trigger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var open = panel.style.display === 'block';
+      document.querySelectorAll('.cs-panel').forEach(function(p) { p.style.display = 'none'; });
+      if (!open) {
+        panel.style.display = 'block';
+        panel.style.opacity = '0';
+        panel.style.transform = 'translateY(-4px)';
+        panel.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+        requestAnimationFrame(function() { panel.style.opacity = '1'; panel.style.transform = 'translateY(0)'; });
+        trigger.style.borderColor = 'rgba(255,255,255,0.25)';
+        trigger.style.background = 'rgba(255,255,255,0.08)';
+      } else {
+        trigger.style.borderColor = 'rgba(255,255,255,0.08)';
+        trigger.style.background = 'rgba(255,255,255,0.04)';
+      }
+    });
+
+    panel.querySelectorAll('.cs-opt').forEach(function(btn) {
+      btn.addEventListener('mouseenter', function() {
+        if (!btn.classList.contains('cs-opt-active')) { btn.style.background = 'rgba(255,255,255,0.05)'; btn.style.color = '#d1d5db'; }
+      });
+      btn.addEventListener('mouseleave', function() {
+        if (!btn.classList.contains('cs-opt-active')) { btn.style.background = 'transparent'; btn.style.color = '#9ca3af'; }
+      });
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.querySelectorAll('.cs-opt').forEach(function(b) {
+          b.classList.remove('cs-opt-active');
+          b.style.background = 'transparent';
+          b.style.color = '#9ca3af';
+          b.style.fontWeight = '500';
+        });
+        btn.classList.add('cs-opt-active');
+        btn.style.background = 'rgba(255,255,255,0.08)';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = '700';
+        label.textContent = btn.textContent;
+        panel.style.display = 'none';
+        trigger.style.borderColor = 'rgba(255,255,255,0.08)';
+        trigger.style.background = 'rgba(255,255,255,0.04)';
+        set(btn.dataset.value);
+        if (typeof onLanguageFilterChange === 'function') onLanguageFilterChange();
+      });
+    });
+
+    document.addEventListener('click', function() { panel.style.display = 'none'; trigger.style.borderColor = 'rgba(255,255,255,0.08)'; trigger.style.background = 'rgba(255,255,255,0.04)'; });
   }
   return { get: get, set: set, matchesFilter: matchesFilter, renderDropdown: renderDropdown, LANGUAGES: LANGUAGES };
 })();
