@@ -755,7 +755,12 @@ window.previewSubtitle = function(btn) {
   const proxyUrl = `/api/download?url=${encodeURIComponent(url)}`;
   fetch(proxyUrl).then(r => {
     if (!r.ok) throw new Error('Fetch failed');
-    return r.text();
+    return r.arrayBuffer();
+  }).then(buf => {
+    const bytes = new Uint8Array(buf);
+    const isZip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04;
+    if (isZip) return extractTextFromZip(bytes);
+    return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
   }).then(text => {
     body.innerHTML = formatPreviewText(text, (format || 'srt').toLowerCase());
   }).catch(() => {
@@ -818,6 +823,104 @@ window.closePreview = function() {
   const modal = document.getElementById('previewModal');
   if (modal) modal.classList.remove('active');
 };
+
+async function extractTextFromZip(bytes) {
+  const SUBTITLE_EXTS = ['.srt', '.ass', '.vtt', '.sub', '.ssa'];
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
+  function findEOCD() {
+    for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+      if (bytes[i] === 0x50 && bytes[i+1] === 0x4B && bytes[i+2] === 0x05 && bytes[i+3] === 0x06) return i;
+    }
+    return -1;
+  }
+
+  const eocd = findEOCD();
+  if (eocd < 0) throw new Error('Not a valid ZIP');
+
+  const numEntries = view.getUint16(eocd + 10, true);
+  const cdOffset = view.getUint32(eocd + 16, true);
+
+  let bestEntry = null;
+  let offset = cdOffset;
+
+  for (let i = 0; i < numEntries && offset + 46 <= bytes.length; i++) {
+    if (bytes[offset] !== 0x50 || bytes[offset+1] !== 0x4B || bytes[offset+2] !== 0x01 || bytes[offset+3] !== 0x02) break;
+
+    const compMethod = view.getUint16(offset + 10, true);
+    const compSize = view.getUint32(offset + 20, true);
+    const uncompSize = view.getUint32(offset + 24, true);
+    const nameLen = view.getUint16(offset + 28, true);
+    const extraLen = view.getUint16(offset + 30, true);
+    const commentLen = view.getUint16(offset + 32, true);
+    const localHeaderOffset = view.getUint32(offset + 42, true);
+    const nameBytes = bytes.slice(offset + 46, offset + 46 + nameLen);
+    const name = new TextDecoder('utf-8', { fatal: false }).decode(nameBytes).toLowerCase();
+
+    const isSubtitle = SUBTITLE_EXTS.some(ext => name.endsWith(ext));
+    if (isSubtitle && !bestEntry) {
+      bestEntry = { localHeaderOffset, compMethod, compSize, uncompSize, nameLen };
+    }
+
+    offset += 46 + nameLen + extraLen + commentLen;
+  }
+
+  if (!bestEntry) {
+    offset = cdOffset;
+    for (let i = 0; i < numEntries && offset + 46 <= bytes.length; i++) {
+      const nameLen = view.getUint16(offset + 28, true);
+      const extraLen = view.getUint16(offset + 30, true);
+      const commentLen = view.getUint16(offset + 32, true);
+      const localHeaderOffset = view.getUint32(offset + 42, true);
+      const compMethod = view.getUint16(offset + 10, true);
+      const compSize = view.getUint32(offset + 20, true);
+      const uncompSize = view.getUint32(offset + 24, true);
+      const nameBytes = bytes.slice(offset + 46, offset + 46 + nameLen);
+      const name = new TextDecoder('utf-8', { fatal: false }).decode(nameBytes);
+
+      bestEntry = { localHeaderOffset, compMethod, compSize, uncompSize, nameLen, fileName: name };
+      break;
+    }
+  }
+
+  if (!bestEntry) throw new Error('No file found in ZIP');
+
+  const lh = bestEntry.localHeaderOffset;
+  if (lh + 30 > bytes.length) throw new Error('Invalid local header');
+  const lnLen = view.getUint16(lh + 26, true);
+  const leLen = view.getUint16(lh + 28, true);
+  const dataOffset = lh + 30 + lnLen + leLen;
+  const dataBytes = bytes.slice(dataOffset, dataOffset + bestEntry.compSize);
+
+  if (bestEntry.compMethod === 0) {
+    return new TextDecoder('utf-8', { fatal: false }).decode(dataBytes);
+  }
+
+  if (bestEntry.compMethod === 8) {
+    try {
+      const ds = new DecompressionStream('deflate-raw');
+      const writer = ds.writable.getWriter();
+      writer.write(dataBytes);
+      writer.close();
+      const reader = ds.readable.getReader();
+      const chunks = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      const totalLen = chunks.reduce((s, c) => s + c.length, 0);
+      const result = new Uint8Array(totalLen);
+      let pos = 0;
+      for (const c of chunks) { result.set(c, pos); pos += c.length; }
+      return new TextDecoder('utf-8', { fatal: false }).decode(result);
+    } catch {
+      throw new Error('Failed to decompress');
+    }
+  }
+
+  throw new Error('Unsupported compression');
+}
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
