@@ -680,6 +680,8 @@ function renderSubtitlesList() {
           </div>
         </div>
         <div style="display:flex; gap:0.5rem; align-items:center;">
+          <span class="scan-status" id="scan-${subId}" title="Not scanned"></span>
+          <button class="scan-btn" tabindex="0" role="button" aria-label="Scan ${release}" data-url="${downloadUrl}" data-sub-id="${subId}" onclick="scanSubtitle(this)" title="Scan with VirusTotal" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.25s ease; flex-shrink:0;"><i class="fas fa-shield-alt"></i></button>
           <button class="preview-btn" tabindex="0" role="button" aria-label="Preview ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}" onclick="previewSubtitle(this)"><i class="fas fa-eye"></i></button>
           <a href="#" class="download-btn" tabindex="0" role="button" aria-label="Download ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}"><i class="fas fa-download"></i></a>
         </div>
@@ -699,6 +701,10 @@ function renderSubtitlesList() {
     } else {
       batchBtn.style.display = 'none';
     }
+  }
+  var scanAllBtn = document.getElementById('scanAllBtn');
+  if (scanAllBtn) {
+    scanAllBtn.style.display = subs.length > 0 ? '' : 'none';
   }
 }
 
@@ -853,6 +859,107 @@ window.closePreview = function() {
   const modal = document.getElementById('previewModal');
   if (modal) modal.classList.remove('active');
 };
+
+// ========== VirusTotal Scan ==========
+const scanCache = {};
+
+window.scanSubtitle = async function(btn) {
+  const url = btn.dataset.url;
+  const subId = btn.dataset.subId;
+  if (!url || url === '#') return;
+
+  const indicator = document.getElementById('scan-' + subId);
+  if (scanCache[subId]) {
+    renderScanResult(indicator, scanCache[subId]);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  btn.title = 'Scanning...';
+
+  try {
+    const res = await fetch('/api/virustotal?url=' + encodeURIComponent(url));
+    const data = await res.json();
+
+    if (data.configured === false) {
+      scanCache[subId] = { status: 'unconfigured' };
+      renderScanResult(indicator, scanCache[subId]);
+      btn.innerHTML = '<i class="fas fa-shield-alt"></i>';
+      btn.disabled = false;
+      btn.title = 'VirusTotal not configured';
+      return;
+    }
+
+    scanCache[subId] = data;
+    renderScanResult(indicator, data);
+
+    if (data.link) {
+      btn.onclick = function() { window.open(data.link, '_blank'); };
+      btn.title = 'View on VirusTotal';
+    }
+  } catch (e) {
+    scanCache[subId] = { status: 'error' };
+    renderScanResult(indicator, scanCache[subId]);
+  }
+
+  btn.innerHTML = '<i class="fas fa-shield-alt"></i>';
+  btn.disabled = false;
+};
+
+function renderScanResult(el, data) {
+  if (!el) return;
+  let color, icon, title;
+
+  switch (data.status) {
+    case 'clean':
+      color = '#10b981';
+      icon = 'fa-check-circle';
+      title = 'Clean (' + (data.undetected || 0) + '/' + (data.total || 0) + ' engines)';
+      break;
+    case 'malicious':
+      color = '#ef4444';
+      icon = 'fa-exclamation-triangle';
+      title = 'Malicious! (' + (data.malicious || 0) + '/' + (data.total || 0) + ' engines)';
+      break;
+    case 'suspicious':
+      color = '#f59e0b';
+      icon = 'fa-exclamation-circle';
+      title = 'Suspicious (' + (data.suspicious || 0) + ' engines)';
+      break;
+    case 'analyzing':
+      color = '#3b82f6';
+      icon = 'fa-clock';
+      title = 'Being analyzed...';
+      break;
+    case 'unknown':
+      color = '#6b7280';
+      icon = 'fa-question-circle';
+      title = 'Not in VirusTotal database';
+      break;
+    case 'unconfigured':
+      color = '#6b7280';
+      icon = 'fa-shield-alt';
+      title = 'VirusTotal API not configured';
+      break;
+    default:
+      color = '#6b7280';
+      icon = 'fa-minus-circle';
+      title = 'Scan failed';
+  }
+
+  el.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font-size:0.7rem;color:' + color + ';cursor:default;flex-shrink:0;';
+  el.innerHTML = '<i class="fas ' + icon + '"></i>';
+  el.title = title;
+}
+
+function scanAllSubtitles() {
+  var btns = document.querySelectorAll('.scan-btn');
+  btns.forEach(function(btn, i) {
+    setTimeout(function() { btn.click(); }, i * 500);
+  });
+  showToast('Scanning all subtitles...');
+}
 
 async function extractTextFromZip(bytes) {
   const SUBTITLE_EXTS = ['.srt', '.ass', '.vtt', '.sub', '.ssa'];

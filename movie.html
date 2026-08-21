@@ -162,6 +162,9 @@
     }
     .preview-btn:hover { background: rgba(59,130,246,0.15); color: #3b82f6; border-color: #3b82f6; }
 
+    .scan-btn:hover { background: rgba(16,185,129,0.15) !important; color: #10b981 !important; border-color: #10b981 !important; }
+    .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .preview-overlay {
       position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7);
       backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center;
@@ -454,6 +457,7 @@
         <h2 id="viewTitle" class="panel-title"><i class="fas fa-closed-captioning"></i> <span data-i18n="subtitlesArchive">Subtitles Archive</span></h2>
         <div style="display:flex; gap:0.5rem; align-items:center;">
           <button id="batchDownloadBtn" class="back-btn btn-ripple" style="display:none;" onclick="batchDownloadAll()"><i class="fas fa-file-archive"></i> Download All</button>
+          <button id="scanAllBtn" class="back-btn btn-ripple" style="display:none;" onclick="scanAllSubtitles()"><i class="fas fa-shield-alt"></i> Scan All</button>
           <button id="watchlistBtn" class="back-btn btn-ripple" onclick="toggleWatchlist()"><i class="far fa-bookmark"></i> <span id="watchlistBtnText" data-i18n="addToWatchlist">Add to Watchlist</span></button>
           <button id="backToSeasonsBtn" class="back-btn btn-ripple" style="display: none;"><i class="fas fa-arrow-left"></i> <span data-i18n="backToSeasons">Back to Seasons</span></button>
         </div>
