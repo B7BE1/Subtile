@@ -1114,24 +1114,6 @@ function handleUploadSubtitle(event) {
   showToast('Subtitle uploaded successfully!');
 }
 
-function showToast(message, isError = false) {
-  const container = document.getElementById('toastContainer');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  const type = isError ? 'error' : 'success';
-  toast.className = `toast-upgraded toast-${  type}`;
-  const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
-  const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
-  toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${escapeHtml(message)}</span>`;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('toast-exit');
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
-}
-
 // ========== Watchlist System ==========
 function toggleWatchlist() {
   const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;

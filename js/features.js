@@ -1,5 +1,21 @@
 "use strict";
 
+function showToast(message, isError) {
+  var container = document.getElementById('toastContainer');
+  if (!container) return;
+  var toast = document.createElement('div');
+  var type = isError ? 'error' : 'success';
+  toast.className = 'toast-upgraded toast-' + type;
+  var icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+  var color = type === 'error' ? '#ef4444' : '#34d399';
+  toast.innerHTML = '<i class="fas ' + icon + '" style="color:' + color + '; flex-shrink:0;"></i> <span>' + escapeText(message) + '</span>';
+  container.appendChild(toast);
+  setTimeout(function() {
+    toast.classList.add('toast-exit');
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 3500);
+}
+
 function timeAgo(ts) {
   var diff = Date.now() - ts;
   if (diff < 60000) return 'just now';
@@ -384,4 +400,37 @@ var ShareLink = (function() {
     container.innerHTML = '<button onclick="ShareLink.copy(\'' + escapeAttr(movieId) + '\',\'' + escapeAttr(type || 'movie') + '\')" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#9ca3af; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.2s;" onmouseenter="this.style.borderColor=\'rgba(255,255,255,0.25)\';this.style.color=\'#fff\'" onmouseleave="this.style.borderColor=\'rgba(255,255,255,0.1)\';this.style.color=\'#9ca3af\'"><i class="fas fa-share-alt"></i> Share</button>';
   }
   return { copy: copy, renderButton: renderButton };
+})();
+
+/* ===== BatchDownload ===== */
+var BatchDownload = (function() {
+  function downloadAll(subs, title) {
+    if (!subs || subs.length === 0) {
+      if (typeof showToast === 'function') showToast('No subtitles to download');
+      return;
+    }
+    if (subs.length === 1) {
+      var s = subs[0];
+      var a = document.createElement('a');
+      a.href = '/api/download?url=' + encodeURIComponent(s.download_url) + '&filename=' + encodeURIComponent((s.release || title) + '.srt');
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (typeof showToast === 'function') showToast('Download started!');
+      return;
+    }
+    subs.forEach(function(s, i) {
+      setTimeout(function() {
+        var a = document.createElement('a');
+        a.href = '/api/download?url=' + encodeURIComponent(s.download_url) + '&filename=' + encodeURIComponent((s.release || title) + '.srt');
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, i * 300);
+    });
+    if (typeof showToast === 'function') showToast('Downloading ' + subs.length + ' subtitles...');
+  }
+  return { downloadAll: downloadAll };
 })();

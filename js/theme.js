@@ -3,8 +3,6 @@
 const ThemeToggle = (() => {
   let currentTheme = localStorage.getItem('subtile_theme') || 'dark';
 
-  function getTheme() { return currentTheme; }
-
   function setTheme(theme) {
     currentTheme = theme;
     localStorage.setItem('subtile_theme', theme);
@@ -42,23 +40,5 @@ const ThemeToggle = (() => {
     document.body.classList.toggle('light-theme', !isDark);
   }
 
-  function renderToggle(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const isDark = currentTheme === 'dark';
-    container.innerHTML = `
-      <button onclick="ThemeToggle.toggle()" style="
-        background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
-        border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'};
-        color: ${isDark ? '#fbbf24' : '#3b82f6'};
-        width: 36px; height: 36px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: all 0.3s ease; font-size: 1rem;
-      " title="${isDark ? 'Switch to light mode' : 'Switch to dark mode'}">
-        <i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i>
-      </button>
-    `;
-  }
-
-  return { getTheme, setTheme, toggle, applyTheme, renderToggle };
+  return { toggle, applyTheme };
 })();

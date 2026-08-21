@@ -186,5 +186,5 @@ const I18n = (() => {
     });
   }
 
-  return { t, setLang, getLang, applyDirection, translatePage };
+  return { setLang, getLang, translatePage };
 })();

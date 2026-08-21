@@ -124,86 +124,6 @@ const Security = (() => {
    * This is the ONLY function that should ever be used to render
    * translator README / release notes / rich comments via innerHTML.
    */
-  function sanitizeRichText(htmlString) {
-    if (!htmlString) return '';
-
-    const template = document.createElement('template');
-    template.innerHTML = htmlString;
-
-    const walk = (node) => {
-      // Snapshot children first since we may mutate the tree.
-      const children = Array.from(node.childNodes);
-
-      for (const child of children) {
-        if (child.nodeType === Node.COMMENT_NODE) {
-          child.remove();
-          continue;
-        }
-
-        if (child.nodeType === Node.TEXT_NODE) {
-          continue; // text nodes are always safe as-is
-        }
-
-        if (child.nodeType !== Node.ELEMENT_NODE) {
-          child.remove();
-          continue;
-        }
-
-        const tag = child.tagName;
-
-        if (!ALLOWED_TAGS.has(tag)) {
-          // Unwrap: keep safe text content, drop the disallowed tag.
-          const text = document.createTextNode(child.textContent || '');
-          node.replaceChild(text, child);
-          continue;
-        }
-
-        // Strip every attribute not explicitly allow-listed for this tag.
-        const allowedForTag = ALLOWED_ATTRS[tag] || [];
-        Array.from(child.attributes).forEach((attr) => {
-          if (!allowedForTag.includes(attr.name)) {
-            child.removeAttribute(attr.name);
-          }
-        });
-
-        if (tag === 'A') {
-          const safeHref = sanitizeURL(child.getAttribute('href'));
-          if (safeHref) {
-            child.setAttribute('href', safeHref);
-            child.setAttribute('rel', 'noopener noreferrer nofollow ugc');
-            child.setAttribute('target', '_blank');
-          } else {
-            child.removeAttribute('href');
-          }
-        }
-
-        if (tag === 'IMG') {
-          const safeSrc = sanitizeURL(child.getAttribute('src'));
-          if (safeSrc) {
-            child.setAttribute('src', safeSrc);
-            child.setAttribute('loading', 'lazy');
-            child.setAttribute('referrerpolicy', 'no-referrer');
-          } else {
-            // No safe image source — drop the element entirely.
-            child.remove();
-            continue;
-          }
-        }
-
-        if (tag === 'SPAN') {
-          const cls = child.getAttribute('class');
-          if (!cls || !ALLOWED_SPAN_CLASSES.has(cls)) {
-            child.removeAttribute('class');
-          }
-        }
-
-        walk(child); // recurse into the (now-cleaned) element
-      }
-    };
-
-    walk(template.content);
-    return template.innerHTML;
-  }
 
   // ---------------------------------------------------------------
   // 4. Safe DOM helpers — prefer these over direct innerHTML usage
@@ -217,84 +137,6 @@ const Security = (() => {
   function setText(el, value) {
     if (!el) return;
     el.textContent = value === null || value === undefined ? '' : String(value);
-  }
-
-  /**
-   * Sets innerHTML from a template where all interpolated dynamic
-   * values have already been escaped via escapeHTML(). This makes the
-   * escaping step explicit and greppable at call sites, e.g.:
-   *
-   *   el.innerHTML = Security.safeTemplate`<b>${Security.escapeHTML(name)}</b>`;
-   *
-   * Provided as a tagged template helper so raw interpolations without
-   * escapeHTML() stand out visually during review.
-   */
-  function safeTemplate(strings, ...values) {
-    return strings.reduce((out, str, i) => {
-      const val = i < values.length ? values[i] : '';
-      return out + str + val;
-    }, '');
-  }
-
-  /**
-   * Renders sanitized rich text (README/notes/comments) into a
-   * container element. This is the single approved entry point for
-   * that content type.
-   */
-  function renderRichText(el, rawHTML) {
-    if (!el) return;
-    el.innerHTML = sanitizeRichText(rawHTML);
-  }
-
-  // ---------------------------------------------------------------
-  // 5. File upload validation (subtitle files)
-  // ---------------------------------------------------------------
-
-  const ALLOWED_SUBTITLE_EXT = ['.srt', '.ass', '.vtt', '.zip'];
-  const ALLOWED_SUBTITLE_MIME = [
-    'text/plain',
-    'text/vtt',
-    'application/x-subrip',
-    'application/zip',
-    'application/x-zip-compressed',
-    'application/octet-stream' // many browsers report .srt/.vtt this way
-  ];
-  const MAX_SUBTITLE_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-
-  function getExtension(filename) {
-    const idx = filename.lastIndexOf('.');
-    return idx === -1 ? '' : filename.slice(idx).toLowerCase();
-  }
-
-  /**
-   * Validates a File object selected for subtitle upload.
-   * Returns { valid: boolean, error?: string, safeName?: string }
-   */
-  function validateSubtitleFile(file) {
-    if (!file) return { valid: false, error: 'لم يتم اختيار أي ملف.' };
-
-    const ext = getExtension(file.name);
-    if (!ALLOWED_SUBTITLE_EXT.includes(ext)) {
-      return { valid: false, error: 'صيغة الملف غير مسموحة. الصيغ المسموحة: .srt, .vtt, .zip' };
-    }
-
-    if (file.type && !ALLOWED_SUBTITLE_MIME.includes(file.type)) {
-      return { valid: false, error: 'نوع الملف (MIME) غير موثوق.' };
-    }
-
-    if (file.size > MAX_SUBTITLE_FILE_SIZE) {
-      return { valid: false, error: 'حجم الملف يتجاوز الحد المسموح (5MB).' };
-    }
-
-    // Strip path separators / control characters from the filename
-    // before it's ever used for display or storage keys.
-    const safeName = file.name
-      .replace(/[\\/]/g, '_')
-      // eslint-disable-next-line no-control-regex
-      .replace(/[\x00-\x1f]/g, '')
-      .slice(0, 180);
-
-    return { valid: true, safeName };
   }
 
   // ---------------------------------------------------------------
@@ -333,11 +175,7 @@ const Security = (() => {
     escapeAttribute,
     sanitizeURL,
     sanitizeImageURL,
-    sanitizeRichText,
-    renderRichText,
     setText,
-    safeTemplate,
-    validateSubtitleFile,
     isValidEmail,
     isValidUsername,
     passwordStrength

@@ -2,7 +2,7 @@
  * Subtitles API - Multi-Language & Multi-Format Subtitle Engine (ASS / SRT / VTT)
  */
 
-const SUBDL_API_KEY = process.env.SUBDL_API_KEY || 'DQfpJoLmLBJf4uxK43chifO66btqon3I';
+const SUBDL_API_KEY = process.env.SUBDL_API_KEY;
 
 const LANG_MAP = {
   ar: { name: 'Arabic', flag: '🇸🇦', local: 'العربية' },

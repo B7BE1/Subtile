@@ -775,20 +775,3 @@ function switchBrowseModalTab(tab) {
   if (loginForm) loginForm.style.display = isLogin ? '' : 'none';
   if (registerForm) registerForm.style.display = !isLogin ? '' : 'none';
 }
-
-function showToast(message, isError = false) {
-  const container = document.getElementById('toastContainer');
-  if (!container) return;
-  const toast = document.createElement('div');
-  const type = isError ? 'error' : 'success';
-  toast.className = `toast-upgraded toast-${  type}`;
-  const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
-  const color = type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#34d399');
-  toast.innerHTML = `<i class="fas ${icon}" style="color:${color}; flex-shrink:0;"></i> <span>${esc(message)}</span>`;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('toast-exit');
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
-}
