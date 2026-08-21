@@ -97,7 +97,7 @@
             <span class="text-xl font-black tracking-tight text-neutral-100">SUBTILE</span>
         </a>
         <div class="flex items-center gap-4">
-            <div id="themeToggleNav"></div>
+
             <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
             <a href="index.html" class="text-sm font-semibold text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5">
                 <i class="fas fa-arrow-left"></i>
@@ -259,7 +259,7 @@
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
-        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+        
         if (typeof I18n !== 'undefined') {
             I18n.translatePage();
             const langBtn = document.getElementById('langToggleBtn');
@@ -289,7 +289,7 @@
         I18n.translatePage();
         const langBtn = document.getElementById('langToggleBtn');
         if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
-        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+        
         updatePageTexts(next);
     }
 

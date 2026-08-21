@@ -513,7 +513,7 @@
                 <span class="text-lg font-black tracking-tight text-white hidden sm:block font-display">SUBTILE</span>
             </a>
             <div class="flex items-center gap-3 flex-shrink-0">
-                <div id="themeToggleNav"></div>
+
                 <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#9ca3af; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.7rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
                 <nav class="desktop-nav hidden md:flex items-center gap-5 text-sm font-semibold text-neutral-400">
                     <a href="index.html" class="hover:text-white transition-colors py-1" data-i18n="trending">Trending</a>
@@ -697,7 +697,7 @@
     const $ = id => document.getElementById(id);
 
     document.addEventListener('DOMContentLoaded', () => {
-        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+        
         if (typeof I18n !== 'undefined') {
             I18n.translatePage();
             const langBtn = document.getElementById('langToggleBtn');
@@ -1004,7 +1004,7 @@
         I18n.translatePage();
         const langBtn = document.getElementById('langToggleBtn');
         if (langBtn) langBtn.textContent = next === 'ar' ? 'EN' : 'AR';
-        if (typeof ThemeToggle !== 'undefined') ThemeToggle.renderToggle('themeToggleNav');
+        
     }
 
     function showToast(message, isError = false) {
