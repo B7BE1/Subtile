@@ -42,6 +42,7 @@ window.attachFadeIn = function(elements) {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof CustomSelect !== 'undefined') CustomSelect.initAll();
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id') || 'dune-2';

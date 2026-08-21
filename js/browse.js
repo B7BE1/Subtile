@@ -205,6 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  if (typeof CustomSelect !== 'undefined') CustomSelect.initAll();
 });
 
 // ---- Escaping / sanitizing helpers -----------------------------------

@@ -153,7 +153,11 @@ var LanguageFilter = (function() {
     var options = LANGUAGES.map(function(l) {
       return '<option value="' + l.code + '"' + (l.code === current ? ' selected' : '') + '>' + l.flag + ' ' + l.label + '</option>';
     }).join('');
-    container.innerHTML = '<select id="langFilterSelect" onchange="LanguageFilter.set(this.value);if(typeof onLanguageFilterChange===\'function\')onLanguageFilterChange();" class="filter-select">' + options + '</select>';
+    container.innerHTML = '<select id="langFilterSelect" data-custom onchange="LanguageFilter.set(this.value);if(typeof onLanguageFilterChange===\'function\')onLanguageFilterChange();">' + options + '</select>';
+    if (typeof CustomSelect !== 'undefined') {
+      var sel = document.getElementById('langFilterSelect');
+      if (sel) CustomSelect.create(sel);
+    }
   }
   return { get: get, set: set, matchesFilter: matchesFilter, renderDropdown: renderDropdown, LANGUAGES: LANGUAGES };
 })();
