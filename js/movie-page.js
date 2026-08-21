@@ -752,10 +752,31 @@ window.previewSubtitle = function(btn) {
     return;
   }
 
-  fetch(url).then(r => r.text()).then(text => {
+  const proxyUrl = `/api/download?url=${encodeURIComponent(url)}`;
+  fetch(proxyUrl).then(r => {
+    if (!r.ok) throw new Error('Fetch failed');
+    return r.text();
+  }).then(text => {
     body.innerHTML = formatPreviewText(text, (format || 'srt').toLowerCase());
   }).catch(() => {
-    body.innerHTML = '<div style="color:#ef4444; text-align:center; padding:2rem;">Failed to load preview</div>';
+    body.innerHTML = `
+      <div style="text-align:center; padding:2rem;">
+        <div style="color:#ef4444; margin-bottom:1rem;"><i class="fas fa-exclamation-circle"></i> Failed to load preview</div>
+        <div style="color:#6b7280; font-size:0.8rem; margin-bottom:1rem;">Showing sample content for <strong>${escapeHtml(release)}</strong></div>
+        <div style="background:rgba(255,255,255,0.04); border-radius:12px; padding:1rem; text-align:left; font-family:'JetBrains Mono','Fira Code',monospace; font-size:0.8rem; line-height:1.7; color:#d1d5db;">
+          <div style="color:#6b7280;">1</div>
+          <div>00:00:05,000 --> 00:00:09,000</div>
+          <div style="color:#9ca3af;">Synced Subtitle: ${escapeHtml(release)}</div>
+          <div style="margin-top:0.8rem; color:#6b7280;">2</div>
+          <div>00:00:10,000 --> 00:00:15,000</div>
+          <div style="color:#9ca3af;">Enjoy your movie with Subtile!</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <a href="/api/download?url=${encodeURIComponent(url)}" download style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.2rem; background:#3b82f6; color:#fff; border-radius:10px; text-decoration:none; font-weight:700; font-size:0.85rem; transition:all 0.2s;">
+            <i class="fas fa-download"></i> Download Instead
+          </a>
+        </div>
+      </div>`;
   });
 };
 
