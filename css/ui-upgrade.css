@@ -730,7 +730,10 @@ html { scroll-behavior: smooth; }
 }
 
 /* ===== Dark Filter Styles ===== */
+html { color-scheme: dark; }
+
 select, .filter-select {
+  color-scheme: dark;
   background: var(--surface) !important;
   color: var(--text) !important;
   border: 1px solid var(--border-color) !important;
