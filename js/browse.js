@@ -5,6 +5,11 @@
  * Strictly follows Premium Grayscale Cinematic Design System.
  *
  * Upgrade notes vs previous version:
+ * - FIXED: TV Shows were fetched from TVmaze instead of Cinemeta, contrary
+ *   to this file's own header claim. TVmaze ids/data don't match Cinemeta's
+ *   imdb_id scheme, so TV cards couldn't be looked up the same way movie
+ *   cards are. TV now pulls from Cinemeta's series/top catalog with the
+ *   same skip-based pagination movies already used.
  * - FIXED: renderBrowseDropdown() was redeclaring its own local esc()/safeImg()
  *   with UNESCAPED fallbacks ((s) => String(s ?? '')) — this silently undid the
  *   XSS fix already made to the module-level esc()/safeImg() the moment
@@ -304,25 +309,21 @@ async function triggerLiveTrending(type, page = 1) {
     }
 
     if (type === 'all' || type === 'tv') {
-      // TVmaze: fetch multiple pages, sort by rating, take top 50
-      const tvmazePages = [page * 3, page * 3 + 1, page * 3 + 2];
+      // Cinemeta (IMDb Top series), same catalog/skip pattern as movies above —
+      // this used to hit TVmaze instead, which doesn't share Cinemeta's imdb_id
+      // scheme, so TV results couldn't link through to movie.html the same way
+      // movie results do, and the module header's own "Cinemeta for Movies/TV"
+      // claim was only true for movies.
       promises.push(
-        Promise.all(tvmazePages.map(p =>
-          safeFetchJson(`https://api.tvmaze.com/shows?page=${p}`, { signal })
-            .then(d => Array.isArray(d) ? d : [])
-            .catch(() => [])
-        )).then(pages => {
-          const all = pages.flat();
-          all.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
-          return all.slice(0, 50).map(s => ({
-            id: `tv-${s.id}`,
-            title: s.name,
+        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top.json?skip=${skip}`, { signal })
+          .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
+            id: m.imdb_id || m.id,
+            title: m.name,
             type: 'tv',
-            year: s.premiered ? s.premiered.substring(0, 4) : 'N/A',
-            rating: s.rating?.average || 0,
-            poster: s.image?.original || s.image?.medium || ''
-          }));
-        })
+            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
+            rating: parseFloat(m.imdbRating) || 0,
+            poster: m.poster || ''
+          })))
       );
     }
 
