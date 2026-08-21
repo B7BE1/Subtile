@@ -207,77 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (typeof CustomSelect !== 'undefined') CustomSelect.initAll();
-
-  // Custom sort dropdown
-  (function() {
-    var trigger = document.getElementById('sortSelectTrigger');
-    var panel = document.getElementById('sortPanel');
-    var label = document.getElementById('sortLabel');
-    var hidden = document.getElementById('catalogSortSelect');
-    if (!trigger || !panel || !hidden) return;
-
-    trigger.addEventListener('click', function(e) {
-      e.stopPropagation();
-      var open = panel.style.display === 'block';
-      // close all other cs-panels
-      document.querySelectorAll('.cs-panel').forEach(function(p) { p.style.display = 'none'; });
-      if (!open) {
-        panel.style.display = 'block';
-        panel.style.opacity = '0';
-        panel.style.transform = 'translateY(-4px)';
-        panel.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
-        requestAnimationFrame(function() {
-          panel.style.opacity = '1';
-          panel.style.transform = 'translateY(0)';
-        });
-        trigger.style.borderColor = 'rgba(255,255,255,0.25)';
-        trigger.style.background = 'rgba(255,255,255,0.08)';
-      } else {
-        trigger.style.borderColor = 'rgba(255,255,255,0.08)';
-        trigger.style.background = 'rgba(255,255,255,0.04)';
-      }
-    });
-
-    panel.querySelectorAll('.cs-opt').forEach(function(btn) {
-      btn.addEventListener('mouseenter', function() {
-        if (!btn.classList.contains('cs-opt-active')) {
-          btn.style.background = 'rgba(255,255,255,0.05)';
-          btn.style.color = '#d1d5db';
-        }
-      });
-      btn.addEventListener('mouseleave', function() {
-        if (!btn.classList.contains('cs-opt-active')) {
-          btn.style.background = 'transparent';
-          btn.style.color = '#9ca3af';
-        }
-      });
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        panel.querySelectorAll('.cs-opt').forEach(function(b) {
-          b.classList.remove('cs-opt-active');
-          b.style.background = 'transparent';
-          b.style.color = '#9ca3af';
-          b.style.fontWeight = '500';
-        });
-        btn.classList.add('cs-opt-active');
-        btn.style.background = 'rgba(255,255,255,0.08)';
-        btn.style.color = '#fff';
-        btn.style.fontWeight = '700';
-        label.textContent = btn.textContent;
-        hidden.value = btn.dataset.val;
-        panel.style.display = 'none';
-        trigger.style.borderColor = 'rgba(255,255,255,0.08)';
-        trigger.style.background = 'rgba(255,255,255,0.04)';
-        onCatalogSort();
-      });
-    });
-
-    document.addEventListener('click', function() {
-      panel.style.display = 'none';
-      trigger.style.borderColor = 'rgba(255,255,255,0.08)';
-      trigger.style.background = 'rgba(255,255,255,0.04)';
-    });
-  })();
 });
 
 // ---- Escaping / sanitizing helpers -----------------------------------
@@ -720,14 +649,6 @@ function renderBrowseDropdown(items, dropdown) {
     `;
   }).join('');
   dropdown.classList.add('active');
-}
-
-function onCatalogSort() {
-  const select = document.getElementById('catalogSortSelect');
-  if (select) {
-    currentSort = select.value;
-    renderCatalog();
-  }
 }
 
 function setupAuthNavbar() {
