@@ -6,17 +6,16 @@
   <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(function(r) {
-      if (r && r.length) {
-        r.forEach(function(s) { s.unregister(); });
-        if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
-      }
+      r.forEach(function(s) { s.unregister(); });
     });
+    if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
   }
   </script>
   <meta name="description" content="Download subtitles for movies, series, and anime.">
   <meta name="referrer" content="no-referrer">
   <title>Subtitles Archive — Subtile</title>
   
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
