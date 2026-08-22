@@ -6,12 +6,9 @@
     <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(r) {
-        if (r && r.length) {
-          r.forEach(function(s) { s.unregister(); });
-          if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
-          setTimeout(function() { location.reload(); }, 100);
-        }
+        r.forEach(function(s) { s.unregister(); });
       });
+      if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
     }
     </script>
     <meta name="description" content="Browse and discover subtitles for movies, TV series, and anime.">

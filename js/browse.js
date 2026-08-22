@@ -257,12 +257,8 @@ let hasMore = true;
 let trendingAbortController = null;
 let trendingRequestToken = 0;
 
-// Fetch real trending/top data without API Keys
+// Fetch complete catalog from server-side /api/catalog endpoint
 async function triggerLiveTrending(type, page = 1) {
-  // Only pagination (page > 1) respects the "already fetching / no more
-  // data" guard. A fresh page-1 request (e.g. switching filter tabs) always
-  // proceeds and supersedes whatever's currently in flight, instead of
-  // silently no-op'ing because isFetching is still true from the last call.
   if (page > 1 && (isFetching || !hasMore)) return;
 
   if (trendingAbortController) trendingAbortController.abort();
@@ -274,123 +270,26 @@ async function triggerLiveTrending(type, page = 1) {
   const spinner = document.getElementById('loadingSpinner');
   if (spinner) spinner.classList.remove('hidden');
 
-  // A promise that resolves to [] on normal failure but *rejects* on abort,
-  // so an aborted request doesn't quietly masquerade as "zero results".
-  // Retries once on network failure to handle transient errors.
-  const fetchFn = window.cachedFetch || fetch;
-  const safeFetchJson = (url, opts, retries = 1) => fetchFn(url, opts)
-    .then(r => r.ok ? r.json() : null)
-    .catch(e => {
-      if (e.name === 'AbortError') throw e;
-      if (retries > 0) {
-        return new Promise(resolve => {
-          setTimeout(() => resolve(safeFetchJson(url, opts, retries - 1)), 800);
-        });
-      }
-      console.warn('[browse] API failed after retry:', url);
-      return null;
-    });
-
   try {
-    const promises = [];
-    const skip = (page - 1) * 50;
-
-    if (type === 'all' || type === 'movie') {
-      const movieEndpoint = skip === 0 
-        ? 'https://v3-cinemeta.strem.io/catalog/movie/top.json' 
-        : `https://v3-cinemeta.strem.io/catalog/movie/top/skip=${skip}.json`;
-
-      promises.push(
-        safeFetchJson(movieEndpoint, { signal })
-          .then(d => ((d && d.metas) || []).map(m => ({
-            id: m.imdb_id || m.id,
-            title: m.name,
-            type: 'movie',
-            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
-            rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
-          })))
-          .catch(() => [])
-      );
-    }
-
-    if (type === 'all' || type === 'tv') {
-      const tvEndpoint = skip === 0 
-        ? 'https://v3-cinemeta.strem.io/catalog/series/top.json' 
-        : `https://v3-cinemeta.strem.io/catalog/series/top/skip=${skip}.json`;
-
-      promises.push(
-        safeFetchJson(tvEndpoint, { signal })
-          .then(d => ((d && d.metas) || []).map(m => ({
-            id: m.imdb_id || m.id,
-            title: m.name,
-            type: 'tv',
-            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
-            rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
-          })))
-          .catch(() => [])
-      );
-    }
-
-    if (type === 'all' || type === 'anime') {
-      // Jikan Top Anime (MyAnimeList open API) — reliable, multi-page catalog
-      const animePromise = safeFetchJson(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=25`, { signal })
-        .then(d => {
-          if (d && d.data && d.data.length > 0) {
-            return d.data.map(a => ({
-              id: `anime-${a.mal_id}`,
-              title: a.title_english || a.title,
-              type: 'anime',
-              year: a.year || (a.aired?.from ? new Date(a.aired.from).getFullYear() : 'N/A'),
-              rating: a.score || 8.5,
-              poster: a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url || ''
-            }));
-          }
-          return [];
-        })
-        .catch(() => []);
-
-      promises.push(animePromise);
-    }
-
-    const settled = await Promise.all(promises);
-
-    // A newer request (different filter/page) has since started — drop this
-    // result silently and let the newer request own isFetching/spinner/state.
+    const res = await fetch(`/api/catalog?type=${encodeURIComponent(type)}&page=${page}`, { signal });
     if (thisRequest !== trendingRequestToken) return;
 
-    const newResults = settled.flat();
+    if (res.ok) {
+      const data = await res.json();
+      const newResults = data.results || [];
+      hasMore = data.hasMore !== false && newResults.length > 0;
 
-    if (newResults.length === 0) {
-      hasMore = false;
-    }
-
-    if (page === 1) {
-      const seen = new Set();
-      liveSearchResults = newResults.filter(item => {
-        if (seen.has(item.id)) return false;
-        seen.add(item.id);
-        return true;
-      });
-    } else {
-      const existingIds = new Set(liveSearchResults.map(i => i.id));
-      const uniqueNew = newResults.filter(i => {
-        if (existingIds.has(i.id)) return false;
-        existingIds.add(i.id);
-        return true;
-      });
-      liveSearchResults.push(...uniqueNew);
-    }
-
-    if (liveSearchResults.length === 0 && page === 1) {
-      liveSearchResults = [...MOVIES_DATABASE];
+      if (page === 1) {
+        liveSearchResults = newResults;
+      } else {
+        const existingIds = new Set(liveSearchResults.map(i => i.id));
+        const uniqueNew = newResults.filter(i => !existingIds.has(i.id));
+        liveSearchResults.push(...uniqueNew);
+      }
     }
   } catch (e) {
-    if (e.name === 'AbortError') return; // superseded — newer request owns state now
-    console.error('Fetch Error:', e);
-    if (thisRequest !== trendingRequestToken) return;
-    if (page === 1) liveSearchResults = [...MOVIES_DATABASE];
+    if (e.name === 'AbortError') return;
+    console.error('Catalog Fetch Error:', e);
   }
 
   isFetching = false;
