@@ -44,20 +44,42 @@ window.attachFadeIn = function(elements) {
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof CustomSelect !== 'undefined') CustomSelect.initAll();
 
-  // Safety: hide loader after 10s no matter what
-  const safetyLoader = document.getElementById('globalLoader');
-  const safetyTimer = setTimeout(() => {
-    if (safetyLoader) safetyLoader.style.display = 'none';
-    const c = document.querySelector('.split-container');
-    if (c) c.classList.add('loaded');
-  }, 10000);
+  const urlParams = new URLSearchParams(window.location.search);
+  const movieId = urlParams.get('id') || 'dune-2';
+  const movieType = urlParams.get('type') || 'movie';
 
+  // Immediately check local DB for instant render
+  const localMovie = MOVIES_DATABASE.find(m => m.id === movieId || (m.imdbId && m.imdbId === movieId));
+  if (localMovie) {
+    currentMovie = localMovie;
+    renderMovieDetails(currentMovie);
+    wireUpEventDelegation();
+    setupAuthNavbar();
+    const loader = document.getElementById('globalLoader');
+    if (loader) loader.style.display = 'none';
+    const container = document.querySelector('.split-container');
+    if (container) container.classList.add('loaded');
+    if (currentMovie.type === 'tv' || currentMovie.type === 'anime') {
+      renderSeasonsList(currentMovie);
+    } else {
+      const seasonsContainer = document.getElementById('seasonsListView');
+      const subtitlesContainer = document.getElementById('subtitlesListView');
+      const viewTitle = document.getElementById('viewTitle');
+      const filters = document.getElementById('filterPillsContainer');
+      const backBtn = document.getElementById('backToSeasonsBtn');
+      if (seasonsContainer) seasonsContainer.style.display = 'none';
+      if (subtitlesContainer) subtitlesContainer.style.display = 'block';
+      if (viewTitle) viewTitle.innerText = 'Available Subtitles';
+      if (filters) filters.style.display = '';
+      if (backBtn) backBtn.style.display = 'none';
+      await fetchRealSubtitles(currentMovie);
+    }
+    return;
+  }
+
+  // Fallback: show loader, fetch from API
   try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const movieId = urlParams.get('id') || 'dune-2';
-    const movieType = urlParams.get('type') || 'movie';
-
-    // 1. Fetch metadata from API (Cinemeta / Jikan / Local)
+    // 1. Fetch metadata from API (Cinemeta / Jikan / AniList)
     currentMovie = await loadMetadata(movieId, movieType);
 
     if (!currentMovie) {
@@ -96,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAuthNavbar();
 
     // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
-    clearTimeout(safetyTimer);
     const loader = document.getElementById('globalLoader');
     const container = document.querySelector('.split-container');
     if (loader) loader.style.opacity = '0';
