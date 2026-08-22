@@ -959,6 +959,46 @@ let CATEGORY_DATA = (() => {
 let searchQuery = "";
 const $ = id => document.getElementById(id);
 
+const GENRES_AR = {
+    'Action': 'أكشن',
+    'Adventure': 'مغامرة',
+    'Animation': 'رسوم متحركة',
+    'Anime': 'أنمي',
+    'Biography': 'سيرة ذاتية',
+    'Comedy': 'كوميديا',
+    'Crime': 'جريمة',
+    'Documentary': 'وثائقي',
+    'Drama': 'دراما',
+    'Family': 'عائلي',
+    'Fantasy': 'فانتازيا',
+    'History': 'تاريخي',
+    'Horror': 'رعب',
+    'Music': 'موسيقى',
+    'Mystery': 'غموض',
+    'Romance': 'رومانسية',
+    'Sci-Fi': 'خيال علمي',
+    'Science Fiction': 'خيال علمي',
+    'Supernatural': 'خوارق',
+    'Thriller': 'إثارة',
+    'War': 'حرب',
+    'Western': 'غرب أمريكي',
+    'Movie': 'فيلم',
+    'TV Series': 'مسلسل',
+    'TV Show': 'مسلسل'
+};
+
+function getSafeGenre(genreRaw, isAr) {
+    if (!genreRaw) return isAr ? 'عمل مميز' : 'Feature';
+    if (!isAr) return genreRaw;
+    return String(genreRaw)
+        .split('/')
+        .map(g => {
+            const trimmed = g.trim();
+            return GENRES_AR[trimmed] || trimmed;
+        })
+        .join(' / ');
+}
+
 function getSafeTitle(item, isAr) {
     if (!item) return 'Untitled';
     if (isAr && item.title_ar) return String(item.title_ar);
@@ -1056,7 +1096,7 @@ function renderActiveCategory() {
     const displayTitle = getSafeTitle(featured, isAr);
     const displayDesc = getSafeDesc(featured, isAr);
     const genreRaw = featured.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
-    const displayGenre = (isAr && GENRES_AR[genreRaw]) ? GENRES_AR[genreRaw] : genreRaw;
+    const displayGenre = getSafeGenre(genreRaw, isAr);
     const yearStr = featured.year || '2024';
     const ratingStr = featured.rating || '8.5';
     const posterUrl = featured.poster || 'assets/default-avatar.svg';
@@ -1096,7 +1136,7 @@ function cardHTML(item, rank) {
     const displayTitle = getSafeTitle(item, isAr);
     const safeTitleEscaped = String(displayTitle).replace(/'/g, "\\'");
     const genreRaw = item.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
-    const displayGenre = (isAr && GENRES_AR[genreRaw]) ? GENRES_AR[genreRaw] : (genreRaw || item.lang || 'Feature');
+    const displayGenre = getSafeGenre(genreRaw, isAr);
     const downloadsText = isAr ? `${item.downloads || '3.2M'} تحميل` : `${item.downloads || '3.2M'} Downloads`;
     const posterUrl = item.poster || 'assets/default-avatar.svg';
 

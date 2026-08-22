@@ -236,18 +236,19 @@ function renderSearchResults(items, dropdown, isLocalOnly) {
   dropdown.innerHTML = `
     ${!isLocalOnly ? '' : recentHtml}
     ${items.slice(0, 8).map(movie => {
-      const typeLabel = movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Show' : 'Movie');
+      const typeLabel = movie.type === 'anime' ? 'anime' : (movie.type === 'tv' ? 'series' : 'movie');
+      const yearStr = (movie.year || movie.releaseInfo || '').toString().split(/[-–]/)[0].trim();
+      const metaText = yearStr ? `${typeLabel} &bull; ${esc(yearStr)}` : typeLabel;
       const targetId = encodeURIComponent(movie.id || movie.imdb_id);
       const targetType = encodeURIComponent(movie.type || 'movie');
       const targetUrl = `movie.html?id=${targetId}&type=${targetType}`;
-      const icon = movie.type === 'anime' ? 'fa-dragon' : (movie.type === 'tv' ? 'fa-tv' : 'fa-film');
 
       return `
         <div class="search-suggestion-item" onclick="saveSearch('${esc(movie.title).replace(/'/g, "\\'")}'); window.location.href='${targetUrl}'">
           <img class="suggestion-icon" src="${safeImg(movie.poster)}" alt="" onerror="this.style.display='none'">
           <div class="suggestion-info">
             <div class="suggestion-title">${esc(movie.title)}</div>
-            <div class="suggestion-meta"><i class="fas ${icon}" style="margin-right:4px;"></i> ${typeLabel} &bull; ${esc(movie.year || movie.releaseInfo || 'N/A')} ${movie.rating ? `&bull; ★ ${  esc(movie.rating)}` : ''}</div>
+            <div class="suggestion-meta">${metaText} ${movie.rating ? `&bull; ★ ${esc(movie.rating)}` : ''}</div>
           </div>
         </div>
       `;

@@ -330,35 +330,24 @@ async function triggerLiveTrending(type, page = 1) {
     }
 
     if (type === 'all' || type === 'anime') {
-      const query = `
-        query {
-          Page(page: ${page}, perPage: 50) {
-            media(type: ANIME, sort: TRENDING_DESC) {
-              id
-              title { romaji english }
-              averageScore
-              coverImage { large }
-              startDate { year }
-            }
+      // Jikan Top Anime (MyAnimeList open API) — highly reliable and CORS-enabled
+      const animePromise = safeFetchJson(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=25`, { signal })
+        .then(d => {
+          if (d && d.data && d.data.length > 0) {
+            return d.data.map(a => ({
+              id: `anime-${a.mal_id}`,
+              title: a.title_english || a.title,
+              type: 'anime',
+              year: a.year || (a.aired?.from ? new Date(a.aired.from).getFullYear() : 'N/A'),
+              rating: a.score || 8.5,
+              poster: a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url || ''
+            }));
           }
-        }
-      `;
-      promises.push(
-        safeFetchJson('https://graphql.anilist.co', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ query }),
-          signal
+          return [];
         })
-          .then(d => ((d && d.data && d.data.Page && d.data.Page.media) || []).map(a => ({
-            id: `anime-${a.id}`,
-            title: a.title.english || a.title.romaji,
-            type: 'anime',
-            year: a.startDate?.year || 'N/A',
-            rating: a.averageScore ? a.averageScore / 10 : 0,
-            poster: a.coverImage?.large || ''
-          })))
-      );
+        .catch(() => []);
+
+      promises.push(animePromise);
     }
 
     const settled = await Promise.all(promises);
