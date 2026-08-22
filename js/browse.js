@@ -293,44 +293,48 @@ async function triggerLiveTrending(type, page = 1) {
 
   try {
     const promises = [];
-    // Cinemeta uses skip (e.g. 0, 50, 100). We'll fetch 50 items per page.
     const skip = (page - 1) * 50;
 
     if (type === 'all' || type === 'movie') {
+      const movieEndpoint = skip === 0 
+        ? 'https://v3-cinemeta.strem.io/catalog/movie/top.json' 
+        : `https://v3-cinemeta.strem.io/catalog/movie/top/skip=${skip}.json`;
+
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/movie/top.json?skip=${skip}`, { signal })
-          .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
+        safeFetchJson(movieEndpoint, { signal })
+          .then(d => ((d && d.metas) || []).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
             type: 'movie',
             year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
             rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || ''
+            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
           })))
+          .catch(() => [])
       );
     }
 
     if (type === 'all' || type === 'tv') {
-      // Cinemeta (IMDb Top series), same catalog/skip pattern as movies above —
-      // this used to hit TVmaze instead, which doesn't share Cinemeta's imdb_id
-      // scheme, so TV results couldn't link through to movie.html the same way
-      // movie results do, and the module header's own "Cinemeta for Movies/TV"
-      // claim was only true for movies.
+      const tvEndpoint = skip === 0 
+        ? 'https://v3-cinemeta.strem.io/catalog/series/top.json' 
+        : `https://v3-cinemeta.strem.io/catalog/series/top/skip=${skip}.json`;
+
       promises.push(
-        safeFetchJson(`https://v3-cinemeta.strem.io/catalog/series/top.json?skip=${skip}`, { signal })
-          .then(d => ((d && d.metas) || []).slice(0, 50).map(m => ({
+        safeFetchJson(tvEndpoint, { signal })
+          .then(d => ((d && d.metas) || []).map(m => ({
             id: m.imdb_id || m.id,
             title: m.name,
             type: 'tv',
             year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || 'N/A',
             rating: parseFloat(m.imdbRating) || 0,
-            poster: m.poster || ''
+            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`
           })))
+          .catch(() => [])
       );
     }
 
     if (type === 'all' || type === 'anime') {
-      // Jikan Top Anime (MyAnimeList open API) — highly reliable and CORS-enabled
+      // Jikan Top Anime (MyAnimeList open API) — reliable, multi-page catalog
       const animePromise = safeFetchJson(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=25`, { signal })
         .then(d => {
           if (d && d.data && d.data.length > 0) {
