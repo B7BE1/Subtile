@@ -781,24 +781,49 @@
         }
     }
 
+    const AVATAR_PRESETS = [
+        { name: 'Gold VIP', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=VIP&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf' },
+        { name: 'Anime Pro', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix&backgroundColor=ffd5dc,ffdfbf' },
+        { name: 'Cinephile', url: 'https://api.dicebear.com/7.x/micah/svg?seed=Oliver&backgroundColor=b6e3f4' },
+        { name: 'Cyber Ninja', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Shadow&backgroundColor=2563eb' },
+        { name: 'Pixel Gamer', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Gamer' },
+        { name: 'Minimalist', url: 'assets/default-avatar.svg' }
+    ];
+
     function enableEditProfile() {
         const area = $('profileEditArea');
         area.innerHTML = `
-            <div class="w-full md:w-80 space-y-3 mt-2 md:mt-0">
+            <div class="w-full md:w-96 space-y-4 mt-3 md:mt-0 p-4 bg-neutral-900/90 border border-neutral-800 rounded-2xl shadow-2xl backdrop-blur-xl">
                 <div>
-                    <label class="block text-xs text-neutral-400 mb-1.5 font-semibold">Bio</label>
-                    <textarea id="editBio" class="edit-input" rows="3" maxlength="500" placeholder="Tell us about yourself...">${Security.escapeHTML(profileUser.bio || '')}</textarea>
+                    <label class="block text-xs text-neutral-300 mb-1.5 font-bold">Bio</label>
+                    <textarea id="editBio" class="edit-input w-full bg-neutral-950/80 border border-neutral-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors" rows="3" maxlength="500" placeholder="Tell the cinema community about yourself...">${Security.escapeHTML(profileUser.bio || '')}</textarea>
                 </div>
                 <div>
-                    <label class="block text-xs text-neutral-400 mb-1.5 font-semibold">Avatar URL</label>
-                    <input id="editAvatar" type="url" class="edit-input" value="${Security.escapeAttribute(profileUser.avatar || '')}" placeholder="https://example.com/avatar.jpg">
+                    <label class="block text-xs text-neutral-300 mb-1.5 font-bold">Quick Avatar Presets</label>
+                    <div class="flex items-center gap-2 flex-wrap mb-3">
+                        ${AVATAR_PRESETS.map(p => `
+                            <button type="button" onclick="selectPresetAvatar('${p.url}')" class="w-10 h-10 rounded-full border-2 border-neutral-700 hover:border-white hover:scale-110 transition-all overflow-hidden p-0.5 bg-neutral-950" title="${p.name}">
+                                <img src="${p.url}" class="w-full h-full object-cover rounded-full" alt="${p.name}">
+                            </button>
+                        `).join('')}
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="saveProfile()" class="btn-primary flex-1 justify-center"><i class="fas fa-check text-xs"></i> Save</button>
-                    <button onclick="cancelEdit()" class="btn-ghost"><i class="fas fa-times text-xs"></i></button>
+                <div>
+                    <label class="block text-xs text-neutral-300 mb-1.5 font-bold">Avatar Image URL</label>
+                    <input id="editAvatar" type="url" class="edit-input w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors" value="${Security.escapeAttribute(profileUser.avatar || '')}" placeholder="https://example.com/avatar.jpg">
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button onclick="saveProfile()" class="btn-primary flex-1 justify-center py-2.5 rounded-xl font-bold text-sm bg-white text-neutral-950 hover:bg-neutral-200 transition-all flex items-center gap-2 shadow-lg"><i class="fas fa-check text-xs"></i> Save Profile</button>
+                    <button onclick="cancelEdit()" class="btn-ghost px-4 py-2.5 rounded-xl text-neutral-400 hover:text-white transition-colors"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         `;
+    }
+
+    function selectPresetAvatar(url) {
+        if ($('editAvatar')) $('editAvatar').value = url;
+        $('profileAvatar').src = url;
+        showToast('Preset selected! Click Save Profile to apply.');
     }
 
     function cancelEdit() {
@@ -812,6 +837,7 @@
             Auth.updateProfile({ bio, avatar });
             profileUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
             renderProfile(profileUser);
+            setupNavbar();
             showToast('Profile updated!');
         } catch (e) {
             showToast(e.message || 'Failed to update profile', true);
@@ -819,22 +845,49 @@
     }
 
     function uploadAvatar(event) {
-        const file = event.target.files[0];
+        const file = event.target.files && event.target.files[0];
         if (!file) return;
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('Image must be under 2MB', true);
-            return;
-        }
+
+        showToast('Processing avatar image...');
         const reader = new FileReader();
         reader.onload = (e) => {
-            try {
-                Auth.updateProfile({ avatar: e.target.result });
-                profileUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
-                $('profileAvatar').src = e.target.result;
-                showToast('Avatar updated!');
-            } catch (err) {
-                showToast('Failed to upload avatar', true);
-            }
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxDim = 256;
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    }
+                } else {
+                    if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+                try {
+                    Auth.updateProfile({ avatar: compressedDataUrl });
+                    profileUser = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
+                    $('profileAvatar').src = compressedDataUrl;
+                    setupNavbar();
+                    showToast('Avatar updated successfully!');
+                } catch (err) {
+                    showToast(err.message || 'Failed to save avatar', true);
+                }
+            };
+            img.onerror = () => {
+                showToast('Failed to parse image file', true);
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }

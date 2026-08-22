@@ -1045,7 +1045,7 @@ function updateAuthNav() {
         btn.outerHTML = `
             <div id="navAuthBtn" style="position:relative; display:inline-block;">
                 <button onclick="toggleNavDropdown(event)" style="display:flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); padding:0.4rem 1rem; border-radius:50px; color:#fff; cursor:pointer; font-weight:600; font-size:0.8rem; font-family:Inter,sans-serif; transition:all 0.3s;">
-                    <img src="assets/default-avatar.svg" style="width:24px; height:24px; border-radius:50%;" alt="">
+                    <img src="${(user.avatar) ? user.avatar : 'assets/default-avatar.svg'}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" alt="">
                     <span>${safeName}</span>
                     <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
                 </button>
