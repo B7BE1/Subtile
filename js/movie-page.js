@@ -48,17 +48,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const movieId = urlParams.get('id') || 'dune-2';
   const movieType = urlParams.get('type') || 'movie';
 
-  // Immediately check local DB for instant render
-  const localMovie = MOVIES_DATABASE.find(m => m.id === movieId || (m.imdbId && m.imdbId === movieId));
-  if (localMovie) {
-    currentMovie = localMovie;
+  function hideLoader() {
+    const loader = document.getElementById('globalLoader');
+    if (loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; }, 300); }
+    const container = document.querySelector('.split-container');
+    if (container) container.classList.add('loaded');
+  }
+
+  function renderAndWireUp() {
     renderMovieDetails(currentMovie);
     wireUpEventDelegation();
     setupAuthNavbar();
-    const loader = document.getElementById('globalLoader');
-    if (loader) loader.style.display = 'none';
-    const container = document.querySelector('.split-container');
-    if (container) container.classList.add('loaded');
+    hideLoader();
     if (currentMovie.type === 'tv' || currentMovie.type === 'anime') {
       renderSeasonsList(currentMovie);
     } else {
@@ -72,83 +73,48 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (viewTitle) viewTitle.innerText = 'Available Subtitles';
       if (filters) filters.style.display = '';
       if (backBtn) backBtn.style.display = 'none';
-      await fetchRealSubtitles(currentMovie);
     }
+  }
+
+  function makeFallback() {
+    return {
+      id: movieId,
+      title: movieId.replace('anime-', '').replace(/^tt/, ''),
+      type: movieType,
+      year: 'Unknown',
+      poster: `https://images.metahub.space/poster/small/${movieId}/img`,
+      backdrop: `https://images.metahub.space/background/medium/${movieId}/img`,
+      overview: 'Loading metadata...',
+      genres: [movieType === 'tv' ? 'TV Series' : (movieType === 'anime' ? 'Anime' : 'Movie')],
+      rating: 'N/A',
+      episodes: []
+    };
+  }
+
+  // 1. Check local DB first — instant render, no API calls
+  const localMovie = MOVIES_DATABASE.find(m => m.id === movieId || (m.imdbId && m.imdbId === movieId));
+  if (localMovie) {
+    currentMovie = localMovie;
+    renderAndWireUp();
+    await fetchRealSubtitles(currentMovie);
     return;
   }
 
-  // Fallback: show loader, fetch from API
+  // 2. No local match — render fallback INSTANTLY so user never sees spinner
+  currentMovie = makeFallback();
+  renderAndWireUp();
+  fetchRealSubtitles(currentMovie);
+
+  // 3. Try to upgrade metadata from APIs in background (non-blocking)
   try {
-    // 1. Fetch metadata from API (Cinemeta / Jikan / AniList)
-    currentMovie = await loadMetadata(movieId, movieType);
-
-    if (!currentMovie) {
-      // Fallback to backend proxy to bypass browser issues or frontend rate limits
-      try {
-        const proxyRes = await fetch(`/api/metadata?id=${movieId}&type=${movieType}`);
-        if (proxyRes.ok) {
-          currentMovie = await proxyRes.json();
-        }
-      } catch (e) {
-        console.error("Backend proxy failed too", e);
-      }
+    const liveData = await loadMetadata(movieId, movieType);
+    if (liveData && liveData !== currentMovie) {
+      currentMovie = liveData;
+      renderMovieDetails(currentMovie);
+      fetchRealSubtitles(currentMovie);
     }
-
-    if (!currentMovie) {
-      currentMovie = MOVIES_DATABASE.find(m => m.id === movieId);
-      // Instead of defaulting to Oppenheimer, create a generic fallback for this ID
-      if (!currentMovie) {
-        currentMovie = {
-          id: movieId,
-          title: movieId.replace('anime-', '').replace('tt', 'Title '), // Best guess fallback title
-          type: movieType,
-          year: 'Unknown',
-          poster: `https://images.metahub.space/poster/small/${movieId}/img`,
-          backdrop: `https://images.metahub.space/background/medium/${movieId}/img`,
-          overview: "Metadata could not be loaded. Fetching subtitles regardless...",
-          genres: [movieType === 'tv' ? 'TV Series' : (movieType === 'anime' ? 'Anime' : 'Movie')],
-          rating: 'N/A',
-          episodes: []
-        };
-      }
-    }
-
-    renderMovieDetails(currentMovie);
-    wireUpEventDelegation();
-    setupAuthNavbar();
-
-    // 3. Hide global loader and fade in page instantly so user doesn't wait for subtitles API
-    const loader = document.getElementById('globalLoader');
-    const container = document.querySelector('.split-container');
-    if (loader) loader.style.opacity = '0';
-    setTimeout(() => {
-      if (loader) loader.style.display = 'none';
-      if (container) container.classList.add('loaded');
-    }, 300);
-
-    // 4. Fetch live subtitles or show seasons list
-    if (currentMovie.type === 'tv' || currentMovie.type === 'anime') {
-      renderSeasonsList(currentMovie);
-    } else {
-      const seasonsContainer = document.getElementById('seasonsListView');
-      const subtitlesContainer = document.getElementById('subtitlesListView');
-      const viewTitle = document.getElementById('viewTitle');
-      const filters = document.getElementById('filterPillsContainer');
-      const backBtn = document.getElementById('backToSeasonsBtn');
-
-      if (seasonsContainer) seasonsContainer.style.display = 'none';
-      if (subtitlesContainer) subtitlesContainer.style.display = 'block';
-      if (viewTitle) viewTitle.innerText = 'Available Subtitles';
-      if (filters) filters.style.display = '';
-      if (backBtn) backBtn.style.display = 'none'; // No back button for movies
-
-      await fetchRealSubtitles(currentMovie);
-    }
-  } catch (err) {
-    console.error('Movie page error:', err);
-    if (typeof showToast === 'function') showToast(`Error loading page: ${  err.message || err}`, true);
-    const loader = document.getElementById('globalLoader');
-    if (loader) loader.style.display = 'none';
+  } catch (e) {
+    console.warn('Background metadata fetch failed:', e);
   }
 });
 
