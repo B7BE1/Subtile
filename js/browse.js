@@ -423,7 +423,7 @@ function onCatalogSearch() {
   if (dropdown) {
     const lowerQ = currentSearchQuery.toLowerCase();
     const localMatches = MOVIES_DATABASE.filter(m =>
-      m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
+      m.title.toLowerCase().includes(lowerQ) || ((m.title_ar || m.arabicTitle) && (m.title_ar || m.arabicTitle).includes(lowerQ))
     );
     renderBrowseDropdown(localMatches, dropdown);
   }
@@ -485,7 +485,7 @@ async function triggerLiveCatalogSearch(q, requestToken = ++catalogSearchRequest
 
     const lowerQ = q.toLowerCase();
     const localMatches = MOVIES_DATABASE.filter(m =>
-      m.title.toLowerCase().includes(lowerQ) || (m.arabicTitle && m.arabicTitle.includes(lowerQ))
+      m.title.toLowerCase().includes(lowerQ) || ((m.title_ar || m.arabicTitle) && (m.title_ar || m.arabicTitle).includes(lowerQ))
     );
 
     const existingIds = new Set(apiResults.map(r => r.id));

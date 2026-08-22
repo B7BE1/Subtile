@@ -1135,7 +1135,7 @@ function renderActiveCategory() {
     if (img) {
         img.alt = displayTitle; img.style.display = "";
         img.classList.remove("loaded");
-        img.onerror = () => { img.style.display = "none"; if (fb) { fb.style.display = "flex"; fb.textContent = displayTitle; } };
+        img.onerror = () => { img.onerror = null; img.src = 'https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter'; img.classList.add('loaded'); };
         img.onload = () => { img.classList.add("loaded"); };
         img.src = posterUrl;
     }
@@ -1151,11 +1151,16 @@ function cardHTML(item, rank) {
     if (!item) return '';
     const movieUrl = `movie.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(item.type || CURRENT_CATEGORY)}`;
     const isAr = (typeof I18n !== 'undefined' && I18n.getLang() === 'ar');
-    const displayTitle = getSafeTitle(item, isAr);
+    
+    // دالة getSafeTitle الآن ستجد title_ar لأننا عدلنا data.js
+    const displayTitle = getSafeTitle(item, isAr); 
     const genreRaw = item.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
     const displayGenre = getSafeGenre(genreRaw, isAr);
     const downloadsText = isAr ? `${escapeHTML(item.downloads || '3.2M')} تحميل` : `${escapeHTML(item.downloads || '3.2M')} Downloads`;
+    
+    // رابط الصورة الأساسي + رابط بديل (Fallback)
     const posterUrl = sanitizeURL(item.poster) || 'assets/default-avatar.svg';
+    const fallbackPoster = `https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter`;
 
     return `
     <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block card-hover" data-id="${escapeHTML(item.id)}" aria-label="${displayTitle}">
@@ -1163,7 +1168,7 @@ function cardHTML(item, rank) {
             <div class="poster-container">
                 <img src="${posterUrl}" alt="${displayTitle}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"
                      onload="this.classList.add('loaded')"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${displayTitle}'">
+                     onerror="this.onerror=null; this.src='${fallbackPoster}'; this.classList.add('loaded');">
                 <div class="poster-fallback"></div>
                 <span class="rank-number">${rank}</span>
                 <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">

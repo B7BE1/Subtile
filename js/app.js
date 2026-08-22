@@ -157,7 +157,7 @@ function setupLiveSearch() {
       const tokens = query.toLowerCase().split(/\s+/).filter(t => t);
       const localMatches = MOVIES_DATABASE.filter(item => {
         const eng = item.title.toLowerCase();
-        const ar = item.arabicTitle ? item.arabicTitle.toLowerCase() : '';
+        const ar = (item.title_ar || item.arabicTitle) ? (item.title_ar || item.arabicTitle).toLowerCase() : '';
         const id = item.imdbId ? item.imdbId.toLowerCase() : (item.id ? item.id.id : '');
         return tokens.every(token => eng.includes(token) || ar.includes(token) || id.includes(token));
       });

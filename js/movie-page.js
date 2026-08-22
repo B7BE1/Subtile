@@ -519,11 +519,17 @@ function renderMovieDetails(movie) {
 
   const poster = document.getElementById('moviePoster');
   if (poster) {
-    poster.src = safeUrl(movie.poster) || 'https://images.metahub.space/poster/small/tt15239678/img';
+    poster.src = safeUrl(movie.poster) || 'https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter';
     poster.onerror = function() {
       const fallbackId = movie.imdb_id || movie.imdbId;
+      this.onerror = function() {
+        this.onerror = null;
+        this.src = 'https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter';
+      };
       if (fallbackId) {
         this.src = `https://images.metahub.space/poster/small/${fallbackId}/img`;
+      } else {
+        this.src = 'https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter';
       }
     };
   }
