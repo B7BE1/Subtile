@@ -102,34 +102,51 @@
         }
         .reveal.visible { opacity: 1; transform: none; }
 
-        /* Category Selector Pills */
+        /* Segmented Capsule Switcher */
+        .category-switcher-wrap {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(18, 18, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            padding: 5px;
+            gap: 4px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
         .category-tab {
-            padding: clamp(0.4rem, 1.5vw, 0.65rem) clamp(0.8rem, 2vw, 1.6rem);
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: clamp(0.75rem, 2vw, 0.9rem);
+            padding: 0.55rem 1.3rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.88rem;
             cursor: pointer;
-            transition: var(--transition-cine);
-            border: 1px solid var(--border-color);
-            background: rgba(18, 18, 24, 0.8);
-            color: var(--text-faded);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+            background: transparent;
+            color: #9ca3af;
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
+            justify-content: center;
+            gap: 0.55rem;
+            user-select: none;
+        }
+        .category-tab i {
+            font-size: 0.85rem;
+            transition: transform 0.25s ease;
         }
         .category-tab:hover {
             color: #ffffff;
-            border-color: var(--border-hover);
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.06);
         }
         .category-tab.active {
             background: #ffffff;
             color: #050507;
-            border-color: #ffffff;
-            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
+        }
+        .category-tab.active i {
+            color: #050507;
+            transform: scale(1.08);
         }
 
         .btn-pill {
@@ -282,23 +299,16 @@
                 <h2 id="gridTitle" class="typo-h1 font-black text-neutral-50" data-i18n="trending">Trending</h2>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3 sm:gap-6">
-                <!-- Category Tabs Switcher -->
-                <div class="flex gap-2 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-full backdrop-blur-xl shadow-lg overflow-x-auto gradient-border">
-                    <button data-cat="movie" class="category-tab active">
-                        <i class="fas fa-film"></i> Movies
-                    </button>
-                    <button data-cat="tv" class="category-tab">
-                        <i class="fas fa-tv"></i> TV Shows
-                    </button>
-                    <button data-cat="anime" class="category-tab">
-                        <i class="fas fa-dragon"></i> Anime
-                    </button>
-                </div>
-                
-                <div class="hidden sm:block text-xs text-neutral-400 font-semibold bg-neutral-900/80 px-3.5 py-1.5 rounded-full border border-neutral-800">
-                    <i class="fas fa-circle text-emerald-400 text-[8px] me-1"></i> Live Real-Time Feed
-                </div>
+            <div class="category-switcher-wrap">
+                <button data-cat="movie" class="category-tab active" aria-label="Movies">
+                    <i class="fas fa-film"></i> <span data-i18n="movies">Movies</span>
+                </button>
+                <button data-cat="tv" class="category-tab" aria-label="TV Shows">
+                    <i class="fas fa-tv"></i> <span data-i18n="tvShows">TV Shows</span>
+                </button>
+                <button data-cat="anime" class="category-tab" aria-label="Anime">
+                    <i class="fas fa-dragon"></i> <span data-i18n="anime">Anime</span>
+                </button>
             </div>
         </div>
 
@@ -1210,8 +1220,11 @@ $("searchInput").addEventListener("keydown", e => {
 
 // Category Tab Clicks
 document.querySelectorAll(".category-tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-        switchCategory(btn.dataset.cat);
+    btn.addEventListener("click", (e) => {
+        const targetBtn = e.target.closest(".category-tab");
+        if (targetBtn && targetBtn.dataset.cat) {
+            switchCategory(targetBtn.dataset.cat);
+        }
     });
 });
 
