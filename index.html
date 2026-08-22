@@ -236,31 +236,32 @@
             </div>
 
             <div class="flex items-center gap-3 flex-shrink-0">
-
-                <button onclick="toggleLang()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#9ca3af; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s ease; font-size:0.7rem; font-weight:800;" title="Toggle Language" id="langToggleBtn">AR</button>
+                <button onclick="toggleLang()" class="bg-white/[0.06] border border-white/[0.08] text-gray-400 w-[34px] h-[34px] rounded-full flex items-center justify-center cursor-pointer transition-all hover:bg-white/[0.1] text-[0.7rem] font-extrabold" title="Toggle Language" id="langToggleBtn">AR</button>
                 <nav class="desktop-nav hidden md:flex items-center gap-5 text-sm font-semibold text-neutral-400">
                     <a href="index.html" class="text-white relative py-1" data-i18n="trending">Trending<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"></span></a>
                     <a href="browse.html" class="hover:text-white transition-colors py-1" data-i18n="browse">Browse</a>
                 </nav>
-                <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-white hover:bg-neutral-200 text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md hover:shadow-white/10">
-                    <i class="fas fa-user-circle text-sm"></i>
-                    <span id="navAuthText" data-i18n="login">Login</span>
-                </a>
+                <div id="navAuthContainer">
+                    <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-white hover:bg-neutral-200 text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md hover:shadow-white/10">
+                        <i class="fas fa-user-circle text-sm"></i>
+                        <span id="navAuthText" data-i18n="login">Login</span>
+                    </a>
+                </div>
                 <!-- Mobile Hamburger -->
-                <button class="mobile-menu-btn md:hidden" onclick="toggleMobileNav()" aria-label="Menu">
-                    <i class="fas fa-bars"></i>
+                <button class="mobile-menu-btn md:hidden p-2 text-white" onclick="toggleMobileNav()" aria-label="Menu">
+                    <i class="fas fa-bars text-lg"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Mobile Nav Overlay -->
-    <div id="mobileNav" class="mobile-nav">
-        <button onclick="toggleMobileNav()" style="position:absolute; top:1.2rem; right:1.2rem; background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer;"><i class="fas fa-times"></i></button>
-        <a href="index.html" style="font-size:1.5rem;"><i class="fas fa-fire"></i> Trending</a>
-        <a href="browse.html" style="font-size:1.5rem;"><i class="fas fa-compass"></i> Browse</a>
-        <a href="profile.html" style="font-size:1.5rem;"><i class="fas fa-user-circle"></i> Profile</a>
-        <a href="login.html" style="font-size:1.5rem; color:#fff; background:rgba(255,255,255,0.1); padding:0.8rem 2.5rem;"><i class="fas fa-sign-in-alt"></i> Login</a>
+    <div id="mobileNav" class="mobile-nav fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center gap-8 transform translate-x-full hidden">
+        <button onclick="toggleMobileNav()" class="absolute top-5 right-5 text-white text-2xl"><i class="fas fa-times"></i></button>
+        <a href="index.html" class="text-2xl text-white"><i class="fas fa-fire"></i> Trending</a>
+        <a href="browse.html" class="text-2xl text-white"><i class="fas fa-compass"></i> Browse</a>
+        <a href="profile.html" class="text-2xl text-white"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="login.html" class="text-2xl text-white bg-white/10 px-10 py-3 rounded-full"><i class="fas fa-sign-in-alt"></i> Login</a>
     </div>
 
 
@@ -941,6 +942,28 @@ const DEFAULT_CATEGORY_DATA = {
 };
 
 let CURRENT_CATEGORY = localStorage.getItem('subtile_active_cat') || 'movie';
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function sanitizeURL(url) {
+    if (!url) return '';
+    try {
+        const encoded = encodeURI(url);
+        if (encoded.startsWith('javascript:') || encoded.startsWith('data:')) return '';
+        return encoded;
+    } catch (e) {
+        return '';
+    }
+}
+
 let CATEGORY_DATA = (() => {
     try {
         const cachedVer = localStorage.getItem('subtile_cache_ver');
@@ -989,7 +1012,7 @@ const GENRES_AR = {
 
 function getSafeGenre(genreRaw, isAr) {
     if (!genreRaw) return isAr ? 'عمل مميز' : 'Feature';
-    if (!isAr) return genreRaw;
+    if (!isAr) return escapeHTML(genreRaw);
     return String(genreRaw)
         .split('/')
         .map(g => {
@@ -1001,19 +1024,19 @@ function getSafeGenre(genreRaw, isAr) {
 
 function getSafeTitle(item, isAr) {
     if (!item) return 'Untitled';
-    if (isAr && item.title_ar) return String(item.title_ar);
-    if (typeof item.title === 'string' && item.title.trim()) return item.title;
+    if (isAr && item.title_ar) return escapeHTML(item.title_ar);
+    if (typeof item.title === 'string' && item.title.trim()) return escapeHTML(item.title);
     if (item.title && typeof item.title === 'object') {
-        return item.title.english || item.title.romaji || item.title.userPreferred || 'Untitled';
+        return escapeHTML(item.title.english || item.title.romaji || item.title.userPreferred || 'Untitled');
     }
-    return String(item.name || 'Untitled');
+    return escapeHTML(item.name || 'Untitled');
 }
 
 function getSafeDesc(item, isAr) {
     if (!item) return '';
-    if (isAr && item.desc_ar) return String(item.desc_ar);
-    if (typeof item.desc === 'string' && item.desc.trim()) return item.desc;
-    return String(item.description || item.overview || 'Watch with verified multi-language subtitles.');
+    if (isAr && item.desc_ar) return escapeHTML(item.desc_ar);
+    if (typeof item.desc === 'string' && item.desc.trim()) return escapeHTML(item.desc);
+    return escapeHTML(item.description || item.overview || 'Watch with verified multi-language subtitles.');
 }
 
 async function fetchLiveTrending() {
@@ -1044,7 +1067,6 @@ function switchCategory(cat) {
     CURRENT_CATEGORY = cat;
     try { localStorage.setItem('subtile_active_cat', cat); } catch(e){}
 
-    // Update active tab styling
     document.querySelectorAll(".category-tab").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.cat === cat);
     });
@@ -1072,7 +1094,6 @@ function renderActiveCategory() {
     const featured = list[0] || DEFAULT_CATEGORY_DATA.movie[0];
     const rest = list.slice(1);
 
-    // 1. Update Labels
     if ($("featuredCategoryLabel")) $("featuredCategoryLabel").textContent = isAr ? 'الرائج #01' : 'Trending #01';
     if ($("featuredLiveSubtitle")) {
         $("featuredLiveSubtitle").innerHTML = '<span class="w-1.5 h-1.5 bg-emerald-400 rounded-full pulse-glow"></span> <span>' + (isAr ? 'الخيار الأكثر طلباً' : 'Top Subtitled Choice') + '</span>';
@@ -1080,7 +1101,6 @@ function renderActiveCategory() {
     const gridTitle = $("gridTitle");
     if (gridTitle) gridTitle.textContent = isAr ? 'الرائج' : 'Trending';
 
-    // 2. Update category tabs text
     document.querySelectorAll(".category-tab").forEach(btn => {
         const cat = btn.dataset.cat;
         btn.classList.toggle("active", cat === CURRENT_CATEGORY);
@@ -1092,19 +1112,18 @@ function renderActiveCategory() {
         }
     });
 
-    // 3. Update Featured Hero Banner
     const displayTitle = getSafeTitle(featured, isAr);
     const displayDesc = getSafeDesc(featured, isAr);
     const genreRaw = featured.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
     const displayGenre = getSafeGenre(genreRaw, isAr);
-    const yearStr = featured.year || '2024';
-    const ratingStr = featured.rating || '8.5';
-    const posterUrl = featured.poster || 'assets/default-avatar.svg';
-    const backdropUrl = featured.backdrop || posterUrl;
+    const yearStr = escapeHTML(featured.year || '2024');
+    const ratingStr = escapeHTML(featured.rating || '8.5');
+    const posterUrl = sanitizeURL(featured.poster) || 'assets/default-avatar.svg';
+    const backdropUrl = sanitizeURL(featured.backdrop) || posterUrl;
 
     if ($("bannerBg")) $("bannerBg").style.backgroundImage = `url('${backdropUrl}')`;
-    if ($("featuredTitle")) $("featuredTitle").textContent = displayTitle;
-    if ($("featuredDesc")) $("featuredDesc").textContent = displayDesc;
+    if ($("featuredTitle")) $("featuredTitle").innerHTML = displayTitle;
+    if ($("featuredDesc")) $("featuredDesc").innerHTML = displayDesc;
     if ($("featuredMeta")) {
         $("featuredMeta").innerHTML =
             `<span>${yearStr}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
@@ -1121,32 +1140,30 @@ function renderActiveCategory() {
         img.src = posterUrl;
     }
     
-    const movieUrl = `movie.html?id=${featured.id}&type=${featured.type || CURRENT_CATEGORY}`;
+    const movieUrl = `movie.html?id=${encodeURIComponent(featured.id)}&type=${encodeURIComponent(featured.type || CURRENT_CATEGORY)}`;
     if ($("featuredDownload")) $("featuredDownload").href = movieUrl;
     if ($("featuredInfo")) $("featuredInfo").href = movieUrl;
 
-    // 4. Update Grid (#02 to #10)
     renderGrid(rest);
 }
 
 function cardHTML(item, rank) {
     if (!item) return '';
-    const movieUrl = `movie.html?id=${item.id}&type=${item.type || CURRENT_CATEGORY}`;
+    const movieUrl = `movie.html?id=${encodeURIComponent(item.id)}&type=${encodeURIComponent(item.type || CURRENT_CATEGORY)}`;
     const isAr = (typeof I18n !== 'undefined' && I18n.getLang() === 'ar');
     const displayTitle = getSafeTitle(item, isAr);
-    const safeTitleEscaped = String(displayTitle).replace(/'/g, "\\'");
     const genreRaw = item.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
     const displayGenre = getSafeGenre(genreRaw, isAr);
-    const downloadsText = isAr ? `${item.downloads || '3.2M'} تحميل` : `${item.downloads || '3.2M'} Downloads`;
-    const posterUrl = item.poster || 'assets/default-avatar.svg';
+    const downloadsText = isAr ? `${escapeHTML(item.downloads || '3.2M')} تحميل` : `${escapeHTML(item.downloads || '3.2M')} Downloads`;
+    const posterUrl = sanitizeURL(item.poster) || 'assets/default-avatar.svg';
 
     return `
-    <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block card-hover" data-id="${item.id}" aria-label="${displayTitle}">
+    <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block card-hover" data-id="${escapeHTML(item.id)}" aria-label="${displayTitle}">
         <div class="relative">
             <div class="poster-container">
                 <img src="${posterUrl}" alt="${displayTitle}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"
                      onload="this.classList.add('loaded')"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${safeTitleEscaped}'">
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${displayTitle}'">
                 <div class="poster-fallback"></div>
                 <span class="rank-number">${rank}</span>
                 <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
@@ -1160,9 +1177,9 @@ function cardHTML(item, rank) {
         <div class="mt-4">
             <div class="flex items-center gap-2 mb-1">
                 <span class="bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${displayGenre}</span>
-                <span class="text-neutral-500 text-xs">${item.year || '2024'}</span>
+                <span class="text-neutral-500 text-xs">${escapeHTML(item.year || '2024')}</span>
                 <span class="text-neutral-600">•</span>
-                <span class="text-amber-400 text-xs font-semibold">★ ${item.rating || '8.5'}</span>
+                <span class="text-amber-400 text-xs font-semibold">★ ${escapeHTML(item.rating || '8.5')}</span>
             </div>
             <h3 class="text-base font-bold text-neutral-100 truncate">${displayTitle}</h3>
             <p class="text-neutral-500 text-sm mt-0.5">${downloadsText}</p>
@@ -1173,48 +1190,71 @@ function cardHTML(item, rank) {
 function renderGrid(customList) {
     const list = customList || ((CATEGORY_DATA[CURRENT_CATEGORY] && CATEGORY_DATA[CURRENT_CATEGORY].length > 0) ? CATEGORY_DATA[CURRENT_CATEGORY] : DEFAULT_CATEGORY_DATA[CURRENT_CATEGORY]).slice(1);
     
-    $("grid").innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
-    $("emptyState").classList.toggle("hidden", list.length > 0);
+    const gridEl = $("grid");
+    if (!gridEl) return;
+    gridEl.innerHTML = list.map((item, i) => cardHTML(item, i + 2)).join("");
+    const emptyState = $("emptyState");
+    if (emptyState) emptyState.classList.toggle("hidden", list.length > 0);
     observeReveals();
 }
 
 function updateAuthNav() {
     const user = (typeof Auth !== 'undefined') ? Auth.getCurrentUser() : null;
-    const btn = $("navAuthBtn");
-    if (!btn) return;
+    const container = $("navAuthContainer");
+    if (!container) return;
 
     if (user && user.username) {
-        const safeName = user.username.replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]));
-        btn.outerHTML = `
-            <div id="navAuthBtn" style="position:relative; display:inline-block;">
-                <button onclick="toggleNavDropdown(event)" style="display:flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); padding:0.4rem 1rem; border-radius:50px; color:#fff; cursor:pointer; font-weight:600; font-size:0.8rem; font-family:Inter,sans-serif; transition:all 0.3s;">
-                    <img src="${(user.avatar) ? user.avatar : 'assets/default-avatar.svg'}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" alt="">
+        const safeName = escapeHTML(user.username);
+        const safeAvatar = sanitizeURL(user.avatar) || 'assets/default-avatar.svg';
+        container.innerHTML = `
+            <div class="relative inline-block">
+                <button onclick="toggleNavDropdown(event)" class="flex items-center gap-2 bg-white/[0.06] border border-white/[0.1] py-1.5 px-4 rounded-full text-white cursor-pointer font-semibold text-sm transition-all hover:bg-white/[0.1]">
+                    <img src="${safeAvatar}" class="w-6 h-6 rounded-full object-cover" alt="${safeName}">
                     <span>${safeName}</span>
-                    <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i>
+                    <i class="fas fa-chevron-down text-[0.6rem]"></i>
                 </button>
-                <div id="navUserDropdown" style="position:absolute; top:110%; right:0; background:rgba(15,15,18,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.4rem; min-width:180px; display:none; flex-direction:column; gap:2px; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
-                    <a href="profile.html" style="padding:0.6rem 1rem; border-radius:8px; color:#9ca3af; text-decoration:none; font-size:0.85rem; transition:all 0.2s; display:flex; align-items:center; gap:0.5rem;">
+                <div id="navUserDropdown" class="absolute top-[110%] right-0 bg-neutral-900/95 border border-white/10 rounded-xl p-1.5 min-w-[180px] hidden flex-col gap-0.5 z-[100] shadow-2xl">
+                    <a href="profile.html" class="p-2.5 px-4 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white text-sm flex items-center gap-2 transition-all">
                         <i class="fas fa-user-circle"></i> Profile
                     </a>
-                    <div style="height:1px; background:rgba(255,255,255,0.08); margin:2px 0;"></div>
-                    <button onclick="Auth.logout(); updateAuthNav();" style="padding:0.6rem 1rem; border-radius:8px; color:#9ca3af; background:transparent; border:none; cursor:pointer; text-align:left; font-size:0.85rem; font-family:Inter,sans-serif; transition:all 0.2s; display:flex; align-items:center; gap:0.5rem;">
+                    <div class="h-px bg-white/10 my-1 mx-1"></div>
+                    <button onclick="Auth.logout(); updateAuthNav();" class="p-2.5 px-4 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white text-sm bg-transparent border-none cursor-pointer text-left flex items-center gap-2 transition-all w-full">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
                 </div>
             </div>`;
     } else {
-        btn.outerHTML = `<a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"><i class="fas fa-user-circle text-sm"></i><span id="navAuthText">Login</span></a>`;
+        container.innerHTML = `
+            <a href="login.html" id="navAuthBtn" class="text-xs font-bold bg-neutral-100 hover:bg-white text-neutral-950 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                <i class="fas fa-user-circle text-sm"></i>
+                <span id="navAuthText" data-i18n="login">Login</span>
+            </a>`;
     }
 }
 
 function toggleNavDropdown(e) {
     e.stopPropagation();
     const dd = document.getElementById('navUserDropdown');
-    if (dd) dd.style.display = dd.style.display === 'flex' ? 'none' : 'flex';
+    if (dd) {
+        const isHidden = dd.classList.contains('hidden') || dd.style.display === 'none';
+        if (isHidden) {
+            dd.classList.remove('hidden');
+            dd.classList.add('flex');
+            dd.style.display = 'flex';
+        } else {
+            dd.classList.add('hidden');
+            dd.classList.remove('flex');
+            dd.style.display = 'none';
+        }
+    }
 }
 document.addEventListener('click', () => {
     const dd = document.getElementById('navUserDropdown');
-    if (dd) dd.style.display = 'none';
+    if (dd && (dd.style.display === 'flex' || !dd.classList.contains('hidden'))) {
+        dd.style.display = 'none';
+        dd.classList.add('hidden');
+        dd.classList.remove('flex');
+    }
 });
 
 const io = new IntersectionObserver(entries => {
@@ -1222,14 +1262,16 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 function observeReveals() { document.querySelectorAll(".reveal:not(.visible)").forEach(el => io.observe(el)); }
 
-$("searchInput").addEventListener("keydown", e => {
-    const val = e.target.value.trim();
-    if (e.key === "Enter" && val) {
-        window.location.href = `browse.html?q=${encodeURIComponent(val)}`;
-    }
-});
+const searchInputEl = $("searchInput");
+if (searchInputEl) {
+    searchInputEl.addEventListener("keydown", e => {
+        const val = e.target.value.trim();
+        if (e.key === "Enter" && val) {
+            window.location.href = `browse.html?q=${encodeURIComponent(val)}`;
+        }
+    });
+}
 
-// Category Tab Clicks
 document.querySelectorAll(".category-tab").forEach(btn => {
     btn.addEventListener("click", (e) => {
         const targetBtn = e.target.closest(".category-tab");
@@ -1241,26 +1283,28 @@ document.querySelectorAll(".category-tab").forEach(btn => {
 
 const toTop = $("toTop");
 window.addEventListener("scroll", () => {
+    if (!toTop) return;
     const show = window.scrollY > 600;
     toTop.classList.toggle("hidden", !show);
     toTop.classList.toggle("flex", show);
 }, { passive: true });
-toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+if (toTop) {
+    toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+}
 
-$("year").textContent = new Date().getFullYear();
+const yearEl = $("year");
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+
 document.querySelectorAll(".category-tab").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.cat === CURRENT_CATEGORY);
 });
 renderActiveCategory();
 fetchLiveTrending();
 
-// Auth: subscribe to changes so navbar updates after login/logout/redirect
 if (typeof Auth !== 'undefined') {
     Auth.onChange(() => updateAuthNav());
 }
 updateAuthNav();
-
-// Theme & i18n
 
 if (typeof I18n !== 'undefined') {
     I18n.translatePage();
