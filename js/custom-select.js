@@ -212,7 +212,7 @@
     },
     initAll: function() {
       document.querySelectorAll('select[data-custom]').forEach(function(el) {
-        CustomSelect.create(el);
+        window.CustomSelect.create(el);
       });
     }
   };
