@@ -739,7 +739,7 @@ function renderSubtitlesList() {
     `;
   }).join('');
 
-  if (typeof window.attachFadeIn === 'function') {
+  if (typeof window.attachFadeIn === 'function' && container && typeof container.querySelectorAll === 'function') {
     window.attachFadeIn(container.querySelectorAll('.subtitle-item'));
   }
 
