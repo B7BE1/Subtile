@@ -9,7 +9,6 @@
       if (r && r.length) {
         r.forEach(function(s) { s.unregister(); });
         if ('caches' in window) caches.keys().then(function(k) { k.forEach(function(c) { caches.delete(c); }); });
-        setTimeout(function() { location.reload(); }, 100);
       }
     });
   }

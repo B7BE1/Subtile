@@ -41,7 +41,7 @@ window.attachFadeIn = function(elements) {
   });
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   if (typeof CustomSelect !== 'undefined') CustomSelect.initAll();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -55,19 +55,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (container) container.classList.add('loaded');
   }
 
+  // FAIL-SAFE: no matter what happens, hide loader after 3 seconds
+  setTimeout(hideLoader, 3000);
+
   function renderAndWireUp() {
-    renderMovieDetails(currentMovie);
-    wireUpEventDelegation();
-    setupAuthNavbar();
+    try {
+      renderMovieDetails(currentMovie);
+    } catch (e) {
+      console.error('renderMovieDetails error:', e);
+    }
+    try {
+      wireUpEventDelegation();
+    } catch (e) {
+      console.error('wireUpEventDelegation error:', e);
+    }
+    try {
+      setupAuthNavbar();
+    } catch (e) {
+      console.error('setupAuthNavbar error:', e);
+    }
     hideLoader();
     if (currentMovie.type === 'tv' || currentMovie.type === 'anime') {
-      renderSeasonsList(currentMovie);
+      try { renderSeasonsList(currentMovie); } catch (e) { console.error('renderSeasonsList error:', e); }
     } else {
-      const seasonsContainer = document.getElementById('seasonsListView');
-      const subtitlesContainer = document.getElementById('subtitlesListView');
-      const viewTitle = document.getElementById('viewTitle');
-      const filters = document.getElementById('filterPillsContainer');
-      const backBtn = document.getElementById('backToSeasonsBtn');
+      var seasonsContainer = document.getElementById('seasonsListView');
+      var subtitlesContainer = document.getElementById('subtitlesListView');
+      var viewTitle = document.getElementById('viewTitle');
+      var filters = document.getElementById('filterPillsContainer');
+      var backBtn = document.getElementById('backToSeasonsBtn');
       if (seasonsContainer) seasonsContainer.style.display = 'none';
       if (subtitlesContainer) subtitlesContainer.style.display = 'block';
       if (viewTitle) viewTitle.innerText = 'Available Subtitles';
@@ -82,8 +97,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       title: movieId.replace('anime-', '').replace(/^tt/, ''),
       type: movieType,
       year: 'Unknown',
-      poster: `https://images.metahub.space/poster/small/${movieId}/img`,
-      backdrop: `https://images.metahub.space/background/medium/${movieId}/img`,
+      poster: 'https://images.metahub.space/poster/small/' + movieId + '/img',
+      backdrop: 'https://images.metahub.space/background/medium/' + movieId + '/img',
       overview: 'Loading metadata...',
       genres: [movieType === 'tv' ? 'TV Series' : (movieType === 'anime' ? 'Anime' : 'Movie')],
       rating: 'N/A',
@@ -92,11 +107,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 1. Check local DB first — instant render, no API calls
-  const localMovie = MOVIES_DATABASE.find(m => m.id === movieId || (m.imdbId && m.imdbId === movieId));
+  var localMovie = MOVIES_DATABASE.find(function(m) { return m.id === movieId || (m.imdbId && m.imdbId === movieId); });
   if (localMovie) {
     currentMovie = localMovie;
     renderAndWireUp();
-    await fetchRealSubtitles(currentMovie);
+    fetchRealSubtitles(currentMovie);
     return;
   }
 
@@ -106,16 +121,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   fetchRealSubtitles(currentMovie);
 
   // 3. Try to upgrade metadata from APIs in background (non-blocking)
-  try {
-    const liveData = await loadMetadata(movieId, movieType);
-    if (liveData && liveData !== currentMovie) {
+  loadMetadata(movieId, movieType).then(function(liveData) {
+    if (liveData && liveData.title !== currentMovie.title) {
       currentMovie = liveData;
-      renderMovieDetails(currentMovie);
+      try { renderMovieDetails(currentMovie); } catch (e) { console.error('Background render error:', e); }
       fetchRealSubtitles(currentMovie);
     }
-  } catch (e) {
+  }).catch(function(e) {
     console.warn('Background metadata fetch failed:', e);
-  }
+  });
 });
 
 // ---------- Auth Navbar ----------
