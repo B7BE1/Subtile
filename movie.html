@@ -371,13 +371,6 @@
     #toastContainer { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.8rem; }
     .toast { background: rgba(14, 14, 18, 0.98); border: 1px solid var(--border-hover); padding: 1rem 1.5rem; border-radius: 12px; color: #fff; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 0.6rem; }
 
-    /* Global Loader */
-    #globalLoader {
-      position: fixed; inset: 0; background: var(--bg-base); z-index: 200;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity 0.4s ease;
-    }
-
     @media (max-width: 900px) {
       .split-container { flex-direction: column; }
       .left-panel { width: 100%; height: auto; position: relative; padding: 5rem 1.5rem 2rem; }
@@ -400,11 +393,6 @@
   <!-- Fullscreen Cinema Backdrop -->
   <div id="globalMovieBackdrop" class="global-backdrop-bg"></div>
   <div class="global-backdrop-overlay"></div>
-
-  <!-- Global Loader -->
-  <div id="globalLoader">
-    <i class="fas fa-spinner fa-spin text-3xl text-white"></i>
-  </div>
 
   <!-- Top Navbar -->
   <header class="nav-header">

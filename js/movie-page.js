@@ -189,8 +189,6 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-// Only allow http(s) or root-relative URLs into DOM sinks (style.backgroundImage,
-// img.src, our own download proxy). Blocks javascript:/data:/vbscript: etc.
 function safeUrl(url) {
   if (!url) return '';
   const trimmed = String(url).trim();
@@ -202,7 +200,7 @@ function safeUrl(url) {
 
 function wireUpEventDelegation() {
   const subtitlesList = document.getElementById('subtitlesList');
-  if (subtitlesList) {
+  if (subtitlesList && typeof subtitlesList.addEventListener === 'function') {
     subtitlesList.addEventListener('click', (e) => {
       const downloadBtn = e.target.closest('.download-btn');
       if (downloadBtn && downloadBtn.dataset.subId) {
@@ -221,7 +219,7 @@ function wireUpEventDelegation() {
   }
 
   const seasonsListView = document.getElementById('seasonsListView');
-  if (seasonsListView) {
+  if (seasonsListView && typeof seasonsListView.addEventListener === 'function') {
     seasonsListView.addEventListener('click', (e) => {
       const seasonCard = e.target.closest('.season-card');
       if (seasonCard && seasonCard.dataset.season !== undefined) {
@@ -240,7 +238,7 @@ function wireUpEventDelegation() {
 
   // Filter Pills Interaction
   const filterContainer = document.getElementById('filterPillsContainer');
-  if (filterContainer) {
+  if (filterContainer && typeof filterContainer.addEventListener === 'function') {
     filterContainer.addEventListener('click', (e) => {
       const pill = e.target.closest('.pill');
       if (pill) {
@@ -264,7 +262,8 @@ function triggerDownloadFromButton(downloadBtn) {
 }
 
 async function loadMetadata(id, type) {
-  const local = MOVIES_DATABASE.find(m => m.id === id || (m.imdbId && m.imdbId === id));
+  const localList = typeof MOVIES_DATABASE !== 'undefined' ? MOVIES_DATABASE : [];
+  const local = localList.find(m => m.id === id || (m.imdbId && m.imdbId === id));
   if (local) return local;
 
   const controller = new AbortController();
