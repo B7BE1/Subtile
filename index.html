@@ -270,8 +270,8 @@
                 <div class="flex items-center gap-4 mb-4">
                     <span class="shimmer-text font-black typo-hero leading-none">01</span>
                     <div class="border-s-2 border-white/20 ps-4">
-                        <p id="featuredCategoryLabel" class="text-neutral-300 text-sm font-bold tracking-widest uppercase">Current #1 Movie</p>
-                        <p class="text-neutral-500 text-xs mt-0.5 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full pulse-glow"></span> Live Real-Time Trending</p>
+                        <p id="featuredCategoryLabel" class="text-neutral-300 text-sm font-bold tracking-widest uppercase">Trending #01</p>
+                        <p id="featuredLiveSubtitle" class="text-neutral-500 text-xs mt-0.5 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full pulse-glow"></span> <span>Top Subtitled Choice</span></p>
                     </div>
                 </div>
 
@@ -1025,17 +1025,38 @@ const DEFAULT_CATEGORY_DATA = {
 let CURRENT_CATEGORY = localStorage.getItem('subtile_active_cat') || 'movie';
 let CATEGORY_DATA = (() => {
     try {
-        const cached = localStorage.getItem('subtile_trending_cache');
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed && parsed.movie && parsed.movie.length > 0 && parsed.anime && parsed.anime.length > 0) return parsed;
+        const cachedVer = localStorage.getItem('subtile_cache_ver');
+        if (cachedVer === 'v4') {
+            const cached = localStorage.getItem('subtile_trending_cache');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && parsed.movie && parsed.movie.length > 0 && parsed.anime && parsed.anime.length > 0) return parsed;
+            }
         }
     } catch(e) {}
+    try { localStorage.setItem('subtile_cache_ver', 'v4'); } catch(e){}
     return JSON.parse(JSON.stringify(DEFAULT_CATEGORY_DATA));
 })();
 
 let searchQuery = "";
 const $ = id => document.getElementById(id);
+
+function getSafeTitle(item, isAr) {
+    if (!item) return 'Untitled';
+    if (isAr && item.title_ar) return String(item.title_ar);
+    if (typeof item.title === 'string' && item.title.trim()) return item.title;
+    if (item.title && typeof item.title === 'object') {
+        return item.title.english || item.title.romaji || item.title.userPreferred || 'Untitled';
+    }
+    return String(item.name || 'Untitled');
+}
+
+function getSafeDesc(item, isAr) {
+    if (!item) return '';
+    if (isAr && item.desc_ar) return String(item.desc_ar);
+    if (typeof item.desc === 'string' && item.desc.trim()) return item.desc;
+    return String(item.description || item.overview || 'Watch with verified multi-language subtitles.');
+}
 
 async function fetchLiveTrending() {
     try {
@@ -1046,7 +1067,10 @@ async function fetchLiveTrending() {
                 const prevFirst = (CATEGORY_DATA[CURRENT_CATEGORY] || [])[0]?.id;
                 const newFirst = (data.categories[CURRENT_CATEGORY] || [])[0]?.id;
                 CATEGORY_DATA = data.categories;
-                try { localStorage.setItem('subtile_trending_cache', JSON.stringify(data.categories)); } catch(e){}
+                try { 
+                    localStorage.setItem('subtile_trending_cache', JSON.stringify(data.categories));
+                    localStorage.setItem('subtile_cache_ver', 'v4');
+                } catch(e){}
                 if (prevFirst !== newFirst) {
                     renderActiveCategory();
                 }
@@ -1067,15 +1091,16 @@ function switchCategory(cat) {
         btn.classList.toggle("active", btn.dataset.cat === cat);
     });
 
-    // Fade the hero out, swap its content while invisible, fade back in —
-    // uses the .switching state that was already defined in CSS but never
-    // triggered, instead of jump-cutting straight to the new title/poster.
     const hero = $("heroContent");
-    hero.classList.add("switching");
-    setTimeout(() => {
+    if (hero) {
+        hero.classList.add("switching");
+        setTimeout(() => {
+            renderActiveCategory();
+            requestAnimationFrame(() => hero.classList.remove("switching"));
+        }, 180);
+    } else {
         renderActiveCategory();
-        requestAnimationFrame(() => hero.classList.remove("switching"));
-    }, 220);
+    }
 }
 
 function renderActiveCategory() {
@@ -1086,56 +1111,84 @@ function renderActiveCategory() {
     if (list.length === 0) list = DEFAULT_CATEGORY_DATA.movie;
 
     const isAr = (typeof I18n !== 'undefined' && I18n.getLang() === 'ar');
-    const featured = list[0];
+    const featured = list[0] || DEFAULT_CATEGORY_DATA.movie[0];
     const rest = list.slice(1);
 
     // 1. Update Labels
-    $("featuredCategoryLabel").textContent = isAr ? 'الرائج #01' : 'Trending #01';
+    if ($("featuredCategoryLabel")) $("featuredCategoryLabel").textContent = isAr ? 'الرائج #01' : 'Trending #01';
+    if ($("featuredLiveSubtitle")) {
+        $("featuredLiveSubtitle").innerHTML = '<span class="w-1.5 h-1.5 bg-emerald-400 rounded-full pulse-glow"></span> <span>' + (isAr ? 'الخيار الأكثر طلباً' : 'Top Subtitled Choice') + '</span>';
+    }
     const gridTitle = $("gridTitle");
     if (gridTitle) gridTitle.textContent = isAr ? 'الرائج' : 'Trending';
 
-    // 2. Update Featured Hero Banner
-    const displayTitle = (isAr && featured.title_ar) ? featured.title_ar : featured.title;
-    const displayDesc = (isAr && featured.desc_ar) ? featured.desc_ar : featured.desc;
-    const displayGenre = (isAr && GENRES_AR[featured.genre]) ? GENRES_AR[featured.genre] : featured.genre;
+    // 2. Update category tabs text
+    document.querySelectorAll(".category-tab").forEach(btn => {
+        const cat = btn.dataset.cat;
+        btn.classList.toggle("active", cat === CURRENT_CATEGORY);
+        const span = btn.querySelector("span");
+        if (span) {
+            if (cat === 'movie') span.textContent = isAr ? 'الأفلام' : 'Movies';
+            else if (cat === 'tv') span.textContent = isAr ? 'المسلسلات' : 'TV Shows';
+            else if (cat === 'anime') span.textContent = isAr ? 'الأنمي' : 'Anime';
+        }
+    });
 
-    $("bannerBg").style.backgroundImage = `url('${featured.backdrop || featured.poster}')`;
-    $("featuredTitle").textContent = displayTitle;
-    $("featuredDesc").textContent = displayDesc;
-    $("featuredMeta").innerHTML =
-        `<span>${featured.year}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
-        `<span>${displayGenre}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
-        `<span>⭐ ${featured.rating} ${isAr ? 'التقييم' : 'Rating'}</span>`;
+    // 3. Update Featured Hero Banner
+    const displayTitle = getSafeTitle(featured, isAr);
+    const displayDesc = getSafeDesc(featured, isAr);
+    const genreRaw = featured.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
+    const displayGenre = (isAr && GENRES_AR[genreRaw]) ? GENRES_AR[genreRaw] : genreRaw;
+    const yearStr = featured.year || '2024';
+    const ratingStr = featured.rating || '8.5';
+    const posterUrl = featured.poster || 'assets/default-avatar.svg';
+    const backdropUrl = featured.backdrop || posterUrl;
+
+    if ($("bannerBg")) $("bannerBg").style.backgroundImage = `url('${backdropUrl}')`;
+    if ($("featuredTitle")) $("featuredTitle").textContent = displayTitle;
+    if ($("featuredDesc")) $("featuredDesc").textContent = displayDesc;
+    if ($("featuredMeta")) {
+        $("featuredMeta").innerHTML =
+            `<span>${yearStr}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
+            `<span>${displayGenre}</span><span class="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span>` +
+            `<span>⭐ ${ratingStr} ${isAr ? 'التقييم' : 'Rating'}</span>`;
+    }
     
     const img = $("featuredPoster"), fb = $("featuredFallback");
-    img.alt = displayTitle; img.style.display = "";
-    img.classList.remove("loaded");
-    img.onerror = () => { img.style.display = "none"; fb.style.display = "flex"; fb.textContent = displayTitle; };
-    img.onload = () => { img.classList.add("loaded"); };
-    img.src = featured.poster;
+    if (img) {
+        img.alt = displayTitle; img.style.display = "";
+        img.classList.remove("loaded");
+        img.onerror = () => { img.style.display = "none"; if (fb) { fb.style.display = "flex"; fb.textContent = displayTitle; } };
+        img.onload = () => { img.classList.add("loaded"); };
+        img.src = posterUrl;
+    }
     
-    const movieUrl = `movie.html?id=${featured.id}&type=${featured.type}`;
-    $("featuredDownload").href = movieUrl;
-    $("featuredInfo").href = movieUrl;
+    const movieUrl = `movie.html?id=${featured.id}&type=${featured.type || CURRENT_CATEGORY}`;
+    if ($("featuredDownload")) $("featuredDownload").href = movieUrl;
+    if ($("featuredInfo")) $("featuredInfo").href = movieUrl;
 
-    // 3. Update Grid (#02 to #10)
+    // 4. Update Grid (#02 to #10)
     renderGrid(rest);
 }
 
 function cardHTML(item, rank) {
-    const movieUrl = `movie.html?id=${item.id}&type=${item.type}`;
+    if (!item) return '';
+    const movieUrl = `movie.html?id=${item.id}&type=${item.type || CURRENT_CATEGORY}`;
     const isAr = (typeof I18n !== 'undefined' && I18n.getLang() === 'ar');
-    const displayTitle = (isAr && item.title_ar) ? item.title_ar : item.title;
-    const displayGenre = (isAr && GENRES_AR[item.genre]) ? GENRES_AR[item.genre] : (item.genre || item.lang);
-    const downloadsText = isAr ? `${item.downloads} تحميل` : `${item.downloads} Downloads`;
+    const displayTitle = getSafeTitle(item, isAr);
+    const safeTitleEscaped = String(displayTitle).replace(/'/g, "\\'");
+    const genreRaw = item.genre || (CURRENT_CATEGORY === 'anime' ? 'Anime' : 'Movie');
+    const displayGenre = (isAr && GENRES_AR[genreRaw]) ? GENRES_AR[genreRaw] : (genreRaw || item.lang || 'Feature');
+    const downloadsText = isAr ? `${item.downloads || '3.2M'} تحميل` : `${item.downloads || '3.2M'} Downloads`;
+    const posterUrl = item.poster || 'assets/default-avatar.svg';
 
     return `
     <a href="${movieUrl}" class="movie-card cursor-pointer group reveal block card-hover" data-id="${item.id}" aria-label="${displayTitle}">
         <div class="relative">
             <div class="poster-container">
-                <img src="${item.poster}" alt="${displayTitle}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"
+                <img src="${posterUrl}" alt="${displayTitle}" loading="lazy" class="poster-img shadow-2xl shadow-black/80"
                      onload="this.classList.add('loaded')"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${displayTitle.replace(/'/g, "\\'")}'">
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';this.nextElementSibling.textContent='${safeTitleEscaped}'">
                 <div class="poster-fallback"></div>
                 <span class="rank-number">${rank}</span>
                 <div class="overlay-content absolute inset-0 flex flex-col justify-end p-4 z-30">
@@ -1149,9 +1202,9 @@ function cardHTML(item, rank) {
         <div class="mt-4">
             <div class="flex items-center gap-2 mb-1">
                 <span class="bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${displayGenre}</span>
-                <span class="text-neutral-500 text-xs">${item.year}</span>
+                <span class="text-neutral-500 text-xs">${item.year || '2024'}</span>
                 <span class="text-neutral-600">•</span>
-                <span class="text-amber-400 text-xs font-semibold">★ ${item.rating}</span>
+                <span class="text-amber-400 text-xs font-semibold">★ ${item.rating || '8.5'}</span>
             </div>
             <h3 class="text-base font-bold text-neutral-100 truncate">${displayTitle}</h3>
             <p class="text-neutral-500 text-sm mt-0.5">${downloadsText}</p>
