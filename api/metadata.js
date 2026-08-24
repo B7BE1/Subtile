@@ -1,10 +1,6 @@
-import { createRequire } from 'module';
 import { resolveMetadata, InvalidRequestError } from '../lib/metadata/resolveMetadata.js';
 import { ttlForStatus } from '../lib/metadata/cache.js';
-
-// استيراد قاعدة البيانات المحلية عبر createRequire لضمان التوافقية الكاملة
-const require = createRequire(import.meta.url);
-const { MOVIES_DATABASE } = require('../js/data.js');
+import { MOVIES_DATABASE } from '../js/data.js';
 
 // إعدادات TMDB (المفتاح يُقرأ من متغيرات البيئة في Vercel)
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
