@@ -105,8 +105,8 @@ function initMoviePage() {
       title: cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1),
       type: movieType,
       year: '2024',
-      poster: movieId.startsWith('tt') ? `https://images.metahub.space/poster/small/${movieId}/img` : 'https://images.metahub.space/poster/small/tt15239678/img',
-      backdrop: movieId.startsWith('tt') ? `https://images.metahub.space/background/medium/${movieId}/img` : 'https://images.metahub.space/background/medium/tt15239678/img',
+      poster: movieId.startsWith('tt') ? `https://images.metahub.space/poster/small/${movieId}/img` : 'https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter',
+      backdrop: movieId.startsWith('tt') ? `https://images.metahub.space/background/medium/${movieId}/img` : 'https://placehold.co/1280x720/121216/525252?text=Subtile&font=Inter',
       overview: 'Download verified high-speed multi-language subtitles.',
       genres: [movieType === 'tv' ? 'TV Series' : (movieType === 'anime' ? 'Anime' : 'Movie')],
       rating: '8.2',
@@ -262,141 +262,16 @@ function triggerDownloadFromButton(downloadBtn) {
 }
 
 async function loadMetadata(id, type) {
-  const localList = typeof MOVIES_DATABASE !== 'undefined' ? MOVIES_DATABASE : [];
-  const local = localList.find(m => m.id === id || (m.imdbId && m.imdbId === id));
-  if (local) return local;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
-
   try {
-    if (type === 'anime') {
-      const malId = id.replace('anime-', '');
-      let res;
-      let retries = 2;
-      while (retries >= 0) {
-        res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, { signal: controller.signal });
-        if (res.ok) break;
-        if (res.status === 429 && retries > 0) {
-          await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
-          retries--;
-        } else {
-          break;
-        }
-      }
-      
-      if (res && res.ok) {
-        const d = await res.json();
-        if (d.data) {
-          const a = d.data;
-          const posterUrl = (a.images && a.images.webp && a.images.webp.large_image_url) || (a.images && a.images.jpg && a.images.jpg.large_image_url) || '';
-          const bgUrl = (a.trailer && a.trailer.images && (a.trailer.images.maximum_image_url || a.trailer.images.large_image_url)) || posterUrl;
-          clearTimeout(timeoutId);
-          return {
-            id: `anime-${a.mal_id}`,
-            mal_id: a.mal_id,
-            title: a.title_english || a.title,
-            type: 'anime',
-            year: a.year || (a.aired && a.aired.prop && a.aired.prop.from ? a.aired.prop.from.year : null),
-            poster: posterUrl,
-            backdrop: bgUrl,
-            overview: a.synopsis || '',
-            genres: (a.genres || []).map(g => g.name),
-            rating: parseFloat(a.score) || 8.0,
-            episodes: Array.from({length: a.episodes || 12}, (_, i) => ({season: 1, episode: i+1}))
-          };
-        }
-      }
-
-      // AniList GraphQL Fallback (handles unindexed/rate-limited MAL entries).
-      // malId here is a MyAnimeList id (stripped from the "anime-" prefix
-      // used throughout this app), NOT an AniList internal id — those are
-      // different numbering schemes. Must query by idMal, not id, or this
-      // silently returns an unrelated anime whenever the two happen to
-      // collide. (Same bug, same fix, as lib/metadata/sources/anilist.js.)
-      try {
-        const numId = parseInt(malId, 10);
-        const alQuery = `
-          query ($idMal: Int) {
-            Media(idMal: $idMal, type: ANIME) {
-              id
-              idMal
-              title { english romaji userPreferred }
-              description
-              bannerImage
-              coverImage { extraLarge large }
-              episodes
-              genres
-              averageScore
-              seasonYear
-              status
-            }
-          }
-        `;
-        const alRes = await fetch('https://graphql.anilist.co', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ query: alQuery, variables: { idMal: numId } }),
-          signal: controller.signal
-        });
-        if (alRes.ok) {
-          const alData = await alRes.json();
-          if (alData?.data?.Media) {
-            const m = alData.data.Media;
-            const p = m.coverImage?.extraLarge || m.coverImage?.large || '';
-            const bg = m.bannerImage || p;
-            const cleanDesc = (m.description || '').replace(/<[^>]*>?/gm, '');
-            clearTimeout(timeoutId);
-            return {
-              id: `anime-${m.idMal || m.id}`,
-              mal_id: m.idMal || m.id,
-              title: m.title.english || m.title.romaji || m.title.userPreferred,
-              type: 'anime',
-              year: m.seasonYear || null,
-              poster: p,
-              backdrop: bg,
-              overview: cleanDesc,
-              genres: m.genres || ['Anime'],
-              rating: m.averageScore ? (m.averageScore / 10).toFixed(1) : '8.0',
-              episodes: Array.from({length: m.episodes || 12}, (_, i) => ({season: 1, episode: i+1}))
-            };
-          }
-        }
-      } catch (alErr) {
-        console.warn('AniList fallback in movie-page:', alErr);
-      }
-    } else {
-      const cType = type === 'tv' ? 'series' : 'movie';
-      const res = await fetch(`https://v3-cinemeta.strem.io/meta/${cType}/${id}.json`, { signal: controller.signal });
-      if (res.ok) {
-        const d = await res.json();
-        if (d.meta) {
-          const m = d.meta;
-          clearTimeout(timeoutId);
-          return {
-            id: m.imdb_id || m.id,
-            imdbId: m.imdb_id || m.id,
-            title: m.name,
-            type: type,
-            year: (m.releaseInfo || m.year || '').toString().split(/[-–]/)[0].trim() || null,
-            poster: m.poster || `https://images.metahub.space/poster/small/${m.id}/img`,
-            backdrop: m.background || `https://images.metahub.space/background/medium/${m.id}/img`,
-            overview: m.description || '',
-            genres: m.genres || [type === 'tv' ? 'TV Series' : 'Movie'],
-            rating: m.imdbRating || 'N/A',
-            episodes: (m.videos || []).map(v => ({season: v.season, episode: v.episode}))
-          };
-        }
-      }
+    const res = await fetch('/api/metadata?id=' + encodeURIComponent(id) + '&type=' + encodeURIComponent(type));
+    if (res.ok) {
+      return await res.json();
     }
   } catch (e) {
-    console.error('Failed to load live metadata:', e);
-  } finally {
-    clearTimeout(timeoutId);
+    console.error('Failed to load live metadata via API:', e);
   }
   return null;
 }
-
 async function fetchRealSubtitles(movie) {
   const type = movie.type === 'anime' ? 'anime' : (movie.type === 'tv' ? 'tv' : 'movie');
   const cacheKey = `${type}:${currentSeason}:${currentEpisode}`;
@@ -503,7 +378,7 @@ function generateFallbackSubtitles(movie) {
 }
 
 function renderMovieDetails(movie) {
-  document.title = `${movie.title || 'Movie Details'} (${movie.year || ''}) - Subtile`;
+  document.title = `${movie.title_ar || movie.title || 'Movie Details'} (${movie.year || ''}) - Subtile`;
 
   const globalBg = document.getElementById('globalMovieBackdrop');
   if (globalBg) {
@@ -536,7 +411,7 @@ function renderMovieDetails(movie) {
 
   const title = document.getElementById('movieTitle');
   if (title) {
-    title.textContent = movie.title || 'Movie Details';
+    title.textContent = movie.title_ar || movie.title || 'Movie Details';
   }
 
   const tags = document.getElementById('movieTags');
@@ -611,7 +486,7 @@ function renderSeasonsList(movie) {
     const sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
     html += `
       <div class="season-card card-hover" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
-        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://images.metahub.space/poster/small/tt15239678/img'" class="season-thumb" loading="lazy">
+        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter'" class="season-thumb" loading="lazy">
         <div class="season-card-content">
           <div class="season-card-title">${escapeHtml(sTitle)}</div>
           <div class="season-card-subtitle">${escapeHtml(sSub)}</div>
@@ -1314,3 +1189,5 @@ window.submitReview = submitReview;
 window.openUploadModal = openUploadModal;
 window.closeUploadModal = closeUploadModal;
 window.handleUploadSubtitle = handleUploadSubtitle;
+
+
