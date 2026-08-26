@@ -198,6 +198,45 @@ function safeUrl(url) {
   return '';
 }
 
+// Extract a YouTube video id from Cinemeta trailer data (string URL or object)
+function extractYoutubeId(trailer) {
+  if (!trailer) return '';
+  if (typeof trailer === 'string') {
+    var m1 = trailer.match(/[?&]v=([\w-]{6,})/);
+    if (m1) return m1[1];
+    var m2 = trailer.match(/youtu\.be\/([\w-]{6,})/);
+    if (m2) return m2[1];
+    var m3 = trailer.match(/embed\/([\w-]{6,})/);
+    if (m3) return m3[1];
+    return '';
+  }
+  if (typeof trailer === 'object') {
+    if (trailer.source) return String(trailer.source);
+    if (trailer.yKey) return String(trailer.yKey);
+  }
+  return '';
+}
+
+window.openTrailer = function() {
+  if (!currentMovie) return;
+  var ytId = extractYoutubeId(currentMovie.trailer);
+  if (!ytId) return;
+  var embed = document.getElementById('trailerEmbed');
+  var modal = document.getElementById('trailerModal');
+  if (!embed || !modal) return;
+  embed.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ytId) + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="Trailer"></iframe>';
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeTrailer = function() {
+  var embed = document.getElementById('trailerEmbed');
+  var modal = document.getElementById('trailerModal');
+  if (embed) embed.innerHTML = '';
+  if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
+};
+
 function wireUpEventDelegation() {
   const subtitlesList = document.getElementById('subtitlesList');
   if (subtitlesList && typeof subtitlesList.addEventListener === 'function') {
@@ -428,12 +467,20 @@ function renderMovieDetails(movie) {
     const imdbId = movie.imdb_id || movie.imdbId || (movie.id && movie.id.startsWith('tt') ? movie.id : null);
     meta.innerHTML = `
       <div class="rating-circle">
+        <i class="fas fa-star" style="font-size:0.65rem; margin-right:4px; color:#050507;"></i>
         <span>${escapeHtml(movie.rating || 'N/A')}</span>
       </div>
       <div class="meta-item"><i class="fas fa-clock"></i> ${movie.type === 'anime' ? 'Anime' : (movie.type === 'tv' ? 'TV Series' : 'Movie')}</div>
+      ${movie.runtime ? `<div class="meta-item"><i class="fas fa-hourglass-half"></i> ${escapeHtml(String(movie.runtime))}</div>` : ''}
       ${imdbId && !imdbId.startsWith('anime') ? `<div class="meta-item"><a href="https://www.imdb.com/title/${encodeURIComponent(imdbId)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fab fa-imdb" style="color:#f5c518"></i> IMDb</a></div>` : ''}
       ${movie.type === 'anime' && movie.mal_id ? `<div class="meta-item"><a href="https://myanimelist.net/anime/${movie.mal_id}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;"><i class="fas fa-external-link-alt" style="color:#2e51a2"></i> MyAnimeList</a></div>` : ''}
     `;
+  }
+
+  // Trailer button
+  var trailerBtn = document.getElementById('trailerBtn');
+  if (trailerBtn) {
+    trailerBtn.style.display = extractYoutubeId(movie.trailer) ? 'inline-flex' : 'none';
   }
 
   const overview = document.getElementById('movieOverview');
@@ -482,14 +529,19 @@ function renderSeasonsList(movie) {
 
   let html = '';
   seasons.forEach(s => {
-    const sTitle = s === 0 ? 'Specials' : `Season ${s}`;
-    const sSub = s === 0 ? 'Specials Season' : (s === 1 ? 'First Season' : (s === 2 ? 'Second Season' : (s === 3 ? 'Third Season' : `Season ${s}`)));
+    const sTitle = s === 0 ? 'Specials' : 'Season ' + s;
+    const epCount = (movie.episodes && movie.episodes.length > 0)
+      ? movie.episodes.filter(e => e.season === s).length
+      : null;
+    const sSub = s === 0 ? 'Special episodes' : (epCount ? epCount + (epCount === 1 ? ' Episode' : ' Episodes') : 'Season ' + s);
     html += `
       <div class="season-card card-hover" data-season="${s}" tabindex="0" role="button" aria-label="${escapeHtml(sTitle)}">
-        <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter'" class="season-thumb" loading="lazy">
-        <div class="season-card-content">
-          <div class="season-card-title">${escapeHtml(sTitle)}</div>
-          <div class="season-card-subtitle">${escapeHtml(sSub)}</div>
+        <div class="season-card-info">
+          <img src="${posterUrl}" alt="${escapeHtml(sTitle)}" onerror="this.src='https://placehold.co/300x450/121216/525252?text=Subtile&font=Inter'" class="season-thumb" loading="lazy">
+          <div>
+            <div class="season-title">${escapeHtml(sTitle)}</div>
+            <div class="season-sub"><i class="fas fa-film" style="margin-right:4px; opacity:0.7;"></i>${escapeHtml(sSub)}</div>
+          </div>
         </div>
         <i class="fas fa-chevron-right season-arrow"></i>
       </div>
@@ -595,19 +647,22 @@ function renderSubtitlesList() {
 
     return `
       <div class="subtitle-item">
-        <div class="sub-info">
-          <div class="sub-release flex items-center flex-wrap gap-2">
-            <span>${release}</span>
-            <span class="format-badge ${badgeClass}">${badgeText}</span>
-          </div>
-          <div class="sub-meta">
-            <span><i class="fas fa-flag"></i> ${langLabel} (${langFlag})</span>
-            <span><i class="fas fa-user"></i> ${uploader}</span>
-            <span><i class="fas fa-download"></i> ${downloadsCount}</span>
-            ${quality ? `<span><i class="fas fa-video"></i> ${quality}</span>` : ''}
+        <div class="sub-main">
+          <div class="lang-flag" title="${langLabel}">${langFlag}</div>
+          <div class="sub-info">
+            <div class="sub-release flex items-center flex-wrap gap-2">
+              <span>${release}</span>
+              <span class="format-badge ${badgeClass}">${badgeText}</span>
+              ${quality ? `<span class="quality-chip"><i class="fas fa-video" style="font-size:0.6rem;"></i> ${quality}</span>` : ''}
+            </div>
+            <div class="sub-meta">
+              <span><i class="fas fa-flag"></i> ${langLabel}</span>
+              <span><i class="fas fa-user"></i> ${uploader}</span>
+              <span><i class="fas fa-download"></i> ${downloadsCount}</span>
+            </div>
           </div>
         </div>
-        <div style="display:flex; gap:0.5rem; align-items:center;">
+        <div class="item-actions">
           <span class="scan-status" id="scan-${subId}" title="Not scanned"></span>
           <button class="scan-btn" tabindex="0" role="button" aria-label="Scan ${release}" data-url="${downloadUrl}" data-sub-id="${subId}" onclick="scanSubtitle(this)" title="Scan with VirusTotal" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.25s ease; flex-shrink:0;"><i class="fas fa-shield-alt"></i></button>
           <button class="preview-btn" tabindex="0" role="button" aria-label="Preview ${release}" data-sub-id="${subId}" data-release="${release}" data-format="${format}" data-download-url="${downloadUrl}" onclick="previewSubtitle(this)"><i class="fas fa-eye"></i></button>
@@ -615,7 +670,7 @@ function renderSubtitlesList() {
           <span id="reportSlot-${subId}"></span>
           <button onclick="var el=document.getElementById('comments-${subId}');el.style.display=el.style.display==='none'?'block':'none';SubComments.render('${subId}','comments-${subId}');" style="background:none; border:none; color:#6b7280; cursor:pointer; font-size:0.7rem; padding:0.2rem 0.4rem;" title="Comments"><i class="fas fa-comment"></i></button>
         </div>
-        <div id="comments-${subId}" style="display:none; padding:0.5rem 0;"></div>
+        <div id="comments-${subId}" style="display:none; padding:0.5rem 0; flex-basis:100%;"></div>
       </div>
     `;
   }).join('');
@@ -1002,6 +1057,11 @@ document.addEventListener('keydown', (e) => {
     if (modal && modal.classList.contains('active')) {
       e.preventDefault();
       window.closePreview();
+    }
+    const trailer = document.getElementById('trailerModal');
+    if (trailer && trailer.classList.contains('active')) {
+      e.preventDefault();
+      window.closeTrailer();
     }
   }
 });

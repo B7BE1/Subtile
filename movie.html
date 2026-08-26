@@ -128,11 +128,66 @@
       margin: 0 auto 2rem;
       transition: var(--transition);
       object-fit: cover;
+      position: relative;
     }
     .left-content:hover .movie-poster {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 36px 70px -15px rgba(0, 0, 0, 1), 0 0 0 1px rgba(255, 255, 255, 0.25);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 36px 70px -15px rgba(0, 0, 0, 1), 0 0 0 1px rgba(255, 255, 255, 0.25), 0 0 60px rgba(245, 197, 24, 0.08);
     }
+
+    /* Poster shine sweep */
+    .poster-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto 2rem;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+    }
+    .poster-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -80%;
+      width: 50%; height: 100%;
+      background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.18) 50%, transparent 80%);
+      transform: skewX(-20deg);
+      animation: posterShine 4.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes posterShine {
+      0%, 55% { left: -80%; }
+      85%, 100% { left: 130%; }
+    }
+    .poster-wrap .movie-poster { margin: 0; width: 100%; }
+
+    /* Trailer button */
+    .trailer-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.8rem 1.5rem; margin-bottom: 0.6rem;
+      background: rgba(245, 197, 24, 0.12); color: #f5c518;
+      border: 1px solid rgba(245, 197, 24, 0.35); border-radius: 12px;
+      font-weight: 800; font-size: 0.9rem; text-decoration: none; cursor: pointer;
+      transition: var(--transition);
+    }
+    .trailer-btn:hover { background: rgba(245, 197, 24, 0.22); box-shadow: 0 0 30px rgba(245, 197, 24, 0.15); transform: translateY(-1px); }
+
+    /* Trailer modal */
+    .trailer-overlay {
+      position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease; padding: 1.5rem;
+    }
+    .trailer-overlay.active { display: flex; }
+    .trailer-modal { width: min(960px, 94vw); aspect-ratio: 16/9; border-radius: 18px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 40px 100px rgba(0,0,0,0.9); position: relative; background: #000; }
+    .trailer-modal iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .trailer-close {
+      position: absolute; top: -3rem; right: 0;
+      width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08); color: #fff; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .trailer-close:hover { background: rgba(239,68,68,0.25); border-color: #ef4444; }
 
     .movie-title {
       font-size: 3rem;
@@ -268,26 +323,45 @@
     .subtitles-list { display: grid; gap: 1rem; }
     .subtitle-item {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.4rem 1.8rem;
+      flex-wrap: wrap;
+      padding: 1.3rem 1.6rem;
       background: var(--bg-card);
       border-radius: var(--radius-md);
       transition: var(--transition);
       border: 1px solid var(--border-color);
       box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
     }
+    .subtitle-item::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, #f5c518, rgba(245,197,24,0.15));
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .subtitle-item:hover::before { opacity: 1; }
     .subtitle-item:hover {
       background: var(--bg-card-hover);
       border-color: var(--border-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      transform: translateY(-3px);
+      box-shadow: 0 18px 44px rgba(0,0,0,0.6);
     }
 
-    .sub-info { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sub-info { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
     .sub-release {
-      font-weight: 700; font-size: 1.1rem; color: #f9fafb;
+      font-weight: 700; font-size: 1.05rem; color: #f9fafb;
       word-break: break-all;
     }
-    
+
+    .lang-flag {
+      width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.35rem; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .sub-main { display: flex; align-items: center; gap: 1.1rem; min-width: 0; flex: 1; }
+
     .format-badge {
       padding: 0.25rem 0.65rem; border-radius: 6px;
       font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
@@ -315,21 +389,31 @@
       border: 1px solid rgba(59, 130, 246, 0.4);
     }
 
-    .sub-meta { display: flex; gap: 1.2rem; font-size: 0.85rem; color: #9ca3af; flex-wrap: wrap; }
-    
+    .quality-chip {
+      padding: 0.25rem 0.65rem; border-radius: 6px;
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.06); color: #d1d5db;
+      border: 1px solid var(--border-color);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    .sub-meta { display: flex; gap: 1.1rem; font-size: 0.82rem; color: #9ca3af; flex-wrap: wrap; }
+
+    .item-actions { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+
     .download-btn {
       background: rgba(255,255,255,0.08); color: white; width: 46px; height: 46px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center; text-decoration: none;
       transition: var(--transition); border: 1px solid var(--border-color); font-size: 1.05rem;
       flex-shrink: 0;
     }
-    .download-btn:hover { background: #ffffff; color: #050507; transform: scale(1.1); border-color: transparent; box-shadow: 0 4px 16px rgba(255,255,255,0.3); }
+    .download-btn:hover { background: #ffffff; color: #050507; transform: scale(1.12); border-color: transparent; box-shadow: 0 4px 24px rgba(255,255,255,0.35); }
 
     /* Seasons Cards */
     .seasons-list-view { display: flex; flex-direction: column; gap: 1rem; }
     .season-card {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.2rem 1.6rem;
+      padding: 1.1rem 1.5rem;
       background: var(--bg-card);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
@@ -339,11 +423,31 @@
       background: var(--bg-card-hover);
       border-color: var(--border-hover);
       transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.5);
     }
+    .season-card:focus-visible { outline: 2px solid #f5c518; outline-offset: 2px; }
     .season-card-info { display: flex; align-items: center; gap: 1.2rem; }
-    .season-thumb { width: 48px; height: 68px; border-radius: 8px; object-fit: cover; }
-    .season-title { font-weight: 800; font-size: 1.2rem; color: #fff; }
-    .season-sub { font-size: 0.85rem; color: #9ca3af; }
+    .season-thumb { width: 52px; height: 74px; border-radius: 10px; object-fit: cover; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+    .season-title { font-weight: 800; font-size: 1.15rem; color: #fff; }
+    .season-sub { font-size: 0.82rem; color: #9ca3af; margin-top: 0.15rem; }
+    .season-arrow {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: #9ca3af; font-size: 0.8rem; transition: var(--transition);
+    }
+    .season-card:hover .season-arrow { background: #fff; color: #050507; border-color: transparent; transform: translateX(3px); }
+
+    /* Episode pills */
+    .episode-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .ep-pill {
+      min-width: 42px; padding: 0.45rem 0.7rem; border-radius: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+      color: #9ca3af; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      transition: var(--transition); text-align: center;
+    }
+    .ep-pill:hover { border-color: var(--border-hover); color: #fff; }
+    .ep-pill.active { background: #fff; color: #050507; border-color: transparent; }
 
     /* Navbar */
     .nav-header {
@@ -388,8 +492,10 @@
     @media (max-width: 480px) {
       .left-panel { padding: 4.5rem 1rem 1.5rem; }
       .right-panel { padding: 1rem; }
-      .movie-poster { max-width: 180px !important; }
+      .poster-wrap, .movie-poster { max-width: 180px !important; }
       .season-card { padding: 0.8rem !important; }
+      .sub-main { gap: 0.7rem; }
+      .lang-flag { width: 36px; height: 36px; font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -429,12 +535,13 @@
     <!-- Left Panel: Movie Hero Artwork & Details -->
     <div class="left-panel">
       <div class="left-content">
-        <img id="moviePoster" src="" alt="Poster" class="movie-poster">
+        <div class="poster-wrap"><img id="moviePoster" src="" alt="Poster" class="movie-poster"></div>
         <h1 id="movieTitle" class="movie-title"></h1>
         <div id="movieTags" class="tags"></div>
         <div id="movieMeta" class="meta"></div>
         <p id="movieOverview" class="overview"></p>
-        <a href="#subtitlesListView" id="heroDownloadBtn" style="margin-top: 1.5rem; width: 100%; padding: 0.85rem 1.5rem; background: #ffffff; color: #050507; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.6rem; transition: all 0.2s ease; box-shadow: 0 4px 20px rgba(255,255,255,0.15);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+        <button id="trailerBtn" class="trailer-btn" style="display:none;" onclick="openTrailer()"><i class="fas fa-play"></i> Watch Trailer</button>
+        <a href="#subtitlesListView" id="heroDownloadBtn" style="margin-top: 0.6rem; width: 100%; padding: 0.85rem 1.5rem; background: #ffffff; color: #050507; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.6rem; transition: all 0.2s ease; box-shadow: 0 4px 20px rgba(255,255,255,0.15);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
           <i class="fas fa-arrow-down"></i> Select & Download Subtitles
         </a>
         <div id="favBtnSlot" style="margin-top: 0.75rem; width: 100%;"></div>
@@ -508,6 +615,14 @@
 
     <!-- Reviews List -->
     <div id="reviewsList" class="space-y-3"></div>
+  </div>
+
+  <!-- Trailer Modal -->
+  <div id="trailerModal" class="trailer-overlay" onclick="if(event.target===this)closeTrailer()">
+    <div class="trailer-modal">
+      <button class="trailer-close" onclick="closeTrailer()"><i class="fas fa-times"></i></button>
+      <div id="trailerEmbed"></div>
+    </div>
   </div>
 
   <div id="toastContainer"></div>
